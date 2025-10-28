@@ -1,0 +1,21 @@
+id,list_id,category,word,sentences
+1,1,phonics_patterns,cat,I have a pet cat.|The cat runs fast.|The cat is black and white.
+2,1,phonics_patterns,pen,I have a blue pen.|There is a pen on the table.|My pen ran out of ink.
+3,1,phonics_patterns,cut,She cut the paper with scissors.|Cut along the dotted line.|I had a cut on my finger. 
+4,1,phonics_patterns,van,We used a van to move the furniture.|The van has four tires.|He drives the van to the football game.
+5,1,phonics_patterns,nap,I need to take a nap.|He woke me up from my nap on the couch.|I nap during the day when I'm tired. 
+6,1,phonics_patterns,tap,I turned the tap on.|Tap the buttons on the screen.|I felt a tap on my shoulder.
+7,1,phonics_patterns,bed,He went to bed early today.|I made my bed this morning.|She didn't want to get out of bed this morning.
+8,1,phonics_patterns,set,I forgot to set my alarm.|We set sail during high tide.|The movie is set in the future. 
+9,1,phonics_patterns,leg,Flamingos stand on one leg.|She fell and broke her leg.|A cat brushed against my leg.
+10,1,phonics_patterns,did,What time did you go to bed last night?|He did not go to school yesterday.|Did you have a good time?
+11,2,custom_list,are,Are you heading to school now?|How are you doing today?|Are we going to be late for the meeting?
+12,2,custom_list,was,Rome was not built in a day.|I was born in Europe.|Who was in charge of letting the dog out?
+13,2,custom_list,has,She has a new bike.|He has a collection of books at home.|The teacher has extra pencils in the classroom.
+14,2,custom_list,that,I like that color on you.|Do you see that bird in the tree?|I love that movie.
+15,2,custom_list,they,They all went to soccer tryouts.|They left the house a few minutes ago.|Do you know where they live?
+16,2,custom_list,this,This backpack is mine.|I really like this song.|Can I borrow this board game?
+17,2,custom_list,for,This gift is for you.|She was saving up for a laptop.|Is there room for me to join you?
+18,2,custom_list,from,He is from Brazil.|I got this gift from my mom.|I took this apple from the kitchen.
+19,2,custom_list,here,Can you come join me over here?|Is your textbook here or at home?|What are you doing here?
+20,2,custom_list,there,There are a lot of flowers in the garden.|What is going on over there?|Is there any more food in the fridge?
