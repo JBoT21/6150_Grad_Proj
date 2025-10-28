@@ -54,9 +54,9 @@ class WordCard extends StatelessWidget {
                   // Sample sentence
                   Text(
                     '"$sampleSentence"',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey[800],
-                    ),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.bodyMedium?.copyWith(color: Colors.grey[800]),
                   ),
                 ],
               ),
@@ -70,8 +70,10 @@ class WordCard extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding:
-                const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               onPressed: onPractice,
               child: const Text(

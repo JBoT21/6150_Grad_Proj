@@ -37,10 +37,7 @@ class ProgressChartStub extends StatelessWidget {
                 // Streak
                 Row(
                   children: [
-                    const Text(
-                      '🔥',
-                      style: TextStyle(fontSize: 20),
-                    ),
+                    const Text('🔥', style: TextStyle(fontSize: 20)),
                     const SizedBox(width: 6),
                     Text(
                       '$streakDays day streak',
@@ -52,8 +49,10 @@ class ProgressChartStub extends StatelessWidget {
                 ),
                 // Average score
                 Container(
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -95,8 +94,9 @@ class ProgressChartStub extends StatelessWidget {
                       (score.clamp(0, 100) / 100.0) * maxBarHeight;
 
                   // Just making sure there's at least a little bar if score > 0
-                  final safeHeight =
-                  score == 0 ? 2.0 : math.max(barHeight, 6.0);
+                  final safeHeight = score == 0
+                      ? 2.0
+                      : math.max(barHeight, 6.0);
 
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -113,10 +113,9 @@ class ProgressChartStub extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         score.toString(),
-                        style: Theme.of(context)
-                            .textTheme
-                            .labelSmall
-                            ?.copyWith(color: Colors.grey[600]),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.grey[600],
+                        ),
                       ),
                     ],
                   );
@@ -129,9 +128,9 @@ class ProgressChartStub extends StatelessWidget {
             // Tiny caption
             Text(
               'Higher bar = better pronunciation score',
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: Colors.grey[600],
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: Colors.grey[600]),
             ),
           ],
         ),

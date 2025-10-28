@@ -35,10 +35,7 @@ class RecordButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: fillColor,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: borderColor,
-                width: 4,
-              ),
+              border: Border.all(color: borderColor, width: 4),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: .1),
@@ -57,21 +54,20 @@ class RecordButton extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           isRecording ? 'Recording...' : 'Tap to record (max 7s)',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
         if (elapsed != null) ...[
           const SizedBox(height: 4),
           Text(
             '${_formatDuration(elapsed!)} / 00:07',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Colors.grey[600],
-            ),
+            style: Theme.of(
+              context,
+            ).textTheme.labelMedium?.copyWith(color: Colors.grey[600]),
           ),
         ],
       ],
     );
   }
 }
-
