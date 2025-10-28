@@ -1,4 +1,4 @@
-### Milestone 0
+# Milestone 0
 
 ## Folder Layout
 - **Screens**  
