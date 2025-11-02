@@ -17,6 +17,7 @@ class DatabaseHelper {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
+    print('Database located at: $dbPath');
     return await openDatabase(
       path,
       version: 1,
@@ -74,5 +75,11 @@ class DatabaseHelper {
   Future close() async {
     final db = await instance.database;
     db.close();
+  }
+
+  Future<void> clearAllTables() async {
+    final db = await DatabaseHelper.instance.database;
+    await db.delete('users');
+    print('All users deleted from database!');
   }
 }
