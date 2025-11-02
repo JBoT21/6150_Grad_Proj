@@ -17,6 +17,9 @@ class _SignupScreenState extends State<SignupScreen> {
   String? _error;
 
   void _signup() async {
+    final name = _nameController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
     final db = DatabaseHelper.instance;
     final existing = await db.getUserByEmail(_emailController.text.trim());
     if (existing != null) {
@@ -24,10 +27,25 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      setState(() => _error = "All fields are required.");
+      return;
+    }
+
+    if (!email.contains('@')) {
+      setState(() => _error = "Email must be a valid email");
+      return;
+    }
+
+    if (_passwordController.text.length < 8) {
+      setState(() => _error = "Password must be 8 characters long");
+      return;
+    }
+
     final newUser = AppUser(
-      name: _nameController.text.trim(),
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
+      name: name,
+      email: email,
+      password: password,
       role: _role,
     );
 
@@ -55,7 +73,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
 
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.redAccent),
+                    icon: const Icon(Icons.delete, color: Colors.blueAccent),
                     onPressed: () {
                       final db = DatabaseHelper.instance;
                       db.clearAllTables();
@@ -156,7 +174,11 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   child: const Text(
                     "Sign Up",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white
+                    ),
                   ),
                 ),
               ),
