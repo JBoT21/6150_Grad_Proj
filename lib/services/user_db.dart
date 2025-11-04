@@ -36,7 +36,9 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE attempts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid TEXT NOT NULL,
         word TEXT NOT NULL,
+        score INTEGER NOT NULL,
         speechToTextResult TEXT NOT NULL,
         createdAt TEXT NOT NULL
       )
