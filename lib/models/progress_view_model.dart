@@ -20,8 +20,9 @@ class ProgressViewModel extends ChangeNotifier {
 
   int get totalAttempts => _attempts.length;
   int get uniqueWords => _attempts.map((a) => a.wordText).toSet().length;
-  double get averageScore =>
-      _attempts.isEmpty ? 0 : _attempts.fold<int>(0, (s, a) => s + a.score) / _attempts.length;
+  double get averageScore => _attempts.isEmpty
+      ? 0
+      : _attempts.fold(0, (s, a) => s + a.score) / _attempts.length;
 
   List<int> get recentScores =>
       _attempts.take(5).map((a) => a.score).toList().reversed.toList();

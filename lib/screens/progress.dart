@@ -27,7 +27,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
     return Consumer<ProgressViewModel>(
       builder: (context, vm, _) {
         if (vm.loading) {
-          return  Scaffold(
+          return Scaffold(
             appBar: AppBar(title: Text('Your Progress')),
             body: Center(child: CircularProgressIndicator()),
           );
@@ -42,7 +42,10 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 children: [
                   const Icon(Icons.error_outline, size: 40),
                   const SizedBox(height: 8),
-                  Text('Could not load progress.', style: Theme.of(context).textTheme.titleMedium),
+                  Text(
+                    'Could not load progress.',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
                   const SizedBox(height: 4),
                   Text(vm.error!, style: Theme.of(context).textTheme.bodySmall),
                   const SizedBox(height: 12),
@@ -68,11 +71,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   const SizedBox(height: 8),
                   const Text('No attempts yet'),
                   const SizedBox(height: 4),
-                  Text('Practice a word to see your stats here.',
-                      style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    'Practice a word to see your stats here.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
                   const SizedBox(height: 12),
                   FilledButton(
-                    onPressed: () => Navigator.popAndPushNamed(context, '/practice'),
+                    onPressed: () =>
+                        Navigator.popAndPushNamed(context, '/practice'),
                     child: const Text('Start practicing'),
                   ),
                 ],
@@ -95,9 +101,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
                   children: [
-                    _Metric(label: 'Attempts', value: vm.totalAttempts.toString()),
+                    _Metric(
+                      label: 'Attempts',
+                      value: vm.totalAttempts.toString(),
+                    ),
                     const SizedBox(width: 8),
-                    _Metric(label: 'Unique Words', value: vm.uniqueWords.toString()),
+                    _Metric(
+                      label: 'Unique Words',
+                      value: vm.uniqueWords.toString(),
+                    ),
                     const SizedBox(width: 8),
                     _Metric(label: 'Avg Score', value: avg.toStringAsFixed(0)),
                   ],
@@ -109,7 +121,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ProgressChartStub(
                 streakDays: 0,
                 averageScore: avg,
-                recentScores: scores.isEmpty ? const [0,0,0,0,0] : scores,
+                recentScores: scores.isEmpty ? const [0, 0, 0, 0, 0] : scores,
                 label: 'Last ${scores.isEmpty ? 5 : scores.length} attempts',
               ),
 
@@ -119,17 +131,28 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'Recent Attempts',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
               const SizedBox(height: 6),
 
-              ...vm.attempts.take(10).map((a) => ListTile(
-                leading: CircleAvatar(child: Text(a.score.toString())),
-                title: Text(a.wordText, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text('Scored ${a.score} on ${a.createdAt.toLocal().toString().split(" ").first}'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-              )),
+              ...vm.attempts
+                  .take(10)
+                  .map(
+                    (a) => ListTile(
+                      leading: CircleAvatar(child: Text(a.score.toString())),
+                      title: Text(
+                        a.wordText,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(
+                        'Scored ${a.score} on ${a.createdAt.toLocal().toString().split(" ").first}',
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                    ),
+                  ),
             ],
           ),
         );
@@ -155,9 +178,19 @@ class _Metric extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+            Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 4),
-            Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey.shade700)),
+            Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: Colors.grey.shade700),
+            ),
           ],
         ),
       ),

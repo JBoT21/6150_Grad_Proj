@@ -37,10 +37,12 @@ class DatabaseHelper {
       CREATE TABLE attempts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uid TEXT NOT NULL,
-        word TEXT NOT NULL,
+        wordText TEXT NOT NULL,
         score INTEGER NOT NULL,
-        speechToTextResult TEXT NOT NULL,
-        createdAt TEXT NOT NULL
+        feedback TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
+        durationMs INTEGER,
+        recordingPath TEXT
       )
     ''');
   }

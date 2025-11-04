@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:team_3_f25_project/routes.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 import 'package:team_3_f25_project/widgets/record_button.dart';
 import 'package:team_3_f25_project/widgets/word_card.dart';
@@ -171,8 +172,28 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                     }
                   : null,
             ),
+            SizedBox(height: 30),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.amber.shade200,
+        label: Icon(
+          Icons.arrow_right_alt_rounded,
+          color: Colors.amber.shade800,
+          size: 45,
+        ),
+        onPressed: () {
+          Navigator.pushNamed(
+            context,
+            AppRoutes.feedback,
+            arguments: {
+              'wordText': currentWord,
+              'score': 1,
+              'feedback': "feedback",
+            },
+          );
+        },
       ),
     );
   }

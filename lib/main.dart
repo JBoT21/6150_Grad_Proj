@@ -13,7 +13,6 @@ import 'package:team_3_f25_project/services/user_db.dart';
 import 'services/attempts_repository.dart';
 import 'models/progress_view_model.dart';
 
-
 void main() {
   final attemptsRepo = AttemptsRepository();
   runApp(

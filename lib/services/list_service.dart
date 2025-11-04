@@ -1,4 +1,3 @@
-
 // Will read information about the list from seed_words.csv
 import 'dart:convert';
 import 'package:flutter/services.dart';

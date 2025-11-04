@@ -32,8 +32,10 @@ class FeedbackCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding:
-                  const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 12,
+                  ),
                   decoration: BoxDecoration(
                     color: scoreColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -64,16 +66,16 @@ class FeedbackCard extends StatelessWidget {
             // Summary feedback sentence
             Text(
               summaryFeedback,
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
 
             const SizedBox(height: 12),
 
             // Tips list
             ...tips.map(
-                  (tip) => Row(
+              (tip) => Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.info_outline_rounded, size: 18),
@@ -81,10 +83,9 @@ class FeedbackCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       tip,
-                      style:
-                      Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Colors.grey[800],
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(color: Colors.grey[800]),
                     ),
                   ),
                 ],

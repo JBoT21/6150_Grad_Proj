@@ -7,15 +7,16 @@ class WordlistScreen extends StatelessWidget {
   final String category;
   final List<WordList> words;
 
-  const WordlistScreen({super.key, required this.category, required this.words});
+  const WordlistScreen({
+    super.key,
+    required this.category,
+    required this.words,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: customAppBar(
-        context: context,
-        title: category
-      ),
+      appBar: customAppBar(context: context, title: category),
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: words.length,
@@ -37,16 +38,17 @@ class WordlistScreen extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.pushNamed(context, '/progress');
-              }, 
+              },
               child: const Text('View Progress'),
             ),
-            ElevatedButton(onPressed: () {
-              Navigator.pushNamed(context, 'Practice');
-            }, 
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
-            ),
-            child: const Text('Practice Wordlist'),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/practice');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+              ),
+              child: const Text('Practice Wordlist'),
             ),
           ],
         ),
@@ -54,4 +56,3 @@ class WordlistScreen extends StatelessWidget {
     );
   }
 }
-

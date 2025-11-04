@@ -27,6 +27,7 @@ class Attempt {
     'feedback': feedback,
     'createdAt': createdAt.toIso8601String(),
     'durationMs': duration.inMilliseconds,
+    'recordingPath': recordingPath,
   };
 
   static Attempt fromMap(Map<String, dynamic> map) => Attempt(
