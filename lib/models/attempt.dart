@@ -2,37 +2,33 @@ import 'dart:convert';
 
 class Attempt {
   final String uid; // 'student123' (fake for now)
-  final String wordText; // 'ship'
+  final String word; // 'ship'
   final int score; // 0-100
-  final String feedback; // short text
-  final DateTime createdAt; // when attempt saved
-  final Duration duration; // length of recording
+  final String speechToTextResult; // short text
+  final DateTime createdAt; // when attempt saved// length of recording
 
   Attempt({
     required this.uid,
-    required this.wordText,
+    required this.word,
     required this.score,
-    required this.feedback,
+    required this.speechToTextResult,
     required this.createdAt,
-    required this.duration,
   });
 
   Map<String, dynamic> toMap() => {
     'uid': uid,
-    'wordText': wordText,
+    'word': word,
     'score': score,
-    'feedback': feedback,
+    'speechToTextResult': speechToTextResult,
     'createdAt': createdAt.toIso8601String(),
-    'durationMs': duration.inMilliseconds,
   };
 
   static Attempt fromMap(Map<String, dynamic> map) => Attempt(
     uid: map['uid'] as String,
-    wordText: map['wordText'] as String,
+    word: map['word'] as String,
     score: map['score'] as int,
-    feedback: map['feedback'] as String,
+    speechToTextResult: map['speechToTextResult'] as String,
     createdAt: DateTime.parse(map['createdAt'] as String),
-    duration: Duration(milliseconds: (map['durationMs'] as num).toInt()),
   );
 
   String toJson() => jsonEncode(toMap());

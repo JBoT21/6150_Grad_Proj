@@ -14,7 +14,7 @@ class ProgressViewModel extends ChangeNotifier {
 
   int get totalAttempts => _attempts.length;
 
-  int get uniqueWordsCount => _attempts.map((a) => a.wordText).toSet().length;
+  int get uniqueWordsCount => _attempts.map((a) => a.word).toSet().length;
 
   double get averageScore {
     if (_attempts.isEmpty) return 0;
@@ -29,7 +29,8 @@ class ProgressViewModel extends ChangeNotifier {
     _loading = true;
     notifyListeners();
 
-    await repo.seedFakeIfEmpty(); // remove once practice flow saves real attempts
+    await repo
+        .seedFakeIfEmpty(); // remove once practice flow saves real attempts
     _attempts = await repo.loadAll();
 
     _loading = false;

@@ -20,7 +20,9 @@ class ProgressScreen extends StatelessWidget {
         final avg = vm.averageScore;
         final total = vm.totalAttempts;
         final unique = vm.uniqueWordsCount;
-        final scores = vm.lastFiveScores.isEmpty ? [0,0,0,0,0] : vm.lastFiveScores;
+        final scores = vm.lastFiveScores.isEmpty
+            ? [0, 0, 0, 0, 0]
+            : vm.lastFiveScores;
 
         return Scaffold(
           appBar: AppBar(title: const Text('Your Progress')),
@@ -38,7 +40,10 @@ class ProgressScreen extends StatelessWidget {
                     const SizedBox(width: 8),
                     _MetricPill(label: 'Unique Words', value: '$unique'),
                     const SizedBox(width: 8),
-                    _MetricPill(label: 'Avg Score', value: avg.toStringAsFixed(0)),
+                    _MetricPill(
+                      label: 'Avg Score',
+                      value: avg.toStringAsFixed(0),
+                    ),
                   ],
                 ),
               ),
@@ -47,9 +52,9 @@ class ProgressScreen extends StatelessWidget {
 
               // mini chart fed real scores
               ProgressChartStub(
-                streakDays: 0,                       // optional later
+                streakDays: 0, // optional later
                 averageScore: avg,
-                recentScores: scores,                // now real data
+                recentScores: scores, // now real data
                 label: 'Last ${scores.length} attempts',
               ),
 
@@ -67,17 +72,26 @@ class ProgressScreen extends StatelessWidget {
 
               const SizedBox(height: 8),
 
-              ...vm.attempts.take(10).map((a) => ListTile(
-                leading: CircleAvatar(
-                  child: Text(
-                    a.score.toString(),
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+              ...vm.attempts
+                  .take(10)
+                  .map(
+                    (a) => ListTile(
+                      leading: CircleAvatar(
+                        child: Text(
+                          a.score.toString(),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      title: Text(
+                        a.word,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      subtitle: Text(
+                        'Scored ${a.score} on ${a.createdAt.toLocal().toString().split(" ").first}',
+                      ),
+                      trailing: const Icon(Icons.chevron_right_rounded),
+                    ),
                   ),
-                ),
-                title: Text(a.wordText, style: const TextStyle(fontWeight: FontWeight.w600)),
-                subtitle: Text('Scored ${a.score} on ${a.createdAt.toLocal().toString().split(" ").first}'),
-                trailing: const Icon(Icons.chevron_right_rounded),
-              )),
             ],
           ),
         );
@@ -103,9 +117,19 @@ class _MetricPill extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700)),
+            Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+            ),
             const SizedBox(height: 4),
-            Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(color: Colors.grey.shade700)),
+            Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelMedium?.copyWith(color: Colors.grey.shade700),
+            ),
           ],
         ),
       ),

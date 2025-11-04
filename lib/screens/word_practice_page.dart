@@ -80,13 +80,19 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
+    bool correct = _isCorrect(result.recognizedWords);
     if (result.finalResult) {
       // add attempt to database
       widget.db.insertAttempt(
-        Attempt(speechToTextResult: result.recognizedWords, word: currentWord),
+        Attempt(
+          uid: 'student',
+          speechToTextResult: result.recognizedWords,
+          word: currentWord,
+          // score is 1 if correct, 0 if false
+          score: correct ? 1 : 0,
+          createdAt: DateTime.now(),
+        ),
       );
-
-      bool correct = _isCorrect(result.recognizedWords);
 
       // show feedback
       Navigator.push(

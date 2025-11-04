@@ -29,11 +29,46 @@ class AttemptsRepository {
     if (list.isNotEmpty) return;
     final now = DateTime.now();
     final demo = <Attempt>[
-      Attempt(uid: 'demo', wordText: 'ship', score: 92, feedback: 'Great /ʃ/!', createdAt: now.subtract(const Duration(days: 0)), duration: const Duration(seconds: 2)),
-      Attempt(uid: 'demo', wordText: 'thin', score: 75, feedback: 'Watch /θ/', createdAt: now.subtract(const Duration(days: 1)), duration: const Duration(seconds: 3)),
-      Attempt(uid: 'demo', wordText: 'read', score: 81, feedback: 'Long vowel', createdAt: now.subtract(const Duration(days: 2)), duration: const Duration(seconds: 2)),
-      Attempt(uid: 'demo', wordText: 'chip', score: 88, feedback: 'Nice /tʃ/', createdAt: now.subtract(const Duration(days: 3)), duration: const Duration(seconds: 2)),
-      Attempt(uid: 'demo', wordText: 'this', score: 90, feedback: 'Good /ð/', createdAt: now.subtract(const Duration(days: 4)), duration: const Duration(seconds: 2)),
+      Attempt(
+        uid: 'demo',
+        wordText: 'ship',
+        score: 92,
+        feedback: 'Great /ʃ/!',
+        createdAt: now.subtract(const Duration(days: 0)),
+        duration: const Duration(seconds: 2),
+      ),
+      Attempt(
+        uid: 'demo',
+        wordText: 'thin',
+        score: 75,
+        feedback: 'Watch /θ/',
+        createdAt: now.subtract(const Duration(days: 1)),
+        duration: const Duration(seconds: 3),
+      ),
+      Attempt(
+        uid: 'demo',
+        wordText: 'read',
+        score: 81,
+        feedback: 'Long vowel',
+        createdAt: now.subtract(const Duration(days: 2)),
+        duration: const Duration(seconds: 2),
+      ),
+      Attempt(
+        uid: 'demo',
+        wordText: 'chip',
+        score: 88,
+        feedback: 'Nice /tʃ/',
+        createdAt: now.subtract(const Duration(days: 3)),
+        duration: const Duration(seconds: 2),
+      ),
+      Attempt(
+        uid: 'demo',
+        wordText: 'this',
+        score: 90,
+        feedback: 'Good /ð/',
+        createdAt: now.subtract(const Duration(days: 4)),
+        duration: const Duration(seconds: 2),
+      ),
     ];
     await saveAll(demo);
   }
