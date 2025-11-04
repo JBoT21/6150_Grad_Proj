@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:team_3_f25_project/models/attempt.dart';
 import '../models/user.dart';
 
 class DatabaseHelper {
@@ -18,11 +19,7 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
     print('Database located at: $dbPath');
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: _createDB,
-    );
+    return await openDatabase(path, version: 1, onCreate: _createDB);
   }
 
   Future _createDB(Database db, int version) async {
@@ -35,6 +32,20 @@ class DatabaseHelper {
         role TEXT NOT NULL
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE attempts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        word TEXT NOT NULL,
+        speechToTextResult TEXT NOT NULL,
+        createdAt TEXT NOT NULL
+      )
+    ''');
+  }
+
+  Future<int> insertAttempt(Attempt attempt) async {
+    final db = await instance.database;
+    return await db.insert('attempts', attempt.toMap());
   }
 
   Future<int> insertUser(AppUser user) async {

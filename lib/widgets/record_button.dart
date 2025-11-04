@@ -20,9 +20,9 @@ class RecordButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = isRecording ? Colors.red : Colors.grey.shade400;
-    final fillColor = isRecording ? Colors.red.shade50 : Colors.grey.shade100;
-    final iconColor = isRecording ? Colors.red : Colors.black87;
+    final borderColor = isRecording ? Colors.red : Colors.green;
+    final fillColor = isRecording ? Colors.red.shade50 : Colors.green[100];
+    final iconColor = isRecording ? Colors.red : Colors.green;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -30,8 +30,8 @@ class RecordButton extends StatelessWidget {
         GestureDetector(
           onTap: onTap,
           child: Container(
-            width: 96,
-            height: 96,
+            width: 250,
+            height: 250,
             decoration: BoxDecoration(
               color: fillColor,
               shape: BoxShape.circle,
@@ -46,7 +46,7 @@ class RecordButton extends StatelessWidget {
             ),
             child: Icon(
               isRecording ? Icons.stop_rounded : Icons.mic_rounded,
-              size: 40,
+              size: 150,
               color: iconColor,
             ),
           ),

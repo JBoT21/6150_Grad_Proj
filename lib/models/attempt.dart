@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 class Attempt {
-  final String uid;          // 'student123' (fake for now)
-  final String wordText;     // 'ship'
-  final int score;           // 0-100
-  final String feedback;     // short text
-  final DateTime createdAt;  // when attempt saved
-  final Duration duration;   // length of recording
+  final String uid; // 'student123' (fake for now)
+  final String wordText; // 'ship'
+  final int score; // 0-100
+  final String feedback; // short text
+  final DateTime createdAt; // when attempt saved
+  final Duration duration; // length of recording
 
   Attempt({
     required this.uid,

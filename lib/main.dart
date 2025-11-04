@@ -40,9 +40,11 @@ class _ReadRightAppState extends State<ReadRightApp> {
       if (savedEmail != null) {
         final user = await DatabaseHelper.instance.getUserByEmail(savedEmail);
         if (user != null) {
-          setState(() => _home = user.role == 'teacher'
-              ? const DashboardScreen()
-              : const WordlistSelectionScreen());
+          setState(
+            () => _home = user.role == 'teacher'
+                ? const DashboardScreen()
+                : const WordlistSelectionScreen(),
+          );
           return;
         }
       }
@@ -64,8 +66,7 @@ class _ReadRightAppState extends State<ReadRightApp> {
         '/wordlist_selection': (context) => const WordlistSelectionScreen(),
         '/wordlist_screen': (context) => const WordlistScreen(),
         '/progress': (context) => const ProgressScreen(),
-        '/practice': (context) => const PracticeScreen(),
-        '/practice_word': (context) => const WordPracticeScreen(),
+        '/practice': (context) => WordPracticeScreen(),
         '/feedback': (context) => const FeedbackScreen(),
         '/signup': (context) => const SignupScreen(),
       },
