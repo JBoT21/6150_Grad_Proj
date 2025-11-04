@@ -35,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (user != null) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', user.email);
+      await prefs.setInt('userId', user.id!);
 
       if (user.role.toLowerCase() == 'student') {
         Navigator.pushReplacement(
