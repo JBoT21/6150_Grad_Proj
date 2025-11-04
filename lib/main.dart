@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/screens/dashboard.dart';
@@ -9,9 +10,18 @@ import 'package:team_3_f25_project/screens/word_practice_page.dart';
 import 'package:team_3_f25_project/screens/feedback.dart';
 import 'package:team_3_f25_project/screens/signup.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
+import 'services/attempts_repository.dart';
+import 'models/progress_view_model.dart';
+
 
 void main() {
-  runApp(const ReadRightApp());
+  final attemptsRepo = AttemptsRepository();
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ProgressViewModel(attemptsRepo)..load(),
+      child: const ReadRightApp(),
+    ),
+  );
 }
 
 class ReadRightApp extends StatefulWidget {

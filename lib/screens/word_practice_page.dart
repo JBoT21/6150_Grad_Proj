@@ -1,210 +1,198 @@
-import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
-import 'package:team_3_f25_project/widgets/record_button.dart';
-import 'package:team_3_f25_project/widgets/word_card.dart';
-import 'package:team_3_f25_project/models/attempt.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-import 'package:path_provider/path_provider.dart';
-import 'package:team_3_f25_project/services/user_db.dart';
-import 'package:speech_to_text/speech_to_text.dart';
+import '../models/attempt.dart';
+import '../services/attempts_repository.dart';
+import '../models/progress_view_model.dart'; // so we can refresh after save (optional)
+import '../widgets/record_button.dart';
+import '../routes.dart';
 
 class WordPracticeScreen extends StatefulWidget {
-  final List<String> wordlist = [
-    'cat',
-    'pen',
-    'cut',
-    'van',
-    'nap',
-    'tap',
-    'bed',
-  ];
-  final db = DatabaseHelper.instance;
-  WordPracticeScreen({super.key});
+  final String wordText;
+  final String sampleSentence;
+  final String uid; // pass real auth uid later; using demo for now
+
+  const WordPracticeScreen({
+    super.key,
+    this.wordText = 'ship',                // sane defaults for dev/demo
+    this.sampleSentence = 'The ship is big.',
+    this.uid = 'demoStudent',
+  });
 
   @override
   State<WordPracticeScreen> createState() => _WordPracticeScreenState();
 }
 
 class _WordPracticeScreenState extends State<WordPracticeScreen> {
-  int nextIndex = 0;
+  bool _isRecording = false;
+  Duration _elapsed = Duration.zero;
+  Timer? _timer;
 
-  final SpeechToText _speechToText = SpeechToText();
-  bool _speechEnabled = false;
-  bool _isListening = false;
+  static const Duration kMax = Duration(seconds: 7);
 
-  String get currentWord {
-    return widget.wordlist[nextIndex];
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initSpeech();
-  }
-
-  void _initSpeech() async {
-    _speechEnabled = await _speechToText.initialize();
-    setState(() {});
-  }
-
-  void _nextWord() {
+  void _startRecording() {
+    if (_isRecording) return;
     setState(() {
-      nextIndex = (nextIndex + 1) % widget.wordlist.length;
+      _isRecording = true;
+      _elapsed = Duration.zero;
     });
-    print(currentWord);
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(milliseconds: 200), (t) {
+      final next = _elapsed + const Duration(milliseconds: 200);
+      if (next >= kMax) {
+        _stopRecording(autoStop: true);
+      } else {
+        setState(() {
+          _elapsed = next;
+        });
+      }
+    });
   }
 
-  void _startListening() async {
-    await _speechToText.listen(
-      onResult: _onSpeechResult,
-      localeId: 'en_US', // Specify the locale
-      listenFor: const Duration(seconds: 7), // How long to listen
-      pauseFor: const Duration(seconds: 2), // How long to wait for pause
+  Future<void> _stopRecording({bool autoStop = false}) async {
+    if (!_isRecording) return;
+    _timer?.cancel();
+    setState(() {
+      _isRecording = false;
+    });
+
+    // ---- Local "STT compare" stub ----
+    // Deterministic pseudo-score based on the word so demos look consistent.
+    final int score = _deterministicScore(widget.wordText);
+    final String feedback = _makeFeedback(widget.wordText, score);
+
+    // Save attempt locally
+    final attempt = Attempt(
+      uid: widget.uid,
+      wordText: widget.wordText,
+      score: score,
+      feedback: feedback,
+      createdAt: DateTime.now(),
+      duration: _elapsed,
     );
-    setState(() {
-      _isListening = true;
-    });
-  }
+    final repo = AttemptsRepository();
+    await repo.add(attempt);
 
-  void _stopListening() async {
-    await _speechToText.stop();
-    setState(() {
-      _isListening = false;
-    });
-  }
-
-  bool _isCorrect(String recognizedWord) {
-    return recognizedWord.toLowerCase() == currentWord.toLowerCase();
-  }
-
-  void _onSpeechResult(SpeechRecognitionResult result) {
-    bool correct = _isCorrect(result.recognizedWords);
-    if (result.finalResult) {
-      // add attempt to database
-      widget.db.insertAttempt(
-        Attempt(
-          uid: 'student',
-          speechToTextResult: result.recognizedWords,
-          word: currentWord,
-          // score is 1 if correct, 0 if false
-          score: correct ? 1 : 0,
-          createdAt: DateTime.now(),
-        ),
-      );
-
-      // show feedback
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => InstantFeedback(success: correct),
-        ),
-      ).then((_) {
-        correct ? _nextWord() : null;
-      });
+    // Optional: refresh progress VM if it's already in memory
+    if (mounted) {
+      final vm = context.read<ProgressViewModel?>();
+      vm?.load();
     }
+
+    // Navigate to Feedback (if your Feedback screen reads arguments, pass them)
+    if (!mounted) return;
+    Navigator.pushNamed(
+      context,
+      AppRoutes.feedback,
+      arguments: {
+        'wordText': widget.wordText,
+        'score': score,
+        'feedback': feedback,
+      },
+    );
+  }
+
+  // Simple deterministic score using a hash on word.
+  int _deterministicScore(String word) {
+    int sum = 0;
+    for (final code in word.codeUnits) {
+      sum = (sum + code) % 1000;
+    }
+    // Map to 60..98 range, looks believable for demo
+    final s = 60 + (sum % 39);
+    return s.clamp(0, 100);
+  }
+
+  String _makeFeedback(String word, int score) {
+    if (word.contains('sh')) {
+      return score >= 80
+          ? 'Great /ʃ/ sound on "$word"!'
+          : 'Work on the /ʃ/ in "$word". Try a slower start.';
+    }
+    if (word.contains('th')) {
+      return score >= 80
+          ? 'Nice /θ/ in "$word".'
+          : 'Watch your /θ/ in "$word" — tongue slightly between teeth.';
+    }
+    return score >= 80
+        ? 'Good clarity on "$word".'
+        : 'Say "$word" a bit slower and hit the ending sound.';
   }
 
   @override
   void dispose() {
-    _speechToText.stop();
+    _timer?.cancel();
     super.dispose();
   }
 
-  Future<String> _nextPath() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final ts = DateTime.now().millisecondsSinceEpoch;
-    return '${dir.path}/readright_$currentWord$ts.m4a';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: customAppBar(context: context, title: "Word Practice Screen"),
-      body: Center(
-        child: Column(
-          children: [
-            WordCard(
-              wordText: currentWord,
-              patternLabel: "Pattern label",
-              sampleSentence: "Sample sentence",
-            ),
-            SizedBox(height: 30),
-            RecordButton(
-              isRecording: _isListening,
-              onTap: _speechEnabled
-                  ? () {
-                      if (_isListening) {
-                        _stopListening();
-                      } else {
-                        _startListening();
-                      }
-                    }
-                  : null,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class InstantFeedback extends StatefulWidget {
-  bool success;
-  InstantFeedback({super.key, required this.success});
-
-  @override
-  State<InstantFeedback> createState() => _InstantFeedbackState();
-}
-
-class _InstantFeedbackState extends State<InstantFeedback> {
-  @override
-  void initState() {
-    super.initState();
-
-    Timer(Duration(seconds: 2), () => Navigator.pop(context));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: widget.success ? Colors.green : Colors.amber[600],
+      appBar: AppBar(title: Text('Practice: "${widget.wordText}"')),
+      body: SafeArea(
         child: Center(
-          child: Icon(
-            widget.success ? Icons.check_rounded : Icons.refresh_rounded,
-            color: Colors.white,
-            size: 250,
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Word + example sentence
+                Text(
+                  widget.wordText,
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  widget.sampleSentence,
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Colors.grey[700],
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // Big mic button
+                RecordButton(
+                  isRecording: _isRecording,
+                  elapsed: _elapsed,
+                  onTap: () {
+                    _isRecording ? _stopRecording() : _startRecording();
+                  },
+                ),
+
+                const SizedBox(height: 16),
+                Text(
+                  'Max 7 seconds • Local compare (stub) → Feedback',
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: Colors.grey[600],
+                  ),
+                ),
+
+                if (_isRecording) ...[
+                  const SizedBox(height: 16),
+                  Text(
+                    'Listening...',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+
+                if (!_isRecording && _elapsed > Duration.zero) ...[
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: _stopRecording,
+                    icon: const Icon(Icons.send_rounded),
+                    label: const Text('Finish & Get Feedback'),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class TryAgain extends StatefulWidget {
-  const TryAgain({super.key});
-
-  @override
-  State<TryAgain> createState() => _TryAgainState();
-}
-
-class _TryAgainState extends State<TryAgain> {
-  @override
-  void initState() {
-    super.initState();
-
-    Timer(Duration(seconds: 2), () => Navigator.pop(context));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Colors.amber.shade600,
-        child: Center(
-          child: Icon(Icons.refresh_rounded, color: Colors.white, size: 250),
         ),
       ),
     );
