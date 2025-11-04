@@ -1,4 +1,4 @@
-// lib/services/attempts_repository.dart
+// attempts_repository.dart
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/attempt.dart';
 
@@ -6,11 +6,16 @@ class AttemptsRepository {
   static const _kKey = 'attempts_v1';
 
   Future<List<Attempt>> loadAll() async {
-    final p = await SharedPreferences.getInstance();
-    final raw = p.getStringList(_kKey) ?? <String>[];
-    final list = raw.map(Attempt.fromJson).toList();
-    list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    return list;
+    try {
+      final p = await SharedPreferences.getInstance();
+      final raw = p.getStringList(_kKey) ?? <String>[];
+      final list = raw.map(Attempt.fromJson).toList();
+      list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return list;
+    } catch (e) {
+      // Don’t propagate; VM will handle empty gracefully.
+      return <Attempt>[];
+    }
   }
 
   Future<void> saveAll(List<Attempt> items) async {
