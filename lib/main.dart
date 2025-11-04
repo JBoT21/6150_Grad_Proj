@@ -5,7 +5,6 @@ import 'package:team_3_f25_project/screens/dashboard.dart';
 import 'package:team_3_f25_project/screens/wordlist_selection.dart';
 import 'package:team_3_f25_project/screens/wordlist_screen.dart';
 import 'package:team_3_f25_project/screens/progress.dart';
-import 'package:team_3_f25_project/screens/practice.dart';
 import 'package:team_3_f25_project/screens/word_practice_page.dart';
 import 'package:team_3_f25_project/screens/feedback.dart';
 import 'package:team_3_f25_project/screens/signup.dart';
