@@ -73,7 +73,7 @@ class _ReadRightAppState extends State<ReadRightApp> {
       routes: {
         '/dashboard': (context) => const DashboardScreen(),
         '/wordlist_selection': (context) => const WordlistSelectionScreen(),
-        '/wordlist_screen': (context) => const WordlistScreen(),
+        //'/wordlist_screen': (context) => const WordlistScreen(),
         '/progress': (context) => const ProgressScreen(),
         '/practice': (context) => WordPracticeScreen(),
         '/feedback': (context) => const FeedbackScreen(),
