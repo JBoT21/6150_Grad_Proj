@@ -8,6 +8,7 @@ class Attempt {
   final String feedback;
   final DateTime createdAt;
   final Duration duration;
+  final String recordingPath;
 
   Attempt({
     required this.uid,
@@ -16,6 +17,7 @@ class Attempt {
     required this.feedback,
     required this.createdAt,
     required this.duration,
+    required this.recordingPath,
   });
 
   Map<String, dynamic> toMap() => {
@@ -34,6 +36,7 @@ class Attempt {
     feedback: map['feedback'] as String,
     createdAt: DateTime.parse(map['createdAt'] as String),
     duration: Duration(milliseconds: (map['durationMs'] as num).toInt()),
+    recordingPath: map['recordingPath'] as String,
   );
 
   String toJson() => jsonEncode(toMap());
