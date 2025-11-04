@@ -29,8 +29,6 @@ class ProgressViewModel extends ChangeNotifier {
     _loading = true;
     notifyListeners();
 
-    await repo
-        .seedFakeIfEmpty(); // remove once practice flow saves real attempts
     _attempts = await repo.loadAll();
 
     _loading = false;
