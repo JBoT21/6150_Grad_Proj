@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 import 'package:team_3_f25_project/widgets/word_card.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:team_3_f25_project/screens/login.dart';
 class WordlistScreen extends StatelessWidget {
   final String category;
   final List<WordList> words;
@@ -12,6 +13,17 @@ class WordlistScreen extends StatelessWidget {
     required this.category,
     required this.words,
   });
+
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('email');
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+    );
+  }
+
 
   @override
   Widget build(BuildContext context) {

@@ -33,6 +33,12 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
       appBar: AppBar(
         title: const Text("Select Your Wordlist", style: TextStyle(color: Colors.white),),
         backgroundColor: Colors.blueAccent,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _logout(context),
+          ),
+        ],
       ),
       body: FutureBuilder<List<int>>(
         future: WordService.getListIds(),

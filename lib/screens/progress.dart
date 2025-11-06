@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/progress_view_model.dart';
 import '../widgets/progress_chart_stub.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:team_3_f25_project/screens/login.dart';
 
 class ProgressScreen extends StatefulWidget {
   const ProgressScreen({super.key});
@@ -12,6 +14,16 @@ class ProgressScreen extends StatefulWidget {
 }
 
 class _ProgressScreenState extends State<ProgressScreen> {
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('email');
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
@@ -28,7 +40,15 @@ class _ProgressScreenState extends State<ProgressScreen> {
       builder: (context, vm, _) {
         if (vm.loading) {
           return Scaffold(
-            appBar: AppBar(title: Text('Your Progress')),
+            appBar: AppBar(
+              title: Text('Your Progress'),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.logout),
+                  onPressed: () => _logout(context),
+                ),
+              ],
+            ),
             body: Center(child: CircularProgressIndicator()),
           );
         }
