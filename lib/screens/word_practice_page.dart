@@ -70,12 +70,22 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     setState(() {
       nextIndex = (nextIndex + 1) % widget.words.length;
     });
-    //_stopListening();
   }
 
   void _removeWordFromList() {
+    if (widget.words.isNotEmpty) {
+      widget.words.remove(currentWordEntry);
+    } else {
+      _nextWord();
+    }
+  }
+
+  void _finishList() {
     widget.words.remove(currentWordEntry);
-    _nextWord();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => CelebrationScreen()),
+    );
   }
 
   void _startListening() async {
@@ -123,7 +133,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   void _onSpeechResult(SpeechRecognitionResult result) {
     if (result.finalResult) {
+      _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
+
       // add attempt to database
       widget.db.insertAttempt(
         Attempt(
@@ -137,16 +149,19 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         ),
       );
 
-      // show feedback
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => InstantFeedback(success: correct),
-        ),
-      ).then((_) {
-        correct ? _removeWordFromList() : _nextWord();
-      });
-      _stopListening();
+      if (correct && widget.words.length == 1) {
+        _finishList();
+      } else {
+        // show feedback
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => InstantFeedback(success: correct),
+          ),
+        ).then((_) {
+          correct ? _removeWordFromList() : _nextWord();
+        });
+      }
     }
   }
 
@@ -174,7 +189,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
               patternLabel: "Pattern label",
               sampleSentence: "Sample sentence",
             ),
-            SizedBox(height: 30),
+            SizedBox(height: 50),
             RecordButton(
               isRecording: _isListening,
               onTap: _speechEnabled
@@ -187,28 +202,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                     }
                   : null,
             ),
-            SizedBox(height: 30),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.amber.shade200,
-        label: Icon(
-          Icons.arrow_right_alt_rounded,
-          color: Colors.amber.shade800,
-          size: 45,
-        ),
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            AppRoutes.feedback,
-            arguments: {
-              'wordText': currentWord,
-              'score': 1,
-              'feedback': "feedback",
-            },
-          );
-        },
       ),
     );
   }
@@ -269,6 +264,33 @@ class _TryAgainState extends State<TryAgain> {
         color: Colors.amber.shade600,
         child: Center(
           child: Icon(Icons.refresh_rounded, color: Colors.white, size: 250),
+        ),
+      ),
+    );
+  }
+}
+
+class CelebrationScreen extends StatefulWidget {
+  const CelebrationScreen({super.key});
+
+  @override
+  State<CelebrationScreen> createState() => _CelebrationScreenState();
+}
+
+class _CelebrationScreenState extends State<CelebrationScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        color: Colors.blue[400],
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.celebration, color: Colors.white, size: 250),
+              ElevatedButton(onPressed: () {}, child: Text("Next List")),
+            ],
+          ),
         ),
       ),
     );
