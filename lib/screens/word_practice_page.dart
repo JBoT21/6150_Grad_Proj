@@ -7,10 +7,11 @@ import 'package:team_3_f25_project/widgets/word_card.dart';
 import 'package:team_3_f25_project/models/attempt.dart';
 import 'package:record/record.dart';
 import 'dart:async';
-
 import 'package:path_provider/path_provider.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 import 'package:speech_to_text/speech_to_text.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:team_3_f25_project/screens/login.dart';
 
 class WordPracticeScreen extends StatefulWidget {
   final List<String> wordlist = [
@@ -30,6 +31,16 @@ class WordPracticeScreen extends StatefulWidget {
 }
 
 class _WordPracticeScreenState extends State<WordPracticeScreen> {
+  Future<void> _logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('email');
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+          (route) => false,
+    );
+  }
+
   int nextIndex = 0;
 
   final _speechToText = SpeechToText();
