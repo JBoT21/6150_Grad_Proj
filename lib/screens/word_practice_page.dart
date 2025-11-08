@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:team_3_f25_project/models/wordlist.dart';
 import 'package:team_3_f25_project/routes.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 import 'package:team_3_f25_project/widgets/record_button.dart';
@@ -14,17 +15,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 
 class WordPracticeScreen extends StatefulWidget {
-  final List<String> wordlist = [
-    'cat',
-    'pen',
-    'cut',
-    'van',
-    'nap',
-    'tap',
-    'bed',
-  ];
+  final List<WordList> words;
+
   final db = DatabaseHelper.instance;
-  WordPracticeScreen({super.key});
+  WordPracticeScreen({super.key, required this.words});
 
   @override
   State<WordPracticeScreen> createState() => _WordPracticeScreenState();
@@ -37,7 +31,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -54,7 +48,11 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   static const Duration kMax = Duration(seconds: 7);
 
   String get currentWord {
-    return widget.wordlist[nextIndex];
+    return widget.words[nextIndex].word;
+  }
+
+  WordList get currentWordEntry {
+    return widget.words[nextIndex];
   }
 
   @override
@@ -70,9 +68,14 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   void _nextWord() {
     setState(() {
-      nextIndex = (nextIndex + 1) % widget.wordlist.length;
+      nextIndex = (nextIndex + 1) % widget.words.length;
     });
-    print(currentWord);
+    //_stopListening();
+  }
+
+  void _removeWordFromList() {
+    widget.words.remove(currentWordEntry);
+    _nextWord();
   }
 
   void _startListening() async {
@@ -141,8 +144,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
           builder: (context) => InstantFeedback(success: correct),
         ),
       ).then((_) {
-        correct ? _nextWord() : null;
+        correct ? _removeWordFromList() : _nextWord();
       });
+      _stopListening();
     }
   }
 

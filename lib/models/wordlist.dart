@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:csv/csv.dart';
 
-// Class for word list 
+// Class for word list
 class WordList {
   final int id;
   final int listId;
@@ -11,7 +11,7 @@ class WordList {
   final String sentence2;
   final String sentence3;
 
-// Word list constructor
+  // Word list constructor
   WordList({
     required this.id,
     required this.listId,
@@ -31,6 +31,6 @@ class WordList {
       sentence1: type[4],
       sentence2: type[5],
       sentence3: type[6],
-      );
+    );
   }
 }

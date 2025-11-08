@@ -13,7 +13,7 @@ class WordlistSelectionScreen extends StatefulWidget {
   const WordlistSelectionScreen({super.key});
 
   @override
-  State<WordlistSelectionScreen> createState() =>_WordlistSelectionState();
+  State<WordlistSelectionScreen> createState() => _WordlistSelectionState();
 }
 
 class _WordlistSelectionState extends State<WordlistSelectionScreen> {
@@ -31,7 +31,10 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Select Your Wordlist", style: TextStyle(color: Colors.white),),
+        title: const Text(
+          "Select Your Wordlist",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
@@ -69,14 +72,17 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
                   }
 
                   final category = catSnapshot.data!;
-                  return FutureBuilder<List<WordList>> (
+                  return FutureBuilder<List<WordList>>(
                     future: WordService.getWords(id),
                     builder: (context, wordSnapshot) {
                       if (!wordSnapshot.hasData) return const SizedBox();
 
                       final words = wordSnapshot.data!;
-                      final wordPreview = words.take(5).map((w) => w.word).join(', ');
-                    
+                      final wordPreview = words
+                          .take(5)
+                          .map((w) => w.word)
+                          .join(', ');
+
                       return Card(
                         margin: const EdgeInsets.symmetric(vertical: 8),
                         child: Padding(
@@ -86,57 +92,76 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
                             children: [
                               Text(
                                 category,
-                                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            const SizedBox(height: 8),
-                          Text(
-                            wordPreview,
-                            style: const TextStyle(fontSize: 20),
+                              const SizedBox(height: 8),
+                              Text(
+                                wordPreview,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                              const SizedBox(height: 16),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              WordPracticeScreen(words: words),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.lightBlueAccent,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
+                                      textStyle: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    child: const Text('Practice'),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(
+                                      Icons.arrow_forward,
+                                      color: Colors.blueAccent,
+                                      size: 32,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => WordlistScreen(
+                                            category: category,
+                                            words: words,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton(
-                            onPressed: () {
-                            Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => WordPracticeScreen()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightBlueAccent,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      child: const Text('Practice'),
-                    ),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_forward, color: Colors.blueAccent, size: 32),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => WordlistScreen(category: category, words: words),
                         ),
                       );
                     },
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      );
-                  },
-                );
-              },
-            );
-          }).toList(),
-        );
-        }, 
+                  );
+                },
+              );
+            }).toList(),
+          );
+        },
       ),
     );
   }
 }
-
