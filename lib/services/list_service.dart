@@ -41,4 +41,26 @@ class WordService {
     }
     //await saveWordsToCsv(listId, allWords);
   }
+
+  static Future<int?> getTopPriority() async {
+    final allWords = await loadWords();
+    if (allWords.isEmpty) return null;
+
+    // Only get priority 1 time per list
+    final Map<int, int> listPriorities = {};
+    for (var w in allWords) {
+      listPriorities[w.listId] = w.priority;
+    }
+
+    // Find priority 1
+    int? topListId;
+    int minPriority = 100;
+    listPriorities.forEach((listId, priority) {
+      if (priority < minPriority) {
+        minPriority = priority;
+        topListId = listId;
+      }
+    });
+    return topListId;
+  } 
 }
