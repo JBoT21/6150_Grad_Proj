@@ -1,9 +1,11 @@
+//import 'package:flutter/foundation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:team_3_f25_project/screens/word_practice_page.dart';
 import 'package:team_3_f25_project/screens/wordlist_screen.dart';
-import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
-import 'package:team_3_f25_project/widgets/word_card.dart';
+//import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
+//import 'package:team_3_f25_project/widgets/word_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
@@ -17,6 +19,8 @@ class WordlistSelectionScreen extends StatefulWidget {
 }
 
 class _WordlistSelectionState extends State<WordlistSelectionScreen> {
+  List<Map<String, dynamic>> wordlists = [];
+
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('email');
@@ -27,116 +31,112 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
     );
   }
 
+  Future<void> _loadWordLists() async {
+    final listIds = await WordService.getListIds();
+    final lists = <Map<String, dynamic>>[];
+
+    for (var id in listIds) {
+      final category = await WordService.getCategory(id);
+      final words = await WordService.getWords(id);
+      final priority = words.isNotEmpty ? words.first.priority : 100;
+      lists.add({
+        'id': id,
+        'category': category,
+        'words': words,
+        'priority': priority,
+      });
+    }
+
+    // Sort by priority
+    lists.sort((a, b) => a['priority'].compareTo(b['priority']));
+    setState(() => wordlists = lists);
+  }
+
+  Future<void> _updatePriorities() async {
+    for (int i = 0; i < wordlists.length; i++) {
+      final listId = wordlists[i]['id'];
+      await WordService.updateListPriority(listId, i+1);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadWordLists();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Select Your Wordlist", style: TextStyle(color: Colors.white),),
+        title: const Text("Manage Wordlists", style: TextStyle(color: Colors.white),),
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
+            color: Colors.white,
             onPressed: () => _logout(context),
           ),
         ],
       ),
-      body: FutureBuilder<List<int>>(
-        future: WordService.getListIds(),
-        builder: (context, snapshot) {
-          //if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Text('Error loading wordlists: ${snapshot.error}'),
-            );
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No wordlists found'));
-          }
-
-          final listIds = snapshot.data!;
-          return ListView(
-            padding: const EdgeInsets.all(16),
-            children: listIds.map((id) {
-              return FutureBuilder<String>(
-                future: WordService.getCategory(id),
-                builder: (context, catSnapshot) {
-                  //if (!catSnapshot.hasData) return const SizedBox();
-                  if (catSnapshot.connectionState == ConnectionState.waiting) {
-                    return const SizedBox();
-                  } else if (catSnapshot.hasError) {
-                    return Text('Error loading category: ${catSnapshot.error}');
-                  }
-
-                  final category = catSnapshot.data!;
-                  return FutureBuilder<List<WordList>> (
-                    future: WordService.getWords(id),
-                    builder: (context, wordSnapshot) {
-                      if (!wordSnapshot.hasData) return const SizedBox();
-
-                      final words = wordSnapshot.data!;
-                      final wordPreview = words.take(5).map((w) => w.word).join(', ');
-                    
-                      return Card(
-                        margin: const EdgeInsets.symmetric(vertical: 8),
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                category,
-                                style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
-                              ),
-                            const SizedBox(height: 8),
-                          Text(
-                            wordPreview,
-                            style: const TextStyle(fontSize: 20),
+      body: wordlists.isEmpty ? const Center(child: CircularProgressIndicator()) : Column(
+        children: [
+          Expanded(
+            child: ReorderableListView(
+              padding: const EdgeInsets.all(16),
+              onReorder: (oldIndex, newIndex) async {
+                setState(() {
+                  if (newIndex > oldIndex) newIndex -= 1;
+                  final item = wordlists.removeAt(oldIndex);
+                  wordlists.insert(newIndex, item);
+                });
+                await _updatePriorities();
+              },
+              children: [
+                for (final list in wordlists)
+                  Card(
+                    key: ValueKey(list['id']),
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    child: ListTile(
+                      title: Text(
+                        list['category'],
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      subtitle: Text(
+                        list['words']
+                        .take(5)
+                        .map((w) => w.word)
+                        .join(', '),
+                      ),
+                      trailing: const Icon(Icons.drag_handle),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WordlistScreen(
+                              category: list['category'], words: list['words'],
+                            ),
                           ),
-                          const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            ElevatedButton(
-                            onPressed: () {
-                            Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => WordPracticeScreen()),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightBlueAccent,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      child: const Text('Practice'),
+                        );
+                      },
                     ),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_forward, color: Colors.blueAccent, size: 32),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => WordlistScreen(category: category, words: words),
-                        ),
-                      );
-                    },
                   ),
-                ],
-              ),
-            ],
+              ],
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(16),
+            child: Text("Drag and drop to reorder list priority (Top = highest priority)",
+            style: TextStyle(
+              fontSize: 16,
+            ),
           ),
         ),
-      );
-                  },
-                );
-              },
-            );
-          }).toList(),
-        );
-        }, 
-      ),
+      ],
+    ),
     );
   }
 }
-
