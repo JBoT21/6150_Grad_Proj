@@ -50,11 +50,10 @@ class WordlistScreen extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
+                Navigator.pushNamed(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => WordPracticeScreen(words: words),
-                  ),
+                  '/progress',
+                  arguments: {'listId': 1},
                 );
               },
               child: const Text('View Progress'),

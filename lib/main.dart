@@ -72,8 +72,26 @@ class _ReadRightAppState extends State<ReadRightApp> {
       routes: {
         '/dashboard': (context) => const DashboardScreen(),
         '/wordlist_selection': (context) => const WordlistSelectionScreen(),
-        '/progress': (context) => const ProgressScreen(),
-        '/feedback': (context) => const FeedbackScreen(),
+        //'/wordlist_screen': (context) => const WordlistScreen(),
+        '/progress': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
+          return ProgressScreen(
+            listId: args['listId'] ?? 1, // default to list 1 if none passed
+          );
+        },
+        '/feedback': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
+          return FeedbackScreen(
+            success: args['success'] ?? false,
+            wordText: args['wordText'] ?? '',
+            feedbackText: args['feedbackText'] ?? '',
+            studentRecording: args['recordingPath'], // optional
+          );
+        },
         '/signup': (context) => const SignupScreen(),
       },
     );
