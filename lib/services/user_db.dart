@@ -45,6 +45,13 @@ class DatabaseHelper {
         recordingPath TEXT
       )
     ''');
+
+    /* Table wordlists
+    ID
+    uid - foreign key
+    list id
+    archived word?
+    */
   }
 
   Future<int> insertAttempt(Attempt attempt) async {
