@@ -5,6 +5,7 @@ import 'package:csv/csv.dart';
 class WordList {
   final int id;
   final int listId;
+  final int priority;
   final String category;
   final String word;
   final String sentence1;
@@ -15,6 +16,7 @@ class WordList {
   WordList({
     required this.id,
     required this.listId,
+    required this.priority,
     required this.category,
     required this.word,
     required this.sentence1,
@@ -26,11 +28,12 @@ class WordList {
     return WordList(
       id: int.parse(type[0]),
       listId: int.parse(type[1]),
-      category: type[2],
-      word: type[3],
-      sentence1: type[4],
-      sentence2: type[5],
-      sentence3: type[6],
+      priority: int.parse(type[2]),
+      category: type[3],
+      word: type[4],
+      sentence1: type[5],
+      sentence2: type[6],
+      sentence3: type[7],
     );
   }
 }
