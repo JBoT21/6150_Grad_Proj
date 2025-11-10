@@ -33,4 +33,12 @@ class WordService {
     final allWords = await loadWords();
     return allWords.firstWhere((w) => w.listId == listId).category;
   }
+
+  static Future<void> updateListPriority(int listId, int newPriority) async {
+    final allWords = await getWords(listId);
+    for (final word in allWords) {
+      word.priority = newPriority;
+    }
+    //await saveWordsToCsv(listId, allWords);
+  }
 }

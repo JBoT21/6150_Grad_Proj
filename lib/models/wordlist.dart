@@ -1,11 +1,11 @@
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:csv/csv.dart';
+//import 'package:flutter/services.dart' show rootBundle;
+//import 'package:csv/csv.dart';
 
 // Class for word list
 class WordList {
   final int id;
   final int listId;
-  final int priority;
+  int priority;
   final String category;
   final String word;
   final String sentence1;
