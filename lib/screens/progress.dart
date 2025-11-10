@@ -1,215 +1,182 @@
-// progress.dart
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../models/progress_view_model.dart';
-import '../widgets/progress_chart_stub.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:team_3_f25_project/screens/login.dart';
+import '../services/user_db.dart';
+import '../services/list_service.dart';
+import '../models/attempt.dart';
 
 class ProgressScreen extends StatefulWidget {
-  const ProgressScreen({super.key});
+  final int listId; // which word list this progress screen shows
+  const ProgressScreen({super.key, required this.listId});
 
   @override
   State<ProgressScreen> createState() => _ProgressScreenState();
 }
 
 class _ProgressScreenState extends State<ProgressScreen> {
-  Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('email');
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
-    );
-  }
+  final db = DatabaseHelper.instance;
+  double completion = 0;
+  int totalWords = 0;
+  int masteredWords = 0;
+  List<Map<String, dynamic>> wordStatus = [];
 
   @override
   void initState() {
     super.initState();
-    // Fire load after first frame to avoid context issues
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final vm = context.read<ProgressViewModel>();
-      vm.load(); // safe: idempotent
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    final words = await WordService.getWords(widget.listId);
+    final allAttempts = await db.database.then((db) => db.query('attempts'));
+
+    // Get list of correctly scored words
+    final correctWords = allAttempts
+        .where((a) => a['score'] == 1)
+        .map((a) => a['wordText'] as String)
+        .toSet();
+
+    setState(() {
+      totalWords = words.length;
+      masteredWords = words.where((w) => correctWords.contains(w.word)).length;
+      completion = totalWords == 0 ? 0 : masteredWords / totalWords;
+
+      // Map each word to its progress state
+      wordStatus = words.map((w) {
+        bool correct = correctWords.contains(w.word);
+        return {
+          'word': w.word,
+          'status': correct ? 'mastered' : 'pending',
+        };
+      }).toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ProgressViewModel>(
-      builder: (context, vm, _) {
-        if (vm.loading) {
-          return Scaffold(
-            appBar: AppBar(
-              title: Text('Your Progress'),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.logout),
-                  onPressed: () => _logout(context),
+    return Scaffold(
+      backgroundColor: Colors.lightBlue.shade50,
+      appBar: AppBar(
+        title: const Text('Your Progress'),
+        backgroundColor: Colors.lightBlue.shade400,
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const SizedBox(height: 20),
+            Text(
+              'Word List ${widget.listId}',
+              style: const TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              'You’ve mastered $masteredWords of $totalWords words!',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey.shade700,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // Circular progress bar
+            SizedBox(
+              width: 180,
+              height: 180,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    value: completion,
+                    strokeWidth: 14,
+                    color: Colors.greenAccent.shade400,
+                    backgroundColor: Colors.grey.shade300,
+                  ),
+                  Text(
+                    '${(completion * 100).toStringAsFixed(0)}%',
+                    style: const TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            Expanded(
+              child: ListView.builder(
+                itemCount: wordStatus.length,
+                itemBuilder: (context, index) {
+                  final word = wordStatus[index]['word'];
+                  final status = wordStatus[index]['status'];
+
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    color: status == 'mastered'
+                        ? Colors.green.shade100
+                        : Colors.white,
+                    child: ListTile(
+                      leading: Icon(
+                        status == 'mastered'
+                            ? Icons.check_circle_rounded
+                            : Icons.circle_outlined,
+                        color: status == 'mastered'
+                            ? Colors.green
+                            : Colors.grey,
+                        size: 32,
+                      ),
+                      title: Text(
+                        word,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: Text(status == 'mastered'
+                          ? 'You got it right!'
+                          : 'Not yet practiced'),
+                    ),
+                  );
+                },
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/practice'),
+                  icon: const Icon(Icons.mic),
+                  label: const Text('Practice Again'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange.shade300,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                  ),
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/wordlist_selection'),
+                  icon: const Icon(Icons.arrow_forward_rounded),
+                  label: const Text('Next List'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.lightBlue.shade300,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                  ),
                 ),
               ],
-            ),
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        if (vm.error != null) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Your Progress')),
-            body: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.error_outline, size: 40),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Could not load progress.',
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(vm.error!, style: Theme.of(context).textTheme.bodySmall),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () => vm.refresh(),
-                    icon: const Icon(Icons.refresh),
-                    label: const Text('Retry'),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        if (vm.attempts.isEmpty) {
-          return Scaffold(
-            appBar: AppBar(title: const Text('Your Progress')),
-            body: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.insights_outlined, size: 40),
-                  const SizedBox(height: 8),
-                  const Text('No attempts yet'),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Practice a word to see your stats here.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton(
-                    onPressed: () =>
-                        Navigator.popAndPushNamed(context, '/practice'),
-                    child: const Text('Start practicing'),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }
-
-        final avg = vm.averageScore;
-        final scores = vm.recentScores;
-
-        return Scaffold(
-          appBar: AppBar(title: const Text('Your Progress')),
-          body: ListView(
-            padding: const EdgeInsets.only(bottom: 24),
-            children: [
-              const SizedBox(height: 16),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    _Metric(
-                      label: 'Attempts',
-                      value: vm.totalAttempts.toString(),
-                    ),
-                    const SizedBox(width: 8),
-                    _Metric(
-                      label: 'Unique Words',
-                      value: vm.uniqueWords.toString(),
-                    ),
-                    const SizedBox(width: 8),
-                    _Metric(label: 'Avg Score', value: avg.toStringAsFixed(0)),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              ProgressChartStub(
-                streakDays: 0,
-                averageScore: avg,
-                recentScores: scores.isEmpty ? const [0, 0, 0, 0, 0] : scores,
-                label: 'Last ${scores.isEmpty ? 5 : scores.length} attempts',
-              ),
-
-              const SizedBox(height: 12),
-
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Recent Attempts',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 6),
-
-              ...vm.attempts
-                  .take(10)
-                  .map(
-                    (a) => ListTile(
-                      leading: CircleAvatar(child: Text(a.score.toString())),
-                      title: Text(
-                        a.wordText,
-                        style: const TextStyle(fontWeight: FontWeight.w600),
-                      ),
-                      subtitle: Text(
-                        'Scored ${a.score} on ${a.createdAt.toLocal().toString().split(" ").first}',
-                      ),
-                      trailing: const Icon(Icons.chevron_right_rounded),
-                    ),
-                  ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _Metric extends StatelessWidget {
-  final String label;
-  final String value;
-  const _Metric({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-        ),
-        child: Column(
-          children: [
-            Text(
-              value,
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.labelMedium?.copyWith(color: Colors.grey.shade700),
             ),
           ],
         ),

@@ -49,7 +49,11 @@ class WordlistScreen extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/progress');
+                Navigator.pushNamed(
+                  context,
+                  '/progress',
+                  arguments: {'listId': 1},
+                );
               },
               child: const Text('View Progress'),
             ),

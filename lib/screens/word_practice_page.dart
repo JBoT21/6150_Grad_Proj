@@ -13,6 +13,8 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 
+bool? lastResult;
+
 class WordPracticeScreen extends StatefulWidget {
   final List<String> wordlist = [
     'cat',
@@ -121,6 +123,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   void _onSpeechResult(SpeechRecognitionResult result) {
     if (result.finalResult) {
       bool correct = _isCorrect(result.recognizedWords);
+      setState(() {
+        lastResult = correct;
+      });
       // add attempt to database
       widget.db.insertAttempt(
         Attempt(
@@ -165,6 +170,11 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       body: Center(
         child: Column(
           children: [
+            LinearProgressIndicator(
+              value: (nextIndex +1)/widget.wordlist.length,
+              color: Colors.green,
+              backgroundColor: Colors.grey.shade300,
+            ),
             WordCard(
               wordText: currentWord,
               patternLabel: "Pattern label",
@@ -195,13 +205,23 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
           size: 45,
         ),
         onPressed: () {
+          if (lastResult == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Try saying the word first!')),
+            );
+            return;
+          }
+
           Navigator.pushNamed(
             context,
-            AppRoutes.feedback,
+            '/feedback',
             arguments: {
+              'success': lastResult!, // 👈 the "!" asserts it’s not null
               'wordText': currentWord,
-              'score': 1,
-              'feedback': "feedback",
+              'feedbackText': lastResult!
+                  ? 'You said it perfectly!'
+                  : 'Try again!',
+              'recordingPath': recordingPath,
             },
           );
         },
