@@ -14,8 +14,6 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 
-bool? lastResult;
-
 class WordPracticeScreen extends StatefulWidget {
   final List<WordList> words;
 
@@ -33,6 +31,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
       (route) => false,
     );
   }
