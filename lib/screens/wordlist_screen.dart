@@ -60,7 +60,12 @@ class WordlistScreen extends StatelessWidget {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/practice');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => WordPracticeScreen(words: words),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blueAccent,

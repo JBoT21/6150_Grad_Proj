@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
-import 'package:team_3_f25_project/routes.dart';
+import 'package:team_3_f25_project/screens/wordlist_selection.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 import 'package:team_3_f25_project/widgets/record_button.dart';
 import 'package:team_3_f25_project/widgets/word_card.dart';
@@ -76,14 +76,11 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   void _removeWordFromList() {
     if (widget.words.isNotEmpty) {
       widget.words.remove(currentWordEntry);
-    } else {
-      _nextWord();
     }
   }
 
   void _finishList() {
-    widget.words.remove(currentWordEntry);
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => CelebrationScreen()),
     );
@@ -136,9 +133,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     if (result.finalResult) {
       _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
-      if (correct) {
-        correctlyPronounced++;
-      }
 
       // add attempt to database
       widget.db.insertAttempt(
@@ -153,19 +147,22 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         ),
       );
 
-      if (correct && widget.words.length == 1) {
-        _finishList();
-      } else {
-        // show feedback
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => InstantFeedback(success: correct),
-          ),
-        ).then((_) {
-          correct ? _removeWordFromList() : _nextWord();
-        });
-      }
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => InstantFeedback(success: correct),
+        ),
+      ).then((_) {
+        if (correct) {
+          correctlyPronounced++;
+          _removeWordFromList();
+        }
+        if (widget.words.isEmpty) {
+          _finishList();
+        } else {
+          _nextWord();
+        }
+      });
     }
   }
 
@@ -281,25 +278,57 @@ class _TryAgainState extends State<TryAgain> {
   }
 }
 
-class CelebrationScreen extends StatefulWidget {
+class CelebrationScreen extends StatelessWidget {
   const CelebrationScreen({super.key});
 
   @override
-  State<CelebrationScreen> createState() => _CelebrationScreenState();
-}
-
-class _CelebrationScreenState extends State<CelebrationScreen> {
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: Colors.blue[400],
+      backgroundColor: Colors.green.shade100,
+      appBar: AppBar(centerTitle: true, backgroundColor: Colors.green.shade400),
+      body: Padding(
+        padding: const EdgeInsets.all(20),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Icon(Icons.celebration, color: Colors.white, size: 250),
-              ElevatedButton(onPressed: () {}, child: Text("Next List")),
+              // Big icon and header message
+              Icon(
+                Icons.star_rounded,
+                color: Colors.yellow.shade700,
+                size: 250,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Awesome Job!',
+                style: TextStyle(
+                  fontSize: 34,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.green.shade800,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+
+              const SizedBox(height: 30),
+
+              // TODO change to getting next priority list
+              IconButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WordlistSelectionScreen(),
+                    ),
+                  );
+                },
+                icon: Icon(
+                  Icons.arrow_circle_right,
+                  size: 100,
+                  color: Colors.purple.shade300,
+                ),
+              ),
             ],
           ),
         ),

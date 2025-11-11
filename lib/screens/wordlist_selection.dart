@@ -1,11 +1,8 @@
-//import 'package:flutter/foundation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:team_3_f25_project/screens/word_practice_page.dart';
 import 'package:team_3_f25_project/screens/wordlist_screen.dart';
-//import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
-//import 'package:team_3_f25_project/widgets/word_card.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
