@@ -37,7 +37,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -165,6 +165,11 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       body: Center(
         child: Column(
           children: [
+            LinearProgressIndicator(
+              value: (nextIndex + 1) / widget.wordlist.length,
+              color: Colors.green,
+              backgroundColor: Colors.grey.shade300,
+            ),
             WordCard(
               wordText: currentWord,
               patternLabel: "Pattern label",
@@ -186,25 +191,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
             SizedBox(height: 30),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.amber.shade200,
-        label: Icon(
-          Icons.arrow_right_alt_rounded,
-          color: Colors.amber.shade800,
-          size: 45,
-        ),
-        onPressed: () {
-          Navigator.pushNamed(
-            context,
-            AppRoutes.feedback,
-            arguments: {
-              'wordText': currentWord,
-              'score': 1,
-              'feedback': "feedback",
-            },
-          );
-        },
       ),
     );
   }
