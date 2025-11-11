@@ -32,7 +32,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
       (route) => false,
-      (route) => false,
     );
   }
 
@@ -186,7 +185,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         child: Column(
           children: [
             LinearProgressIndicator(
-              value: (nextIndex + 1) / widget.wordlist.length,
+              value: (nextIndex + 1) / widget.words.length,
               color: Colors.green,
               backgroundColor: Colors.grey.shade300,
             ),
