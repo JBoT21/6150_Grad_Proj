@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
+import 'package:team_3_f25_project/screens/wordlist_selection.dart';
+//import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 import 'package:team_3_f25_project/widgets/stat_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
@@ -17,6 +18,14 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // Temporary navigation to wordlist page feel free to change
+  void _openWordListSelection(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const WordlistSelectionScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,10 +39,21 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
       body: Center(
-        child: StatTile(
-          label: "Class Average",
-          value: "100",
-          icon: Icons.check,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            StatTile(
+              label: "Class Average",
+              value: "100",
+              icon: Icons.check,
+            ),
+            // Basic button to get to wordlist page feel free to change
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _openWordListSelection(context),
+              child: const Text("Word Lists"),
+            ),
+          ],
         ),
       ),
     );

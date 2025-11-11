@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:team_3_f25_project/services/list_service.dart';
 import '../services/user_db.dart';
 import '../screens/dashboard.dart';
-import '../screens/wordlist_selection.dart';
+import '../screens/wordlist_screen.dart';
 import '../screens/signup.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -38,10 +40,18 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setInt('userId', user.id!);
 
       if (user.role.toLowerCase() == 'student') {
+        // Get wordlist for students
+        final topListId = await WordService.getTopPriority();
+        if (topListId != null) {
+          final words = await WordService.getWords(topListId);
+          final category = await WordService.getCategory(topListId); 
+        
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const WordlistSelectionScreen()),
+          MaterialPageRoute(builder: (_) => WordlistScreen(category: category, words: words),
+          ),
         );
+        }
       } else if (user.role.toLowerCase() == 'teacher') {
         Navigator.pushReplacement(
           context,
