@@ -13,8 +13,6 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 
-bool? lastResult;
-
 class WordPracticeScreen extends StatefulWidget {
   final List<String> wordlist = [
     'cat',
@@ -39,7 +37,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -123,9 +121,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   void _onSpeechResult(SpeechRecognitionResult result) {
     if (result.finalResult) {
       bool correct = _isCorrect(result.recognizedWords);
-      setState(() {
-        lastResult = correct;
-      });
       // add attempt to database
       widget.db.insertAttempt(
         Attempt(
@@ -171,7 +166,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         child: Column(
           children: [
             LinearProgressIndicator(
-              value: (nextIndex +1)/widget.wordlist.length,
+              value: (nextIndex + 1) / widget.wordlist.length,
               color: Colors.green,
               backgroundColor: Colors.grey.shade300,
             ),
@@ -196,35 +191,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
             SizedBox(height: 30),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.amber.shade200,
-        label: Icon(
-          Icons.arrow_right_alt_rounded,
-          color: Colors.amber.shade800,
-          size: 45,
-        ),
-        onPressed: () {
-          if (lastResult == null) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Try saying the word first!')),
-            );
-            return;
-          }
-
-          Navigator.pushNamed(
-            context,
-            '/feedback',
-            arguments: {
-              'success': lastResult!, // 👈 the "!" asserts it’s not null
-              'wordText': currentWord,
-              'feedbackText': lastResult!
-                  ? 'You said it perfectly!'
-                  : 'Try again!',
-              'recordingPath': recordingPath,
-            },
-          );
-        },
       ),
     );
   }
