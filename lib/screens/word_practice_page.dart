@@ -39,6 +39,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   final _speechToText = SpeechToText();
   final _recorder = AudioRecorder();
+  int correctlyPronounced = 0;
   String recordingPath = "";
   bool _speechEnabled = false;
   bool _isListening = false;
@@ -135,6 +136,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     if (result.finalResult) {
       _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
+      if (correct) {
+        correctlyPronounced++;
+      }
 
       // add attempt to database
       widget.db.insertAttempt(
@@ -185,7 +189,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         child: Column(
           children: [
             LinearProgressIndicator(
-              value: (nextIndex + 1) / widget.words.length,
+              value:
+                  correctlyPronounced /
+                  (correctlyPronounced + widget.words.length),
               color: Colors.green,
               backgroundColor: Colors.grey.shade300,
             ),
