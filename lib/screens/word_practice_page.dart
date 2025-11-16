@@ -189,6 +189,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
               value:
                   correctlyPronounced /
                   (correctlyPronounced + widget.words.length),
+              value: (nextIndex + 1) / widget.wordlist.length,
               color: Colors.green,
               backgroundColor: Colors.grey.shade300,
             ),

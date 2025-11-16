@@ -77,6 +77,7 @@ class _ReadRightAppState extends State<ReadRightApp> {
           final args =
               ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return ProgressScreen(
             listId: args['listId'] ?? 1, // default to list 1 if none passed
           );
@@ -85,6 +86,9 @@ class _ReadRightAppState extends State<ReadRightApp> {
           final args =
               ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>;
+        '/practice': (context) => WordPracticeScreen(),
+        '/feedback': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return FeedbackScreen(
             success: args['success'] ?? false,
             wordText: args['wordText'] ?? '',

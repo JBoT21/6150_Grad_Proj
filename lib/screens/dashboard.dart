@@ -26,6 +26,14 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
+  // Temporary navigation to wordlist page feel free to change
+  void _openWordListSelection(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const WordlistSelectionScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
