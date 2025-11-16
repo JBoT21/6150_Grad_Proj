@@ -21,7 +21,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   String generateClassCode() {
     var uuid = Uuid().v4();
-    return "CLASS-${uuid.substring(0, 6).toUpperCase()}";
+    return uuid.substring(0, 6).toUpperCase();
   }
 
 

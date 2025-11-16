@@ -100,12 +100,14 @@ class DatabaseHelper {
     db.close();
   }
 
+  //Clear all rows in user
   Future<void> clearAllTables() async {
     final db = await DatabaseHelper.instance.database;
     await db.delete('users');
     print('All users deleted from database!');
   }
 
+  //Check for classcode when signing up
   Future<bool> classCodeExists(String classCode) async {
     final db = await instance.database;
     final result = await db.query(
@@ -116,11 +118,17 @@ class DatabaseHelper {
     return result.isNotEmpty;
   }
 
-  Future<void> deleteDatabaseFile() async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, 'readright_user.db');
-    await deleteDatabase(path);
-    print('Old database deleted!');
+  //Get students by classCode for teacher in dashboard screen
+  Future<List<AppUser>> getStudentsByClassCode(String classCode) async {
+    final db = await instance.database;
+
+    final result = await db.query(
+      'users',
+      where: 'role = ? AND classCode = ?',
+      whereArgs: ['student', classCode],
+    );
+
+    return result.map((row) => AppUser.fromMap(row)).toList();
   }
 
 }

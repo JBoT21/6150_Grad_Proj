@@ -67,7 +67,7 @@ class _ReadRightAppState extends State<ReadRightApp> {
     return MaterialApp(
       title: 'ReadRight',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.indigo),
+      theme: ThemeData(primarySwatch: Colors.indigo, useMaterial3: false,),
       home: _home,
       routes: {
         '/dashboard': (context) => const DashboardScreen(),
