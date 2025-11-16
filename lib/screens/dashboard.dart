@@ -5,8 +5,28 @@ import 'package:team_3_f25_project/widgets/stat_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  String classCode = "";
+
+  @override
+  void initState() {
+    super.initState();
+    _loadClassCode();
+  }
+
+  Future<void> _loadClassCode() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      classCode = prefs.getString('classCode') ?? "N/A";
+    });
+  }
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -26,14 +46,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // Temporary navigation to wordlist page feel free to change
-  void _openWordListSelection(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const WordlistSelectionScreen()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,7 +54,14 @@ class DashboardScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
+            onPressed: () async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+              );
+            },
           ),
         ],
       ),
@@ -50,17 +69,18 @@ class DashboardScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            StatTile(
-              label: "Class Average",
-              value: "100",
-              icon: Icons.check,
+            Text(
+              "Your Class Code:",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
-            // Basic button to get to wordlist page feel free to change
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _openWordListSelection(context),
-              child: const Text("Word Lists"),
+            const SizedBox(height: 8),
+            SelectableText(
+              classCode,
+              style: TextStyle(fontSize: 28, color: Colors.blue),
             ),
+            const SizedBox(height: 30),
+
+            // Your existing dashboard widgets...
           ],
         ),
       ),

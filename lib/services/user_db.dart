@@ -19,17 +19,18 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
     print('Database located at: $dbPath');
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(path, version: 2, onCreate: _createDB);
   }
 
   Future _createDB(Database db, int version) async {
-    await db.execute('''
+    await db.execute(''' 
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        role TEXT NOT NULL
+        role TEXT NOT NULL,
+        classCode TEXT NOT NULL
       )
     ''');
 
@@ -104,4 +105,22 @@ class DatabaseHelper {
     await db.delete('users');
     print('All users deleted from database!');
   }
+
+  Future<bool> classCodeExists(String classCode) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'role = ? AND classCode = ?',
+      whereArgs: ['teacher', classCode],
+    );
+    return result.isNotEmpty;
+  }
+
+  Future<void> deleteDatabaseFile() async {
+    final dbPath = await getDatabasesPath();
+    final path = join(dbPath, 'readright_user.db');
+    await deleteDatabase(path);
+    print('Old database deleted!');
+  }
+
 }

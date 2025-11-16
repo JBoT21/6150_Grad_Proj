@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/user_db.dart';
 import '../models/user.dart';
+import 'package:uuid/uuid.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -13,14 +14,24 @@ class _SignupScreenState extends State<SignupScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _classCodeController = TextEditingController();
+
   String _role = 'student';
   String? _error;
+
+  String generateClassCode() {
+    var uuid = Uuid().v4();
+    return "CLASS-${uuid.substring(0, 6).toUpperCase()}";
+  }
+
 
   void _signup() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final db = DatabaseHelper.instance;
+    String classCode;
+
     final existing = await db.getUserByEmail(_emailController.text.trim());
     if (existing != null) {
       setState(() => _error = "Email already registered.");
@@ -41,18 +52,38 @@ class _SignupScreenState extends State<SignupScreen> {
       setState(() => _error = "Password must be 8 characters long");
       return;
     }
+    if (_role == 'teacher') {
+      classCode = generateClassCode();
+    }
+    else {
+      classCode = _classCodeController.text.trim();
+      final exists = await db.classCodeExists(classCode);
+      if (classCode.isEmpty) {
+        setState(() => _error = "Students must enter a class code.");
+        return;
+      }
+      if (!exists) {
+        setState(() => _error = "Students must enter a valid class code.");
+        return;
+      }
+    }
 
     final newUser = AppUser(
       name: name,
       email: email,
       password: password,
       role: _role,
+      classCode: classCode,
     );
 
-    await db.insertUser(newUser);
+    final insertedId = await db.insertUser(newUser);
+
+    if (insertedId <= 0) {
+      setState(() => _error = "Failed to create user. Please try again.");
+      return;
+    }
     if (mounted) Navigator.pop(context);
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -159,6 +190,25 @@ class _SignupScreenState extends State<SignupScreen> {
                   _error!,
                   style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
                 ),
+
+              if (_role == 'student')
+                Column(
+                  children: [
+                    TextField(
+                      controller: _classCodeController,
+                      decoration: InputDecoration(
+                        labelText: "Class Code",
+                        prefixIcon: const Icon(Icons.class_),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        filled: true,
+                        fillColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,

@@ -35,6 +35,5 @@ class WordList {
       sentence2: type[6],
       sentence3: type[7],
     );
-      );
   }
 }

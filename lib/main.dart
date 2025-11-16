@@ -72,30 +72,29 @@ class _ReadRightAppState extends State<ReadRightApp> {
       routes: {
         '/dashboard': (context) => const DashboardScreen(),
         '/wordlist_selection': (context) => const WordlistSelectionScreen(),
-        //'/wordlist_screen': (context) => const WordlistScreen(),
+        '/wordlist_screen': (context) => const WordlistScreen(category: '', words: [],),
+
         '/progress': (context) {
-          final args =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments
+          as Map<String, dynamic>;
           return ProgressScreen(
-            listId: args['listId'] ?? 1, // default to list 1 if none passed
+            listId: args['listId'] ?? 1,
           );
         },
+
+        '/practice': (context) => WordPracticeScreen(words: [],),
+
         '/feedback': (context) {
-          final args =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>;
-        '/practice': (context) => WordPracticeScreen(),
-        '/feedback': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final args = ModalRoute.of(context)!.settings.arguments
+          as Map<String, dynamic>;
           return FeedbackScreen(
             success: args['success'] ?? false,
             wordText: args['wordText'] ?? '',
             feedbackText: args['feedbackText'] ?? '',
-            studentRecording: args['recordingPath'], // optional
+            studentRecording: args['recordingPath'],
           );
         },
+
         '/signup': (context) => const SignupScreen(),
       },
     );
