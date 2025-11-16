@@ -37,7 +37,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE attempts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid TEXT NOT NULL,
+        uid INTEGER NOT NULL,
         wordText TEXT NOT NULL,
         score INTEGER NOT NULL,
         feedback TEXT NOT NULL,
@@ -131,4 +131,19 @@ class DatabaseHelper {
     return result.map((row) => AppUser.fromMap(row)).toList();
   }
 
+  Future<double> getStudentProgress(int uid) async {
+    final db = await instance.database;
+
+    final result = await db.rawQuery('''
+    SELECT 
+      AVG(score) as avgScore
+    FROM attempts
+    WHERE uid = ?
+  ''', [uid]);
+
+    if (result.isNotEmpty && result.first["avgScore"] != null) {
+      return (result.first["avgScore"] as num).toDouble();
+    }
+    return 0.0;
+  }
 }

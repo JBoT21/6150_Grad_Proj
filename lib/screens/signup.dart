@@ -185,12 +185,6 @@ class _SignupScreenState extends State<SignupScreen> {
                 onChanged: (value) => setState(() => _role = value!),
               ),
               const SizedBox(height: 20),
-              if (_error != null)
-                Text(
-                  _error!,
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
-                ),
-
               if (_role == 'student')
                 Column(
                   children: [
@@ -232,6 +226,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+              if (_error != null)
+                Text(
+                  _error!,
+                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+                ),
             ],
           ),
         ),

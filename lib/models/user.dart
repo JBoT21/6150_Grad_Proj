@@ -4,7 +4,7 @@ class AppUser {
   final String email;
   final String password;
   final String role;
-  final String? classCode;
+  final String classCode;
 
   AppUser({
     this.id,
@@ -12,7 +12,7 @@ class AppUser {
     required this.email,
     required this.password,
     required this.role,
-    this.classCode,
+    required this.classCode,
   });
 
   Map<String, dynamic> toMap() => {

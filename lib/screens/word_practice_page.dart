@@ -25,6 +25,8 @@ class WordPracticeScreen extends StatefulWidget {
 }
 
 class _WordPracticeScreenState extends State<WordPracticeScreen> {
+  int? userId;
+  SharedPreferences? prefs;
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('email');
@@ -59,9 +61,15 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   @override
   void initState() {
     super.initState();
+    _loadUser();
     _initSpeech();
   }
 
+  Future<void> _loadUser() async {
+    prefs = await SharedPreferences.getInstance();
+    userId = prefs!.getInt('userId');
+    setState(() {});
+  }
   void _initSpeech() async {
     _speechEnabled = await _speechToText.initialize();
     setState(() {});
@@ -134,10 +142,11 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
 
+      userId ??= -1;;
       // add attempt to database
       widget.db.insertAttempt(
         Attempt(
-          uid: "INSERT",
+          uid: userId,
           wordText: currentWord,
           score: correct ? 1 : 0,
           createdAt: DateTime.now(),
