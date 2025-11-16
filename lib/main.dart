@@ -74,11 +74,18 @@ class _ReadRightAppState extends State<ReadRightApp> {
         '/wordlist_selection': (context) => const WordlistSelectionScreen(),
         //'/wordlist_screen': (context) => const WordlistScreen(),
         '/progress': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           return ProgressScreen(
             listId: args['listId'] ?? 1, // default to list 1 if none passed
           );
         },
+        '/feedback': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
         '/practice': (context) => WordPracticeScreen(),
         '/feedback': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
