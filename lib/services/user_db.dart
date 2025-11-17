@@ -19,24 +19,25 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
     print('Database located at: $dbPath');
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(path, version: 2, onCreate: _createDB);
   }
 
   Future _createDB(Database db, int version) async {
-    await db.execute('''
+    await db.execute(''' 
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        role TEXT NOT NULL
+        role TEXT NOT NULL,
+        classCode TEXT NOT NULL
       )
     ''');
 
     await db.execute('''
       CREATE TABLE attempts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid TEXT NOT NULL,
+        uid INTEGER NOT NULL,
         wordText TEXT NOT NULL,
         score INTEGER NOT NULL,
         feedback TEXT NOT NULL,
@@ -99,9 +100,50 @@ class DatabaseHelper {
     db.close();
   }
 
+  //Clear all rows in user
   Future<void> clearAllTables() async {
     final db = await DatabaseHelper.instance.database;
     await db.delete('users');
     print('All users deleted from database!');
+  }
+
+  //Check for classcode when signing up
+  Future<bool> classCodeExists(String classCode) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'role = ? AND classCode = ?',
+      whereArgs: ['teacher', classCode],
+    );
+    return result.isNotEmpty;
+  }
+
+  //Get students by classCode for teacher in dashboard screen
+  Future<List<AppUser>> getStudentsByClassCode(String classCode) async {
+    final db = await instance.database;
+
+    final result = await db.query(
+      'users',
+      where: 'role = ? AND classCode = ?',
+      whereArgs: ['student', classCode],
+    );
+
+    return result.map((row) => AppUser.fromMap(row)).toList();
+  }
+
+  Future<double> getStudentProgress(int uid) async {
+    final db = await instance.database;
+
+    final result = await db.rawQuery('''
+    SELECT 
+      AVG(score) as avgScore
+    FROM attempts
+    WHERE uid = ?
+  ''', [uid]);
+
+    if (result.isNotEmpty && result.first["avgScore"] != null) {
+      return (result.first["avgScore"] as num).toDouble();
+    }
+    return 0.0;
   }
 }
