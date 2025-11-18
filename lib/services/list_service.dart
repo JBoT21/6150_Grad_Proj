@@ -31,9 +31,9 @@ class WordService {
       print('failed to get csv path: $e');
       rethrow;
     }
-  } 
+  }
 
-  // Gets all words from the csv file 
+  // Gets all words from the csv file
   static Future<List<WordList>> loadWords() async {
     final path = await _getCSVPath();
     final csvData = await File(path).readAsString();
@@ -79,23 +79,23 @@ class WordService {
       }
     }
 
-    // Rebuild CSV 
-    final header = 'id,list_id,priority,category,word,sentence1,sentence2,sentence3';
+    // Rebuild CSV
+    final header =
+        'id,list_id,priority,category,word,sentence1,sentence2,sentence3';
     final csvLines = [header];
     for (var w in allWords) {
       csvLines.add(
-        '${w.id},${w.listId},${w.priority},${w.category},${w.word},${w.sentence1},${w.sentence2},${w.sentence3}'
+        '${w.id},${w.listId},${w.priority},${w.category},${w.word},${w.sentence1},${w.sentence2},${w.sentence3}',
       );
     }
 
-  await File(path).writeAsString(csvLines.join('\n'));
-  //print('CSV updated at $path');
-}
+    await File(path).writeAsString(csvLines.join('\n'));
+    //print('CSV updated at $path');
+  }
 
-  // Gets the top priority 
-  static Future<int?> getTopPriority() async {
+  // Gets the top priority
+  static Future<int> getTopPriority() async {
     final allWords = await loadWords();
-    if (allWords.isEmpty) return null;
 
     // Only get priority 1 time per list
     final Map<int, int> listPriorities = {};
@@ -112,8 +112,8 @@ class WordService {
         topListId = listId;
       }
     });
-    return topListId;
-  } 
+    return topListId!;
+  }
 
   // Gets the next listID based on priority of given list
   static Future<int?> getNextListID(int currentListID) async {
@@ -132,13 +132,14 @@ class WordService {
     int? nextPriority;
 
     listPriorities.forEach((id, priority) {
-      if (priority > currentPriority && (nextPriority == null || priority < nextPriority!)) {
+      if (priority > currentPriority &&
+          (nextPriority == null || priority < nextPriority!)) {
         nextPriority = priority;
         nextListID = id;
       }
     });
 
-    return nextListID; 
+    return nextListID;
     // will return null when there is not another list available
   }
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
-import 'package:team_3_f25_project/screens/wordlist_selection.dart';
+import 'package:team_3_f25_project/screens/wordlist_screen.dart';
+import 'package:team_3_f25_project/services/list_service.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 import 'package:team_3_f25_project/widgets/record_button.dart';
 import 'package:team_3_f25_project/widgets/word_card.dart';
@@ -12,33 +13,34 @@ import 'package:path_provider/path_provider.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:team_3_f25_project/screens/login.dart';
 
 class WordPracticeScreen extends StatefulWidget {
-  final List<WordList> words;
-
   final db = DatabaseHelper.instance;
-  WordPracticeScreen({super.key, required this.words});
+  WordPracticeScreen({super.key});
 
   @override
   State<WordPracticeScreen> createState() => _WordPracticeScreenState();
 }
 
 class _WordPracticeScreenState extends State<WordPracticeScreen> {
-  int? userId;
+  // variables to keep track of progress
   SharedPreferences? prefs;
-  Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('email');
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
-  }
-
+  int? userId;
+  int? currentListId;
+  List<WordList>? completeWordList;
+  List<String>? wordsToPractice;
   int nextIndex = 0;
 
+  String get currentWord {
+    if (wordsToPractice == null || wordsToPractice!.isEmpty) return '';
+    return wordsToPractice![nextIndex];
+  }
+
+  bool _loading = true;
+  bool _hasError = false;
+  String _errorMessage = '';
+
+  // variables for recording / listening
   final _speechToText = SpeechToText();
   final _recorder = AudioRecorder();
   int correctlyPronounced = 0;
@@ -50,26 +52,57 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   Timer? _timer;
   static const Duration kMax = Duration(seconds: 7);
 
-  String get currentWord {
-    return widget.words[nextIndex].word;
-  }
-
-  WordList get currentWordEntry {
-    return widget.words[nextIndex];
-  }
-
   @override
   void initState() {
     super.initState();
-    _loadUser();
+    _loadUserAndWords();
     _initSpeech();
   }
 
-  Future<void> _loadUser() async {
-    prefs = await SharedPreferences.getInstance();
-    userId = prefs!.getInt('userId');
-    setState(() {});
+  Future<void> _loadUserAndWords() async {
+    setState(() {
+      _loading = true;
+      _hasError = false;
+    });
+    try {
+      // gets shared preferences to load user data and see user progress
+      prefs = await SharedPreferences.getInstance();
+      userId = prefs!.getInt('userId');
+
+      // get list of words
+      currentListId = prefs!.getInt('currentListId');
+      completeWordList = await WordService.getWords(currentListId!);
+
+      // find and remove words user has gotten correct in the past
+      final allAttempts = await widget.db.database.then(
+        (db) => db.query('attempts'),
+      );
+
+      final correctWords = allAttempts
+          .where((a) => a['score'] == 1 && a['uid'] == userId)
+          .map((a) => a['wordText'] as String)
+          .toSet();
+
+      // initialize list
+      wordsToPractice = completeWordList!.map((entry) => entry.word).toList();
+      wordsToPractice!.removeWhere((word) => correctWords.contains(word));
+      correctlyPronounced = completeWordList!.length - wordsToPractice!.length;
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _hasError = true;
+          _errorMessage = e.toString();
+        });
+      }
+    }
   }
+
   void _initSpeech() async {
     _speechEnabled = await _speechToText.initialize();
     setState(() {});
@@ -77,20 +110,26 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   void _nextWord() {
     setState(() {
-      nextIndex = (nextIndex + 1) % widget.words.length;
+      nextIndex = nextIndex % completeWordList!.length;
     });
   }
 
   void _removeWordFromList() {
-    if (widget.words.isNotEmpty) {
-      widget.words.remove(currentWordEntry);
+    if (wordsToPractice!.isNotEmpty) {
+      wordsToPractice!.remove(currentWord);
     }
   }
 
   void _finishList() {
+    // TODO get number of lists and have special celebration screen for
+    // when all lists are completed
+    int nextListId = currentListId! + 1 % 5;
+    prefs!.setInt('currentListId', nextListId);
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (_) => CelebrationScreen()),
+      MaterialPageRoute(
+        builder: (_) => CelebrationScreen(nextListId: nextListId),
+      ),
     );
   }
 
@@ -134,6 +173,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   bool _isCorrect(String recognizedWord) {
+    print(recognizedWord);
     return recognizedWord.toLowerCase() == currentWord.toLowerCase();
   }
 
@@ -142,19 +182,22 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
 
-      userId ??= -1;;
+      userId ??= -1;
+      ;
       // add attempt to database
-      widget.db.insertAttempt(
-        Attempt(
-          uid: userId,
-          wordText: currentWord,
-          score: correct ? 1 : 0,
-          createdAt: DateTime.now(),
-          feedback: correct ? "Great job" : "Try again",
-          recordingPath: recordingPath,
-          duration: _elapsed,
-        ),
-      );
+      widget.db
+          .insertAttempt(
+            Attempt(
+              uid: userId!,
+              wordText: currentWord,
+              score: correct ? 1 : 0,
+              createdAt: DateTime.now(),
+              feedback: correct ? "Great job" : "Try again",
+              recordingPath: recordingPath,
+              duration: _elapsed,
+            ),
+          )
+          .then((_) => print('User ID SUCCESS: $userId'));
 
       Navigator.push(
         context,
@@ -166,7 +209,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
           correctlyPronounced++;
           _removeWordFromList();
         }
-        if (widget.words.isEmpty) {
+        if (correctlyPronounced == completeWordList!.length) {
           _finishList();
         } else {
           _nextWord();
@@ -187,41 +230,119 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     return '${dir.path}/readright_$currentWord$ts.m4a';
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: customAppBar(context: context, title: "Word Practice Screen"),
-      body: Center(
+  Widget _buildBody() {
+    if (_loading) {
+      return const Center(
+        child: CircularProgressIndicator(color: Colors.blueGrey),
+      );
+    }
+
+    // Error state
+    if (_hasError) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(
+                'Error: $_errorMessage',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _loadUserAndWords,
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Empty state - no words to practice
+    if (wordsToPractice == null || wordsToPractice!.isEmpty) {
+      return Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            LinearProgressIndicator(
-              value:
-                  correctlyPronounced /
-                  (correctlyPronounced + widget.words.length),
-              color: Colors.green,
-              backgroundColor: Colors.grey.shade300,
+            Icon(Icons.check_circle, size: 100, color: Colors.green),
+            const SizedBox(height: 20),
+            const Text(
+              'No words to practice!',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-            WordCard(
-              wordText: currentWord,
-              patternLabel: "Pattern label",
-              sampleSentence: "Sample sentence",
-            ),
-            SizedBox(height: 50),
-            RecordButton(
-              isRecording: _isListening,
-              onTap: _speechEnabled
-                  ? () {
-                      if (_isListening) {
-                        _stopListening();
-                      } else {
-                        _startListening();
-                      }
-                    }
-                  : null,
+            const SizedBox(height: 10),
+            const Text('You\'ve mastered all words in this list!'),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: _finishList,
+              child: const Text('Continue'),
             ),
           ],
         ),
+      );
+    }
+
+    return Center(
+      child: Column(
+        children: [
+          LinearProgressIndicator(
+            value:
+                correctlyPronounced /
+                (correctlyPronounced + wordsToPractice!.length),
+            color: Colors.green,
+            backgroundColor: Colors.grey.shade300,
+          ),
+          const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'Progress: $correctlyPronounced / ${completeWordList!.length}',
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+          ),
+          WordCard(
+            wordText: currentWord,
+            patternLabel: "Pattern label",
+            sampleSentence: "Sample sentence",
+          ),
+          const SizedBox(height: 50),
+          RecordButton(
+            isRecording: _isListening,
+            onTap: _speechEnabled
+                ? () {
+                    if (_isListening) {
+                      _stopListening();
+                    } else {
+                      _startListening();
+                    }
+                  }
+                : null,
+          ),
+          if (_isListening)
+            Padding(
+              padding: const EdgeInsets.only(top: 20),
+              child: Text(
+                '${_elapsed.inSeconds}s / ${kMax.inSeconds}s',
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+        ],
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.blue[50],
+      appBar: customAppBar(context: context, title: "Word Practice Screen"),
+      body: _buildBody(),
     );
   }
 }
@@ -288,7 +409,8 @@ class _TryAgainState extends State<TryAgain> {
 }
 
 class CelebrationScreen extends StatelessWidget {
-  const CelebrationScreen({super.key});
+  final nextListId;
+  const CelebrationScreen({super.key, required this.nextListId});
 
   @override
   Widget build(BuildContext context) {
@@ -320,22 +442,19 @@ class CelebrationScreen extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              const SizedBox(height: 30),
-
-              // TODO change to getting next priority list
-              IconButton(
+              FilledButton(
                 onPressed: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const WordlistSelectionScreen(),
+                      builder: (_) => ProgressScreen(listId: nextListId),
                     ),
                   );
                 },
-                icon: Icon(
+                child: Icon(
                   Icons.arrow_circle_right,
                   size: 100,
-                  color: Colors.purple.shade300,
+                  color: Colors.yellow.shade700,
                 ),
               ),
             ],

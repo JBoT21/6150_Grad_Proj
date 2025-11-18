@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:team_3_f25_project/screens/wordlist_selection.dart';
-//import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
-import 'package:team_3_f25_project/widgets/stat_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import '../models/user.dart';
@@ -41,6 +39,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       progressMap = temp;
     });
   }
+
   Future<void> _loadClassCode() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -59,7 +58,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
     _loadProgress();
   }
-
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
@@ -105,14 +103,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
 
     return filtered;
-  }
-
-  // Temporary navigation to wordlist page feel free to change
-  void _openWordListSelection(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const WordlistSelectionScreen()),
-    );
   }
 
   @override
@@ -162,7 +152,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
-
                       ),
                     ),
 
@@ -181,7 +170,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () => _openWordListSelection(context),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const WordlistSelectionScreen(),
+                  ),
+                ),
                 child: const Text("Word Lists"),
               ),
               const SizedBox(height: 30),
@@ -237,7 +231,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               Text(
                 "Students in Class $classCode",
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
 
               const SizedBox(height: 10),

@@ -51,7 +51,7 @@ class DatabaseHelper {
     ID
     uid - foreign key
     list id
-    archived word?
+    progress - not started, in progress, complete
     */
   }
 
