@@ -112,8 +112,8 @@ class WordService {
         topListId = listId;
       }
     });
-    return topListId;
-  } 
+    return topListId!;
+  }
 
   // Gets the next listID based on priority of given list
   static Future<int?> getNextListID(int currentListID) async {
@@ -132,13 +132,14 @@ class WordService {
     int? nextPriority;
 
     listPriorities.forEach((id, priority) {
-      if (priority > currentPriority && (nextPriority == null || priority < nextPriority!)) {
+      if (priority > currentPriority &&
+          (nextPriority == null || priority < nextPriority!)) {
         nextPriority = priority;
         nextListID = id;
       }
     });
 
-    return nextListID; 
+    return nextListID;
     // will return null when there is not another list available
   }
 }

@@ -69,16 +69,15 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       prefs = await SharedPreferences.getInstance();
       userId = prefs!.getInt('userId');
 
-      // get list
+      // get list of words
       currentListId = prefs!.getInt('currentListId');
-      print(currentListId);
       completeWordList = await WordService.getWords(currentListId!);
 
       // find and remove words user has gotten correct in the past
       final allAttempts = await widget.db.database.then(
         (db) => db.query('attempts'),
       );
-      print(allAttempts.where((a) => a['uid'] == userId));
+
       final correctWords = allAttempts
           .where((a) => a['score'] == 1 && a['uid'] == userId)
           .map((a) => a['wordText'] as String)
@@ -183,7 +182,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
 
-      userId ??= -1;;
+      userId ??= -1;
+      ;
       // add attempt to database
       widget.db
           .insertAttempt(
@@ -288,7 +288,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       );
     }
 
-    // ✅ Main content - now safe to access wordsToPractice
     return Center(
       child: Column(
         children: [
@@ -341,6 +340,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.blue[50],
       appBar: customAppBar(context: context, title: "Word Practice Screen"),
       body: _buildBody(),
     );
