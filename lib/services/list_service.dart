@@ -112,6 +112,33 @@ class WordService {
         topListId = listId;
       }
     });
-    return topListId!;
+    return topListId;
+  } 
+
+  // Gets the next listID based on priority of given list
+  static Future<int?> getNextListID(int currentListID) async {
+    final allwords = await loadWords();
+
+    final Map<int, int> listPriorities = {};
+    for (var w in allwords) {
+      listPriorities[w.listId] = w.priority;
+    }
+
+    if (!listPriorities.containsKey(currentListID)) return null;
+
+    final currentPriority = listPriorities[currentListID]!;
+
+    int? nextListID;
+    int? nextPriority;
+
+    listPriorities.forEach((id, priority) {
+      if (priority > currentPriority && (nextPriority == null || priority < nextPriority!)) {
+        nextPriority = priority;
+        nextListID = id;
+      }
+    });
+
+    return nextListID; 
+    // will return null when there is not another list available
   }
 }

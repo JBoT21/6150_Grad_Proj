@@ -38,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', user.email);
       await prefs.setInt('userId', user.id!);
-
+      await prefs.setString('classCode', user.classCode ?? "");
       if (user.role.toLowerCase() == 'student') {
         // Get wordlist for students
         int? currentListId = prefs.getInt('currentListId');

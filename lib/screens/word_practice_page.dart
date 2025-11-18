@@ -183,6 +183,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
 
+      userId ??= -1;;
       // add attempt to database
       widget.db
           .insertAttempt(

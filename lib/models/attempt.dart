@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 class Attempt {
-  final int uid;
+  final int? uid;
   final String wordText;
   final int score;
   final String feedback;

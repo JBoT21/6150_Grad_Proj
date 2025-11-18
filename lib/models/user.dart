@@ -4,6 +4,7 @@ class AppUser {
   final String email;
   final String password;
   final String role;
+  final String classCode;
 
   AppUser({
     this.id,
@@ -11,6 +12,7 @@ class AppUser {
     required this.email,
     required this.password,
     required this.role,
+    required this.classCode,
   });
 
   Map<String, dynamic> toMap() => {
@@ -19,6 +21,7 @@ class AppUser {
     'email': email,
     'password': password,
     'role': role,
+    'classCode': classCode,
   };
 
   factory AppUser.fromMap(Map<String, dynamic> map) {
@@ -28,6 +31,7 @@ class AppUser {
       email: map['email'],
       password: map['password'],
       role: map['role'],
+      classCode: map['classCode'],
     );
   }
 }
