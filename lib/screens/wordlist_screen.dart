@@ -156,7 +156,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
             ),
 
             ElevatedButton.icon(
-              onPressed: () => Navigator.pushNamed(context, '/practice'),
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/practice').then((_) {
+                    setState(() {
+                      _loadProgress();
+                    });
+                  }),
               icon: const Icon(Icons.mic),
               label: const Text('Practice'),
               style: ElevatedButton.styleFrom(
