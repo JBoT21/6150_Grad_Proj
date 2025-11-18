@@ -1,31 +1,81 @@
 id,list_id,priority,category,word,sentence1,sentence2,sentence3
-1,1,1,phonics_patterns,cat,I have a pet cat.,The cat runs fast.,The cat is black and white.
-2,1,1,phonics_patterns,pen,I have a blue pen.,There is a pen on the table.,My pen ran out of ink.
-3,1,1,phonics_patterns,cut,She cut the paper with scissors.,Cut along the dotted line.,I had a cut on my finger. 
-4,1,1,phonics_patterns,van,We used a van to move the furniture.,The van has four tires.,He drives the van to the football game.
-5,1,1,phonics_patterns,nap,I need to take a nap.,He woke me up from my nap on the couch.,I nap during the day when I'm tired. 
-6,1,1,phonics_patterns,tap,I turned the tap on.,Tap the buttons on the screen.,I felt a tap on my shoulder.
-7,1,1,phonics_patterns,bed,He went to bed early today.,I made my bed this morning.,She didn't want to get out of bed this morning.
-8,1,1,phonics_patterns,set,I forgot to set my alarm.,We set sail during high tide.,The movie is set in the future. 
-9,1,1,phonics_patterns,leg,Flamingos stand on one leg.,She fell and broke her leg.,A cat brushed against my leg.
-10,1,1,phonics_patterns,did,What time did you go to bed last night?,He did not go to school yesterday.,Did you have a good time?
-11,2,2,custom_list,are,Are you heading to school now?,How are you doing today?,Are we going to be late for the meeting?
-12,2,2,custom_list,was,Rome was not built in a day.,I was born in Europe.,Who was in charge of letting the dog out?
-13,2,2,custom_list,has,She has a new bike.,He has a collection of books at home.,The teacher has extra pencils in the classroom.
-14,2,2,custom_list,that,I like that color on you.,Do you see that bird in the tree?,I love that movie.
-15,2,2,custom_list,they,They all went to soccer tryouts.,They left the house a few minutes ago.,Do you know where they live?
-16,2,2,custom_list,this,This backpack is mine.,I really like this song.,Can I borrow this board game?
-17,2,2,custom_list,for,This gift is for you.,She was saving up for a laptop.,Is there room for me to join you?
-18,2,2,custom_list,from,He is from Brazil.,I got this gift from my mom.,I took this apple from the kitchen.
-19,2,2,custom_list,here,Can you come join me over here?,Is your textbook here or at home?,What are you doing here?
-20,2,2,custom_list,there,There are a lot of flowers in the garden.,What is going on over there?,Is there any more food in the fridge?
-21,3,3,dolch_list,could,Could you please hand me that pencil?,I wish I could have gone with you.,She could feel her heart racing.
-22,3,3,dolch_list,know,Do you know how to swim?,She knows a lot about chemistry.,I'll let you know when the movie starts.
-23,3,3,dolch_list,any,If you need any help let me know.,He came to class without any paper.,Do you have any gum?
-24,3,3,dolch_list,every,I have coffee every morning.,She walks home from school every day.,Every student needs to take the exam on Friday.
-25,3,3,dolch_list,after,Can we have dessert after dinner?,We can talk after the meeting.,He met up with me after class.
-26,3,3,dolch_list,stop,Can you stop walking in front of me?,We had to stop the game due to the rain.,The stop sign was located at the corner.
-27,3,3,dolch_list,again,I'll see you again later today.,He knocked on the door again.,Can we do this again tomorrow?
-28,3,3,dolch_list,think,I think I left my bag in the car.,I think we all did a great job.,I don't think he's at school today.
-29,3,3,dolch_list,open,Can you open the door for me?,She decided to open the window.,The store doesn't open until nine o'clock.
-30,3,3,dolch_list,them,I saw them at the park earlier today.,The teacher handed them their papers.,We invited them to join us for lunch.
+1,1,1,Dolch_Pre-Primer,the,There is a cat in the woods.,The cat runs fast.,The cat is white.
+2,1,1,Dolch_Pre-Primer,and,The plane goes up and down.,My mom and dad were waiting for me.,You can see the moon and the stars. 
+3,1,1,Dolch_Pre-Primer,to,I went to the pool.,I have to go grab the ball., He's on the way to the park. 
+4,1,1,Dolch_Pre-Primer,a,I saw a cat today.,I have a band-aid on my knee.,There is a ladybug on the leaf.
+5,1,1,Dolch_Pre-Primer,I,I need to take a nap.,I nap during the day when I'm tired.,I played at the park today.
+6,1,1,Dolch_Pre-Primer,you,Where are you hiding?,You showed up late today.,How are you feeling?
+7,1,1,Dolch_Pre-Primer,it,It hurt when I fell down.,It is raining outside today.,It is a red balloon.
+8,1,1,Dolch_Pre-Primer,in,The movie is set in the future.,Its cold in the room.,How for are you in the book?
+9,1,1,Dolch_Pre-Primer,said,I said my name was Emily.,She said to call her later.,He said he has a dog not a cat.
+10,1,1,Dolch_Pre-Primer,for,I went looking for some snacks.,He bought a book for his brother.,We were waiting for an hour.
+11,1,1,Dolch_Pre-Primer,up,His birthday was coming up.,Theres a house up on the hill.,How high up do balloons float?
+12,1,1,Dolch_Pre-Primer,look,The clouds look like a jellyfish.,Look at he red ball.,You look nice today.
+13,1,1,Dolch_Pre-Primer,is,What is a noun?,He is giving her a blue hat.,When is your birthday?
+14,1,1,Dolch_Pre-Primer,go,I want to go to the pool.,We go to school on the bus.,Where do you want to go?
+15,1,1,Dolch_Pre-Primer,we,We went fishing on Saturday.,What are we going to do?,We both went to the movies.
+16,1,1,Dolch_Pre-Primer,little,The bird was very little.,I used to be scared of the dark when I was little.,I got very little sleep last night.
+17,1,1,Dolch_Pre-Primer,down,I need to calm down.,The ball rolled down the hill.,How far down does the hole lead?
+18,1,1,Dolch_Pre-Primer,can,Can I see you on Sunday?,How far can you throw the ball?,The soup was stored in a tin can.
+19,1,1,Dolch_Pre-Primer,see,I use my eyes to see.,I can't wait to see you on Sunday.,Do you see that bird building its nest?
+20,1,1,Dolch_Pre-Primer,not,The books are not here.,She will not be in class today.,They do not get along.
+21,1,1,Dolch_Pre-Primer,one,There was only one bag left.,I have one more cookie.,My dog is bigger than the other one.
+22,1,1,Dolch_Pre-Primer,my,I like my cat.,This is my sister.,My dog is very pretty.
+23,1,1,Dolch_Pre-Primer,me,She gave me her last cookie.,Can you pass me the ball?,Dad brought me to the park.
+24,1,1,Dolch_Pre-Primer,big,I see a big elephant.,Her house is very big compared to mine.,My dollhouse is pretty big.
+25,1,1,Dolch_Pre-Primer,come,Do you want to come over?,The bird will come back to its nest.,Please come and sit next to me.
+26,1,1,Dolch_Pre-Primer,blue,My favorite color is blue.,The blue bird is very pretty.,What has you feeling so blue?
+27,1,1,Dolch_Pre-Primer,red,Red roses are my favorite.,Red is my favorite color.,I always use red on my drawings.
+28,1,1,Dolch_Pre-Primer,where,Where did your sister go?,Can you tell me where the library is?,Where did I put my shoes.
+29,1,1,Dolch_Pre-Primer,jump,The frog can jump really high.,Can you jump over that puddle?,I play jump rope all the time.
+30,1,1,Dolch_Pre-Primer,away,The birds flew away.,How far away are we?,Can you put your toys away?
+31,1,1,Dolch_Pre-Primer,here,Here is your present.,I'm here to help.,It's cold down here.
+32,1,1,Dolch_Pre-Primer,help,Can you help me find my parents?,I help my mom cook dinner.,Can you help me find my toy?
+33,1,1,Dolch_Pre-Primer,make,I can't make it to your birthday.,Lets make a birthday cake for mom.,Can you make a sandwich for me?
+34,1,1,Dolch_Pre-Primer,yellow,Yellow is one of my favorite colors.,The flowers are yellow.,Look at the yellow on that caterpillar.
+35,1,1,Dolch_Pre-Primer,two,I wanted two dogs.,My younger brother is two years old.,I had two friends over yesterday.
+36,1,1,Dolch_Pre-Primer,play,I want to play on the playground.,My friend came over yesterday to play.,My sister was in a school play.
+37,1,1,Dolch_Pre-Primer,run,I like to run around outside.,We had to run a lot during tag.,I love to run after my dog in the backyard.
+38,1,1,Dolch_Pre-Primer,find,Can you help me find my toy?,She will find the answer to the riddle.,Lets find a new book to read.
+39,1,1,Dolch_Pre-Primer,three,The three little pigs is my favorite story.,There are three dogs in my house.,I have three siblings.
+40,1,1,Dolch_Pre-Primer,funny,He's a very funny guy.,He told a funny story.,A funny thing happened yesterday.
+97,3,3,Dolch_FirstGrade,could,Could you please hand me that pencil?,I wish I could have gone with you.,She could feel her heart racing.
+98,3,3,Dolch_FirstGrade,when,Recess starts when the bell rings.,When are we going out to eat?,I remember climbing this tree when I was younger.
+99,3,3,Dolch_FirstGrade,were,The waves were really big.,They were late to class today.,The pizzas were hot.
+100,3,3,Dolch_FirstGrade,them,I saw them at the park earlier today.,The teacher handed them their papers.,We invited them to join us for lunch.
+101,3,3,Dolch_FirstGrade,ask,Can I ask a question?,Ask your friend if they can come over.,I will ask mom for a cookie.
+102,3,3,Dolch_FirstGrade,an,I saw an elephant at the zoo.,We need an umbrella in case it rains.,She ate an orange at lunch today.
+103,3,3,Dolch_FirstGrade,over,The bird flew over the house.,The cat jumped over the fence.,The bridge goes over the river.
+104,3,3,Dolch_FirstGrade,just,I want just a little bit of cake.,She just finished her homework.,It was just a joke.
+105,3,3,Dolch_FirstGrade,from,This necklace is from my mom.,I can see the tree from the window.,The book is different from the movie.
+106,3,3,Dolch_FirstGrade,any,If you need any help let me know.,He came to class without any paper.,Do you have any gum?
+108,3,3,Dolch_FirstGrade,know,Do you know how to swim?,She knows a lot about chemistry.,I'll let you know when the movie starts.
+111,3,3,Dolch_FirstGrade,every,I have coffee every morning.,She walks home from school every day.,Every student needs to take the exam on Friday.
+114,3,3,Dolch_FirstGrade,after,Can we have dessert after dinner?,We can talk after the meeting.,He met up with me after class.
+115,3,3,Dolch_FirstGrade,think,I think I left my bag in the car.,I think we all did a great job.,I don't think he's at school today.
+119,3,3,Dolch_FirstGrade,again,I'll see you again later today.,He knocked on the door again.,Can we do this again tomorrow?
+121,3,3,Dolch_FirstGrade,stop,Can you stop walking in front of me?,We had to stop the game due to the rain.,The stop sign was located at the corner.
+126,3,3,Dolch_FirstGrade,open,Can you open the door for me?,She decided to open the window.,The store doesn't open until nine o'clock.
+127,3,3,Dolch_FirstGrade,has,He has a blue car.,My dog has a long tail.,My sister has a new book.
+132,3,3,Dolch_FirstGrade,live,The fish live in water.,They live near the beach.,I live in a small town.
+133,3,3,Dolch_FirstGrade,thank,Thank you for my birthday gift.,I had to thank my neighbor for helping me.,Make sure to say thank you.
+134,4,4,Dolch_SecondGrade,would,Would you please pass the salt?,Would you like to go to the park?,We would go to the pool every summer.
+135,4,4,Dolch_SecondGrade,very,I'm very thankful for my friends.,The dog was very fluffy.,The sun was very bright.
+136,4,4,Dolch_SecondGrade,your,Please wash your hands before you eat.,What is your favorite color?,Let's go to your house.
+137,4,4,Dolch_SecondGrade,its,The dog wagged its tail.,The tree lost its leaves in the fall.,I can see its eyes.
+138,4,4,Dolch_SecondGrade,around,The children sat around the table.,The Earth goes around the sun.,We drove around the neighborhood.
+139,4,4,Dolch_SecondGrade,don't,Don't run in the house!,Please don't make a mess in the classroom.,Don't be late for school.
+140,4,4,Dolch_SecondGrade,right,You got the answer right.,Turn right when you get to the library.,Your shoes are right here by the door.
+141,4,4,Dolch_SecondGrade,green,The light turned green so we can go.,Green is one of my favorite colors.,I love laying on the green grass.
+142,4,4,Dolch_SecondGrade,their,The kids put on their jackets.,It's their turn to use the swingset.,The students forgot their homework.
+143,4,4,Dolch_SecondGrade,call,The teacher will call your name.,Can you call me after school?,Don't forget to call your friend tomorrow.
+144,4,4,Dolch_SecondGrade,sleep,I need to go to sleep in ten minutes.,Can you go to sleep now?,I had a good nights sleep last night.
+145,4,4,Dolch_SecondGrade,five,I have five more minutes until I need to leave.,My brother is five years old today.,Do you want to meet at five today?
+146,4,4,Dolch_SecondGrade,wash,Don't forget to wash your hands.,Mom needs to wash my shirt since I spilled food on it.,Can you help me wash the dishes?
+147,4,4,Dolch_SecondGrade,or,Do you want to play inside or outside?,Do you like milk or juice better?,Do you have a cat or a dog?
+148,4,4,Dolch_SecondGrade,before,I need to brush my teeth before bed.,She left before the bell rung.,Finish dinner before you have dessert.
+149,4,4,Dolch_SecondGrade,been,I have been to the park.,She has been a good friend to me.,It has been a fun day.
+150,4,4,Dolch_SecondGrade,off,The dog ran off to chase the squirrel.,He took off his shoes at the door.,Can you turn off the lights?
+151,4,4,Dolch_SecondGrade,cold,My dad has an old car.,The old man has a long beard.,I am ten years old.
+152,4,4,Dolch_SecondGrade,tell,Did you tell mom what happened?,He wants to tell us a joke.,The gps tells us when to turn.
+153,4,4,Dolch_SecondGrade,work,Dad had to leave for work this morning.,We should work together for this assignment.,I like to work on my art.
