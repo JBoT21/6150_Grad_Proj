@@ -39,6 +39,26 @@ id,list_id,priority,category,word,sentence1,sentence2,sentence3
 38,1,1,Dolch_Pre-Primer,find,Can you help me find my toy?,She will find the answer to the riddle.,Lets find a new book to read.
 39,1,1,Dolch_Pre-Primer,three,The three little pigs is my favorite story.,There are three dogs in my house.,I have three siblings.
 40,1,1,Dolch_Pre-Primer,funny,He's a very funny guy.,He told a funny story.,A funny thing happened yesterday.
+41,2,2,Dolch_Primer,he,He had a cute dog.,He likes to play soccer.,He has a blue shirt.
+42,2,2,Dolch_Primer,was,I was happy to see my friends.,It was a sunny day yesterday.,The little boy was eating an apple.
+43,2,2,Dolch_Primer,that,That is my dog.,Can you see the bird in that tree.,That was a fun game.
+44,2,2,Dolch_Primer,she,She is my sister.,She likes to play volleyball.,She is wearing a red shirt.
+45,2,2,Dolch_Primer,on,This book is on sale.,I hope my package arrives on time.,I'm going on a trip next week.
+46,2,2,Dolch_Primer,they,They are playing in the park.,They are my friends.,They like to eat pizza for dinner.
+47,2,2,Dolch_Primer,but,I like pizza but not mushrooms.,Its sunny but cold outside.,I want to play but need to do homework first.
+48,2,2,Dolch_Primer,at,The cat is at the door.,We can meet at noon.,She is looking at the tree.
+49,2,2,Dolch_Primer,with,I like to play with my dog.,I went on a trip with my family.,Can I have some milk with my cookies?
+50,2,2,Dolch_Primer,all,We have all these toys.,That is all my homework.,All the kids want to go outside.
+51,2,2,Dolch_Primer,there,I drove the kids there.,We are almost there.,Go to your room and stay there.
+52,2,2,Dolch_Primer,out,The lights went out.,He looked out the window.,We went out to play.
+53,2,2,Dolch_Primer,be,The weather will be sunny tomorrow.,He must be tired.,I want to be nice when I'm older.
+54,2,2,Dolch_Primer,have,Do you have an umbrella?,I have something in my pocket.,Do you have another candy?
+55,2,2,Dolch_Primer,am,How old am I?,I am ten years old.,I am feeling very happy.
+56,2,2,Dolch_Primer,do,What did you do?,Do you want a snack?,Do you like to draw?
+57,2,2,Dolch_Primer,did,What did you do?,Did you go to the park today?,Did you pack a lunch today?
+58,2,2,Dolch_Primer,what,What did you do on Saturday?,What pets do you have?,What was your name?
+59,2,2,Dolch_Primer,so,He was tired so he went to bed early.,I was hungry so I ate a snack,The dog wagged its tail so I knew it was happy.
+60,2,2,Dolch_Primer,get,Can I get a glass of water?,What did you get for your birthday?,Do I need to get dressed?
 97,3,3,Dolch_FirstGrade,could,Could you please hand me that pencil?,I wish I could have gone with you.,She could feel her heart racing.
 98,3,3,Dolch_FirstGrade,when,Recess starts when the bell rings.,When are we going out to eat?,I remember climbing this tree when I was younger.
 99,3,3,Dolch_FirstGrade,were,The waves were really big.,They were late to class today.,The pizzas were hot.
