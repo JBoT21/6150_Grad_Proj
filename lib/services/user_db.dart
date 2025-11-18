@@ -36,7 +36,20 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE attempts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid TEXT NOT NULL,
+        uid INTEGER NOT NULL,
+        wordText TEXT NOT NULL,
+        score INTEGER NOT NULL,
+        feedback TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
+        durationMs INTEGER,
+        recordingPath TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE wordlist (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid INTEGER NOT NULL,
         wordText TEXT NOT NULL,
         score INTEGER NOT NULL,
         feedback TEXT NOT NULL,
@@ -50,7 +63,7 @@ class DatabaseHelper {
     ID
     uid - foreign key
     list id
-    archived word?
+    progress - not started, in progress, complete
     */
   }
 

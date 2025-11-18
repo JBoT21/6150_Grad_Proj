@@ -22,9 +22,14 @@ class FeedbackScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: success ? Colors.green.shade100 : Colors.orange.shade100,
       appBar: AppBar(
-        title: const Text('Feedback', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Feedback',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
-        backgroundColor: success ? Colors.green.shade400 : Colors.orange.shade400,
+        backgroundColor: success
+            ? Colors.green.shade400
+            : Colors.orange.shade400,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -77,7 +82,9 @@ class FeedbackScreen extends StatelessWidget {
                       audioPlayer.play(DeviceFileSource(studentRecording!));
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('No student recording found!')),
+                        const SnackBar(
+                          content: Text('No student recording found!'),
+                        ),
                       );
                     }
                   },
@@ -95,7 +102,9 @@ class FeedbackScreen extends StatelessWidget {
                   onPressed: () {
                     // Placeholder for teacher’s pronunciation audio
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Teacher pronunciation coming soon!')),
+                      const SnackBar(
+                        content: Text('Teacher pronunciation coming soon!'),
+                      ),
                     );
                   },
                   icon: const Icon(Icons.volume_up_rounded),
@@ -130,7 +139,8 @@ class FeedbackScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(18),
                     ),
                   ),
-                  onPressed: () => Navigator.pushNamed(context, '/wordlist_selection'),
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/wordlist_selection'),
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Text('Next Word', style: TextStyle(fontSize: 18)),

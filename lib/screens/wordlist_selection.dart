@@ -56,7 +56,7 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
     for (int i = 0; i < wordlists.length; i++) {
       final listId = wordlists[i]['id'];
       await WordService.updateListPriority(listId, i + 1);
-      await WordService.updateListPriority(listId, i+1);
+      await WordService.updateListPriority(listId, i + 1);
     }
   }
 
@@ -74,7 +74,6 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
           "Manage Wordlists",
           style: TextStyle(color: Colors.white),
         ),
-        title: const Text("Manage Wordlists", style: TextStyle(color: Colors.white),),
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
@@ -123,10 +122,8 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => WordlistScreen(
-                                    category: list['category'],
-                                    words: list['words'],
-                                  ),
+                                  builder: (_) =>
+                                      ProgressScreen(listId: list['id']),
                                 ),
                               );
                             },
@@ -144,64 +141,6 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
                 ),
               ],
             ),
-      body: wordlists.isEmpty ? const Center(child: CircularProgressIndicator()) : Column(
-        children: [
-          Expanded(
-            child: ReorderableListView(
-              padding: const EdgeInsets.all(16),
-              onReorder: (oldIndex, newIndex) async {
-                setState(() {
-                  if (newIndex > oldIndex) newIndex -= 1;
-                  final item = wordlists.removeAt(oldIndex);
-                  wordlists.insert(newIndex, item);
-                });
-                await _updatePriorities();
-              },
-              children: [
-                for (final list in wordlists)
-                  Card(
-                    key: ValueKey(list['id']),
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      title: Text(
-                        list['category'],
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      subtitle: Text(
-                        list['words']
-                        .take(5)
-                        .map((w) => w.word)
-                        .join(', '),
-                      ),
-                      trailing: const Icon(Icons.drag_handle),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => WordlistScreen(
-                              category: list['category'], words: list['words'],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text("Drag and drop to reorder list priority (Top = highest priority)",
-            style: TextStyle(
-              fontSize: 16,
-            ),
-          ),
-        ),
-      ],
-    ),
     );
   }
 }

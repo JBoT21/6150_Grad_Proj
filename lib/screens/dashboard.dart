@@ -26,14 +26,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // Temporary navigation to wordlist page feel free to change
-  void _openWordListSelection(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const WordlistSelectionScreen()),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,11 +42,7 @@ class DashboardScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            StatTile(
-              label: "Class Average",
-              value: "100",
-              icon: Icons.check,
-            ),
+            StatTile(label: "Class Average", value: "100", icon: Icons.check),
             // Basic button to get to wordlist page feel free to change
             const SizedBox(height: 20),
             ElevatedButton(
