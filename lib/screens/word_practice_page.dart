@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:team_3_f25_project/helpers/phonetic_matching.dart';
 
 class WordPracticeScreen extends StatefulWidget {
   final db = DatabaseHelper.instance;
@@ -173,7 +174,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   bool _isCorrect(String recognizedWord) {
-    return recognizedWord.toLowerCase() == currentWord.toLowerCase();
+    // if speech to text already matched, no need for further checking
+    if (recognizedWord.toLowerCase() == currentWord.toLowerCase()) {
+      return true;
+    }
+    // if not, use phonetic conversion
+    return PhoneticsHelper.soundsLike(currentWord, recognizedWord);
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
