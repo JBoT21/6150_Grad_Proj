@@ -110,7 +110,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   void _nextWord() {
     setState(() {
-      nextIndex = nextIndex % completeWordList!.length;
+      nextIndex = nextIndex + 1 % wordsToPractice!.length;
     });
   }
 
@@ -173,7 +173,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   bool _isCorrect(String recognizedWord) {
-    print(recognizedWord);
     return recognizedWord.toLowerCase() == currentWord.toLowerCase();
   }
 
@@ -183,21 +182,18 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       bool correct = _isCorrect(result.recognizedWords);
 
       userId ??= -1;
-      ;
       // add attempt to database
-      widget.db
-          .insertAttempt(
-            Attempt(
-              uid: userId!,
-              wordText: currentWord,
-              score: correct ? 1 : 0,
-              createdAt: DateTime.now(),
-              feedback: correct ? "Great job" : "Try again",
-              recordingPath: recordingPath,
-              duration: _elapsed,
-            ),
-          )
-          .then((_) => print('User ID SUCCESS: $userId'));
+      widget.db.insertAttempt(
+        Attempt(
+          uid: userId!,
+          wordText: currentWord,
+          score: correct ? 1 : 0,
+          createdAt: DateTime.now(),
+          feedback: correct ? "Great job" : "Try again",
+          recordingPath: recordingPath,
+          duration: _elapsed,
+        ),
+      );
 
       Navigator.push(
         context,
@@ -209,7 +205,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
           correctlyPronounced++;
           _removeWordFromList();
         }
-        if (correctlyPronounced == completeWordList!.length) {
+        if (correctlyPronounced == completeWordList!.length ||
+            wordsToPractice!.isEmpty) {
           _finishList();
         } else {
           _nextWord();
