@@ -46,19 +46,9 @@ class DatabaseHelper {
         recordingPath TEXT
       )
     ''');
-
-    /* Table wordlists
-    ID
-    uid - foreign key
-    list id
-    progress - not started, in progress, complete
-    */
   }
 
-  Future<int> insertAttempt(Attempt attempt) async {
-    final db = await instance.database;
-    return await db.insert('attempts', attempt.toMap());
-  }
+  // User service
 
   Future<int> insertUser(AppUser user) async {
     final db = await instance.database;
@@ -134,16 +124,37 @@ class DatabaseHelper {
   Future<double> getStudentProgress(int uid) async {
     final db = await instance.database;
 
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
     SELECT 
       AVG(score) as avgScore
     FROM attempts
     WHERE uid = ?
-  ''', [uid]);
+  ''',
+      [uid],
+    );
 
     if (result.isNotEmpty && result.first["avgScore"] != null) {
       return (result.first["avgScore"] as num).toDouble();
     }
     return 0.0;
+  }
+
+  // Attempts service
+
+  Future<int> insertAttempt(Attempt attempt) async {
+    final db = await instance.database;
+    return await db.insert('attempts', attempt.toMap());
+  }
+
+  Future<Set<String>> getAllCorrectWords(int uid) async {
+    final db = await instance.database;
+    final allAttempts = await db.query('attempts');
+
+    final correctWords = allAttempts
+        .where((a) => a['score'] == 1 && a['uid'] == uid)
+        .map((a) => a['wordText'] as String)
+        .toSet();
+    return correctWords;
   }
 }

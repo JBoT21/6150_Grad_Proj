@@ -13,7 +13,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:team_3_f25_project/helpers/phonetic_matching.dart';
+import 'package:dart_phonetics/dart_phonetics.dart';
+import 'package:team_3_f25_project/data/homophones.dart';
 
 class WordPracticeScreen extends StatefulWidget {
   final db = DatabaseHelper.instance;
@@ -48,7 +49,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   String recordingPath = "";
   bool _speechEnabled = false;
   bool _isListening = false;
+  final DoubleMetaphone _phoneticEncoder = DoubleMetaphone.defaultEncoder;
 
+  // timer variables
   Duration _elapsed = Duration.zero;
   Timer? _timer;
   static const Duration kMax = Duration(seconds: 7);
@@ -70,19 +73,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       prefs = await SharedPreferences.getInstance();
       userId = prefs!.getInt('userId');
 
-      // get list of words
-      currentListId = prefs!.getInt('currentListId');
+      // get list of words to practice
+      currentListId = prefs!.getInt('currentListId$userId');
       completeWordList = await WordService.getWords(currentListId!);
 
       // find and remove words user has gotten correct in the past
-      final allAttempts = await widget.db.database.then(
-        (db) => db.query('attempts'),
-      );
-
-      final correctWords = allAttempts
-          .where((a) => a['score'] == 1 && a['uid'] == userId)
-          .map((a) => a['wordText'] as String)
-          .toSet();
+      Set<String> correctWords = await widget.db.getAllCorrectWords(userId!);
 
       // initialize list
       wordsToPractice = completeWordList!.map((entry) => entry.word).toList();
@@ -109,9 +105,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     setState(() {});
   }
 
-  void _nextWord() {
+  void _nextWord(bool correct) {
     setState(() {
-      nextIndex = nextIndex + 1 % wordsToPractice!.length;
+      if (correct)
+        nextIndex = nextIndex % wordsToPractice!.length;
+      else
+        nextIndex = nextIndex + 1 % wordsToPractice!.length;
     });
   }
 
@@ -125,7 +124,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     // TODO get number of lists and have special celebration screen for
     // when all lists are completed
     int nextListId = currentListId! + 1 % 5;
-    prefs!.setInt('currentListId', nextListId);
+    prefs!.setInt('currentListId$userId', nextListId);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -135,12 +134,15 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   void _startListening() async {
+    // start speech to text
     await _speechToText.listen(
       onResult: _onSpeechResult,
       localeId: 'en_US', // Specify the locale
       listenFor: const Duration(seconds: 7), // How long to listen
       pauseFor: const Duration(seconds: 2), // How long to wait for pause
     );
+
+    // start recording
     final config = RecordConfig(
       encoder: AudioEncoder.aacLc, // -> .m4a
       sampleRate: 44100,
@@ -148,10 +150,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     );
     recordingPath = await _nextPath();
     await _recorder.start(config, path: recordingPath);
+
     setState(() {
       _isListening = true;
       _elapsed = Duration.zero;
     });
+
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(milliseconds: 200), (t) {
       final next = _elapsed + const Duration(milliseconds: 200);
@@ -167,6 +171,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   void _stopListening() async {
     await _speechToText.stop();
+    await _recorder.stop();
     _timer?.cancel();
     setState(() {
       _isListening = false;
@@ -178,8 +183,15 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     if (recognizedWord.toLowerCase() == currentWord.toLowerCase()) {
       return true;
     }
-    // if not, use phonetic conversion
-    return PhoneticsHelper.soundsLike(currentWord, recognizedWord);
+
+    // if not, check for homophones
+    return Homophones().isHomophone(recognizedWord, currentWord);
+    // i is a problem. accepts 'e' sound as equal
+    print("Recognized: ${_phoneticEncoder.encode(recognizedWord)}");
+    print("Actual: ${_phoneticEncoder.encode(currentWord)}");
+    // if not, use phonetic encoding
+    return _phoneticEncoder.encode(recognizedWord)!.primary ==
+        _phoneticEncoder.encode(currentWord)!.primary;
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
@@ -215,7 +227,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
             wordsToPractice!.isEmpty) {
           _finishList();
         } else {
-          _nextWord();
+          _nextWord(correct);
         }
       });
     }
