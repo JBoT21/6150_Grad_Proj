@@ -42,9 +42,10 @@ class _ReadRightAppState extends State<ReadRightApp> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedEmail = prefs.getString('email');
-      int? currentListId = prefs.getInt('currentListId');
+      final userId = prefs.getInt('userId');
+      int? currentListId = prefs.getInt('currentListId$userId');
       if (currentListId == null) {
-        prefs.setInt('currentListId', 1);
+        prefs.setInt('currentListId$userId', 1);
         currentListId = 1;
       }
       if (savedEmail != null) {

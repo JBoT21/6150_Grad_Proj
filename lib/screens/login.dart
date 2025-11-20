@@ -41,10 +41,10 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setString('classCode', user.classCode ?? "");
       if (user.role.toLowerCase() == 'student') {
         // Get wordlist for students
-        int? currentListId = prefs.getInt('currentListId');
+        int? currentListId = prefs.getInt('currentListId${user.id}');
         if (currentListId == null) {
           currentListId = await WordService.getTopPriority();
-          prefs.setInt('currentListId', currentListId);
+          prefs.setInt('currentListId${user.id}', currentListId);
         }
         Navigator.pushReplacement(
           context,
@@ -63,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue[50],
