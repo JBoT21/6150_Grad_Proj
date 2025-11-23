@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:team_3_f25_project/models/attempt.dart';
 import '../models/user.dart';
+import 'list_service.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -134,16 +135,64 @@ class DatabaseHelper {
   Future<double> getStudentProgress(int uid) async {
     final db = await instance.database;
 
+    final allWords = await WordService.loadWords();
+    final totalWords = allWords.length;
+
+    if (totalWords == 0) return 0.0;
+
+    final attempts = await db.query(
+      'attempts',
+      where: 'uid = ? AND score = 1',
+      whereArgs: [uid],
+    );
+
+    final mastered = attempts.map((a) => a['wordText'] as String).toSet();
+
+    return mastered.length / totalWords;
+  }
+
+  // missed words by student
+  Future<List<Map<String, dynamic>>> getMissedWordsByStudent(int uid) async {
+    final db = await database;
     final result = await db.rawQuery('''
     SELECT 
-      AVG(score) as avgScore
+      wordText, 
+      COUNT(*) as attempts, 
+      MAX(recordingPath) as lastRecording
     FROM attempts
-    WHERE uid = ?
+    WHERE uid = ? AND score = 0
+    GROUP BY wordText
+    ORDER BY attempts DESC
   ''', [uid]);
 
-    if (result.isNotEmpty && result.first["avgScore"] != null) {
-      return (result.first["avgScore"] as num).toDouble();
-    }
-    return 0.0;
+    return result;
+  }
+
+  // Missed words by class
+  Future<List<Map<String, dynamic>>> getClassMissedWords(String classCode) async {
+    final db = await database;
+
+    final result = await db.rawQuery('''
+    SELECT 
+      a.wordText, 
+      COUNT(*) as attempts
+    FROM attempts a
+    JOIN users u ON u.id = a.uid
+    WHERE u.classCode = ? AND a.score = 0
+    GROUP BY a.wordText
+    ORDER BY attempts DESC
+  ''', [classCode]);
+
+    return result;
+  }
+
+  Future<AppUser> getUser(int uid) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [uid],
+    );
+    return AppUser.fromMap(result.first);
   }
 }
