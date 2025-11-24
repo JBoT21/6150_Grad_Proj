@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:team_3_f25_project/models/attempt.dart';
 import '../models/user.dart';
+import 'list_service.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -124,37 +125,64 @@ class DatabaseHelper {
   Future<double> getStudentProgress(int uid) async {
     final db = await instance.database;
 
-    final result = await db.rawQuery(
-      '''
-    SELECT 
-      AVG(score) as avgScore
-    FROM attempts
-    WHERE uid = ?
-  ''',
-      [uid],
+    final allWords = await WordService.loadWords();
+    final totalWords = allWords.length;
+
+    if (totalWords == 0) return 0.0;
+
+    final attempts = await db.query(
+      'attempts',
+      where: 'uid = ? AND score = 1',
+      whereArgs: [uid],
     );
 
-    if (result.isNotEmpty && result.first["avgScore"] != null) {
-      return (result.first["avgScore"] as num).toDouble();
-    }
-    return 0.0;
+    final mastered = attempts.map((a) => a['wordText'] as String).toSet();
+
+    return mastered.length / totalWords;
   }
 
-  // Attempts service
+  // missed words by student
+  Future<List<Map<String, dynamic>>> getMissedWordsByStudent(int uid) async {
+    final db = await database;
+    final result = await db.rawQuery('''
+    SELECT 
+      wordText, 
+      COUNT(*) as attempts, 
+      MAX(recordingPath) as lastRecording
+    FROM attempts
+    WHERE uid = ? AND score = 0
+    GROUP BY wordText
+    ORDER BY attempts DESC
+  ''', [uid]);
 
-  Future<int> insertAttempt(Attempt attempt) async {
-    final db = await instance.database;
-    return await db.insert('attempts', attempt.toMap());
+    return result;
   }
 
-  Future<Set<String>> getAllCorrectWords(int uid) async {
-    final db = await instance.database;
-    final allAttempts = await db.query('attempts');
+  // Missed words by class
+  Future<List<Map<String, dynamic>>> getClassMissedWords(String classCode) async {
+    final db = await database;
 
-    final correctWords = allAttempts
-        .where((a) => a['score'] == 1 && a['uid'] == uid)
-        .map((a) => a['wordText'] as String)
-        .toSet();
-    return correctWords;
+    final result = await db.rawQuery('''
+    SELECT 
+      a.wordText, 
+      COUNT(*) as attempts
+    FROM attempts a
+    JOIN users u ON u.id = a.uid
+    WHERE u.classCode = ? AND a.score = 0
+    GROUP BY a.wordText
+    ORDER BY attempts DESC
+  ''', [classCode]);
+
+    return result;
+  }
+
+  Future<AppUser> getUser(int uid) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [uid],
+    );
+    return AppUser.fromMap(result.first);
   }
 }

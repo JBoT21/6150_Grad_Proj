@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:team_3_f25_project/screens/wordlist_selection.dart';
+import 'package:team_3_f25_project/widgets/stat_tile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import '../models/user.dart';
 import '../services/user_db.dart';
+import 'missed_word.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -253,9 +255,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     return ListTile(
                       leading: const Icon(Icons.person),
                       title: Text(student.name),
-                      subtitle: Text(
-                        "Progress: ${(progress * 100).toStringAsFixed(0)}%",
-                      ),
+                      subtitle: Text("Progress: ${(progress * 100).toStringAsFixed(0)}%"),
                       trailing: SizedBox(
                         width: 100,
                         child: LinearProgressIndicator(
@@ -264,11 +264,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           color: Colors.green,
                         ),
                       ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MissedWordsScreen(
+                              uid: student.id!,
+                              studentName: student.name,
+                              classCode: classCode,
+                            ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
-
               const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MissedWordsScreen(
+                        uid: null,
+                        classCode: classCode,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text("Class Overall Missed Words"),
+              ),
             ],
           ),
         ),
