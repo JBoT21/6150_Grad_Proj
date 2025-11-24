@@ -2,15 +2,14 @@
 
 class Homophones {
   bool isHomophone(String word1, String word2) {
-    print(word1);
-    print(word2);
     word1 = word1.toLowerCase();
     word2 = word2.toLowerCase();
-    if (homophones[word1] != null) {
-      return homophones[word1]!.contains(word2);
+
+    if (homophones[word1] != null && homophones[word1]!.contains(word2)) {
+      return true;
     }
-    if (homophones[word2] != null) {
-      return homophones[word2]!.contains(word1);
+    if (homophones[word2] != null && homophones[word2]!.contains(word1)) {
+      return true;
     }
     return false;
   }
@@ -1830,8 +1829,8 @@ class Homophones {
     'read': ['rede', 'reed'],
     'rede': ['read', 'reed'],
     'reed': ['read', 'rede'],
-    'red': ['redd'],
-    'redd': ['red'],
+    'red': ['redd', 'read'],
+    'redd': ['red', 'read'],
     'real': ['reel'],
     'reel': ['real'],
     'ream': ['reem', 'rheme'],
