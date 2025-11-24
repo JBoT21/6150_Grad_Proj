@@ -1,17 +1,21 @@
 // Source: https://homophonelist.com/homophones-list/
 
 class Homophones {
-  bool isHomophone(String word1, String word2) {
-    word1 = word1.toLowerCase();
-    word2 = word2.toLowerCase();
+  bool isHomophone(String actualWord, String expectedWord) {
+    actualWord = actualWord.toLowerCase();
+    expectedWord = expectedWord.toLowerCase();
 
-    if (homophones[word1] != null && homophones[word1]!.contains(word2)) {
+    if (homophones[actualWord] != null &&
+        homophones[actualWord]!.contains(expectedWord)) {
       return true;
     }
-    if (homophones[word2] != null && homophones[word2]!.contains(word1)) {
+    if (homophones[expectedWord] != null &&
+        homophones[expectedWord]!.contains(actualWord)) {
       return true;
     }
-    print("$word1, $word2, ${homophones[word1]} ${homophones[word2]}");
+    print(
+      "$actualWord, $expectedWord, ${homophones[actualWord]} ${homophones[expectedWord]}",
+    );
     return false;
   }
 
@@ -81,6 +85,8 @@ class Homophones {
     'arms': ['alms'],
     'altar': ['alter'],
     'alter': ['altar'],
+    'an': ['and'],
+    'and': ['an'],
     'analyst': ['annalist'],
     'annalist': ['analyst'],
     'ant': ['aunt'],

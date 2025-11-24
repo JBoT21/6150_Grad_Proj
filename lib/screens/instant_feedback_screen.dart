@@ -19,25 +19,31 @@ class InstantFeedback extends StatefulWidget {
 class _InstantFeedbackState extends State<InstantFeedback> {
   TextToSpeech textToSpeech = TextToSpeech();
 
+  Future<void> speakWordAndSentence() async {
+    // punctuation helps it sound more natural, allegedly
+    await textToSpeech.speak("${widget.wordObject.word}.");
+    await Future.delayed(Duration(seconds: 1), () {
+      textToSpeech.speak(widget.wordObject.sentence1);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     textToSpeech.initTts();
-    textToSpeech
-        .speak(widget.wordObject)
-        .then(
-          (_) => {
-            {
-              Timer(Duration(seconds: 2), () {
-                if (mounted) {
-                  Navigator.pop(context);
-                } else {
-                  textToSpeech.stop();
-                }
-              }),
-            },
-          },
-        );
+    speakWordAndSentence().then(
+      (_) => {
+        {
+          Timer(Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.pop(context);
+            } else {
+              textToSpeech.stop();
+            }
+          }),
+        },
+      },
+    );
   }
 
   @override
@@ -79,21 +85,18 @@ class _InstantFeedbackState extends State<InstantFeedback> {
                   color: Colors.white,
                   size: 250,
                 ),
-                FittedBox(
-                  fit: BoxFit.fitWidth,
-                  child: Text(
-                    textAlign: TextAlign.center,
-                    softWrap: true,
-                    overflow: TextOverflow.clip,
-                    widget.wordObject.sentence1,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 45.0,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(color: Colors.black38, offset: Offset(1.5, 2)),
-                      ],
-                    ),
+                Text(
+                  textAlign: TextAlign.center,
+                  softWrap: true,
+                  overflow: TextOverflow.clip,
+                  widget.wordObject.sentence1,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 35.0,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(color: Colors.black38, offset: Offset(1.5, 2)),
+                    ],
                   ),
                 ),
               ],

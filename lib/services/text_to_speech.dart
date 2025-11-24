@@ -42,16 +42,12 @@ class TextToSpeech {
     }
   }
 
-  Future<void> speak(WordList wordObject) async {
+  Future<void> speak(String text) async {
     await flutterTts.setVolume(0.5);
     await flutterTts.setSpeechRate(0.3);
     await flutterTts.setPitch(1.6);
 
-    // punctuation helps it sound more natural, allegedly
-    await flutterTts.speak("${wordObject.word}.");
-    await Future.delayed(Duration(seconds: 1), () {
-      flutterTts.speak(wordObject.sentence1);
-    });
+    await flutterTts.speak(text);
   }
 
   Future<void> stop() async {
