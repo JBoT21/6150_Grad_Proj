@@ -144,7 +144,8 @@ class DatabaseHelper {
   // missed words by student
   Future<List<Map<String, dynamic>>> getMissedWordsByStudent(int uid) async {
     final db = await database;
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
     SELECT 
       wordText, 
       COUNT(*) as attempts, 
@@ -153,16 +154,21 @@ class DatabaseHelper {
     WHERE uid = ? AND score = 0
     GROUP BY wordText
     ORDER BY attempts DESC
-  ''', [uid]);
+  ''',
+      [uid],
+    );
 
     return result;
   }
 
   // Missed words by class
-  Future<List<Map<String, dynamic>>> getClassMissedWords(String classCode) async {
+  Future<List<Map<String, dynamic>>> getClassMissedWords(
+    String classCode,
+  ) async {
     final db = await database;
 
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
     SELECT 
       a.wordText, 
       COUNT(*) as attempts
@@ -171,18 +177,33 @@ class DatabaseHelper {
     WHERE u.classCode = ? AND a.score = 0
     GROUP BY a.wordText
     ORDER BY attempts DESC
-  ''', [classCode]);
+  ''',
+      [classCode],
+    );
 
     return result;
   }
 
   Future<AppUser> getUser(int uid) async {
     final db = await instance.database;
-    final result = await db.query(
-      'users',
-      where: 'id = ?',
-      whereArgs: [uid],
-    );
+    final result = await db.query('users', where: 'id = ?', whereArgs: [uid]);
     return AppUser.fromMap(result.first);
+  }
+
+  // Attempts service
+  Future<int> insertAttempt(Attempt attempt) async {
+    final db = await instance.database;
+    return await db.insert('attempts', attempt.toMap());
+  }
+
+  Future<Set<String>> getAllCorrectWords(int uid) async {
+    final db = await instance.database;
+    final allAttempts = await db.query('attempts');
+
+    final correctWords = allAttempts
+        .where((a) => a['score'] == 1 && a['uid'] == uid)
+        .map((a) => a['wordText'] as String)
+        .toSet();
+    return correctWords;
   }
 }
