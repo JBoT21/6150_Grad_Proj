@@ -53,7 +53,7 @@ class RecordButton extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          isRecording ? 'Recording...' : 'Tap to record (max 7s)',
+          isRecording ? 'Recording...' : 'Tap to record',
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),

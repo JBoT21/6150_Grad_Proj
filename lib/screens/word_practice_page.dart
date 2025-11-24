@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
-import 'package:team_3_f25_project/screens/wordlist_screen.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 import 'package:team_3_f25_project/widgets/record_button.dart';
 import 'package:team_3_f25_project/widgets/word_card.dart';
 import 'package:team_3_f25_project/models/attempt.dart';
+import 'package:team_3_f25_project/screens/instant_feedback_screen.dart';
 import 'package:team_3_f25_project/screens/celebration_screen.dart';
 import 'package:record/record.dart';
 import 'dart:async';
@@ -14,7 +14,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:dart_phonetics/dart_phonetics.dart';
 import 'package:team_3_f25_project/data/homophones.dart';
 
 class WordPracticeScreen extends StatefulWidget {
@@ -39,6 +38,10 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     return wordsToPractice![nextIndex];
   }
 
+  WordList get currentWordObject {
+    return completeWordList!.firstWhere((word) => word.word == currentWord);
+  }
+
   bool _loading = true;
   bool _hasError = false;
   String _errorMessage = '';
@@ -50,7 +53,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   String recordingPath = "";
   bool _speechEnabled = false;
   bool _isListening = false;
-  final DoubleMetaphone _phoneticEncoder = DoubleMetaphone.defaultEncoder;
 
   // timer variables
   Duration _elapsed = Duration.zero;
@@ -78,13 +80,17 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       currentListId = prefs!.getInt('currentListId$userId');
       completeWordList = await WordService.getWords(currentListId!);
 
+      // initialize list of only word strings
+      wordsToPractice = completeWordList!.map((entry) => entry.word).toList();
+
       // find and remove words user has gotten correct in the past
       Set<String> correctWords = await widget.db.getAllCorrectWords(userId!);
-
-      // initialize list
-      wordsToPractice = completeWordList!.map((entry) => entry.word).toList();
       wordsToPractice!.removeWhere((word) => correctWords.contains(word));
+
+      // used for progress tracking
       correctlyPronounced = completeWordList!.length - wordsToPractice!.length;
+
+      // async management
       if (mounted) {
         setState(() {
           _loading = false;
@@ -108,10 +114,11 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   void _nextWord(bool correct) {
     setState(() {
-      if (correct)
+      if (correct) {
         nextIndex = nextIndex % wordsToPractice!.length;
-      else
+      } else {
         nextIndex = nextIndex + 1 % wordsToPractice!.length;
+      }
     });
   }
 
@@ -122,8 +129,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   void _finishList() {
-    // TODO get number of lists and have special celebration screen for
-    // when all lists are completed
     int nextListId = currentListId! + 1 % 5;
     prefs!.setInt('currentListId$userId', nextListId);
     Navigator.pushReplacement(
@@ -161,7 +166,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     _timer = Timer.periodic(const Duration(milliseconds: 200), (t) {
       final next = _elapsed + const Duration(milliseconds: 200);
       if (next >= kMax) {
-        _stopListening();
+        _onSpeechResult(null, timedOut: true);
       } else {
         setState(() {
           _elapsed = next;
@@ -187,16 +192,22 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
     // if not, check for homophones
     return Homophones().isHomophone(recognizedWord, currentWord);
-    // i is a problem. accepts 'e' sound as equal
-    print("Recognized: ${_phoneticEncoder.encode(recognizedWord)}");
-    print("Actual: ${_phoneticEncoder.encode(currentWord)}");
-    // if not, use phonetic encoding
-    return _phoneticEncoder.encode(recognizedWord)!.primary ==
-        _phoneticEncoder.encode(currentWord)!.primary;
   }
 
-  void _onSpeechResult(SpeechRecognitionResult result) {
-    if (result.finalResult) {
+  void _onSpeechResult(
+    SpeechRecognitionResult? result, {
+    bool timedOut = false,
+  }) {
+    if (timedOut) {
+      _stopListening();
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              InstantFeedback(success: false, wordObject: currentWordObject),
+        ),
+      );
+    } else if (result!.finalResult) {
       _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
 
@@ -217,7 +228,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => InstantFeedback(success: correct),
+          builder: (context) =>
+              InstantFeedback(success: correct, wordObject: currentWordObject),
         ),
       ).then((_) {
         if (correct) {
@@ -306,6 +318,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
     return Center(
       child: Column(
+        spacing: 10.0,
         children: [
           LinearProgressIndicator(
             value:
@@ -314,9 +327,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
             color: Colors.green,
             backgroundColor: Colors.grey.shade300,
           ),
-          const SizedBox(height: 20),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(0.0),
             child: Text(
               'Progress: $correctlyPronounced / ${completeWordList!.length}',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
@@ -327,7 +339,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
             patternLabel: "Pattern label",
             sampleSentence: "Sample sentence",
           ),
-          const SizedBox(height: 50),
           RecordButton(
             isRecording: _isListening,
             onTap: _speechEnabled
@@ -340,14 +351,30 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                   }
                 : null,
           ),
-          if (_isListening)
-            Padding(
-              padding: const EdgeInsets.only(top: 20),
-              child: Text(
-                '${_elapsed.inSeconds}s / ${kMax.inSeconds}s',
-                style: const TextStyle(fontSize: 18),
+          const SizedBox(height: 15.0),
+          GestureDetector(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: Container(
+              width: 250,
+              // 250 is also the width of the record button
+              decoration: BoxDecoration(
+                color: Colors.orange[100],
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                border: Border.all(color: Colors.orange, width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: .1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
+              child: Icon(Icons.stop_rounded, size: 50, color: Colors.orange),
             ),
+          ),
         ],
       ),
     );
@@ -359,124 +386,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       backgroundColor: Colors.blue[50],
       appBar: customAppBar(context: context, title: "Word Practice Screen"),
       body: _buildBody(),
-    );
-  }
-}
-
-class InstantFeedback extends StatefulWidget {
-  bool success;
-  InstantFeedback({super.key, required this.success});
-
-  @override
-  State<InstantFeedback> createState() => _InstantFeedbackState();
-}
-
-class _InstantFeedbackState extends State<InstantFeedback> {
-  @override
-  void initState() {
-    super.initState();
-
-    Timer(Duration(seconds: 2), () => Navigator.pop(context));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: widget.success ? Colors.green : Colors.amber[600],
-        child: Center(
-          child: Icon(
-            widget.success ? Icons.check_rounded : Icons.refresh_rounded,
-            color: Colors.white,
-            size: 250,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class TryAgain extends StatefulWidget {
-  const TryAgain({super.key});
-
-  @override
-  State<TryAgain> createState() => _TryAgainState();
-}
-
-class _TryAgainState extends State<TryAgain> {
-  @override
-  void initState() {
-    super.initState();
-
-    Timer(Duration(seconds: 2), () => Navigator.pop(context));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Colors.amber.shade600,
-        child: Center(
-          child: Icon(Icons.refresh_rounded, color: Colors.white, size: 250),
-        ),
-      ),
-    );
-  }
-}
-
-class CelebrationScreen extends StatelessWidget {
-  final nextListId;
-  const CelebrationScreen({super.key, required this.nextListId});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.green.shade100,
-      appBar: AppBar(centerTitle: true, backgroundColor: Colors.green.shade400),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Big icon and header message
-              Icon(
-                Icons.star_rounded,
-                color: Colors.yellow.shade700,
-                size: 250,
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Awesome Job!',
-                style: TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.green.shade800,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 10),
-
-              FilledButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ProgressScreen(listId: nextListId),
-                    ),
-                  );
-                },
-                child: Icon(
-                  Icons.arrow_circle_right,
-                  size: 100,
-                  color: Colors.yellow.shade700,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
