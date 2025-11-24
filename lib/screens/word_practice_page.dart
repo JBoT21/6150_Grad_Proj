@@ -7,6 +7,7 @@ import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 import 'package:team_3_f25_project/widgets/record_button.dart';
 import 'package:team_3_f25_project/widgets/word_card.dart';
 import 'package:team_3_f25_project/models/attempt.dart';
+import 'package:team_3_f25_project/screens/celebration_screen.dart';
 import 'package:record/record.dart';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
