@@ -57,7 +57,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   // timer variables
   Duration _elapsed = Duration.zero;
   Timer? _timer;
-  static const Duration kMax = Duration(seconds: 7);
+  static const Duration kMax = Duration(seconds: 3);
 
   @override
   void initState() {
