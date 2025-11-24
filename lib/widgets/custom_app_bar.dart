@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 
 AppBar customAppBar({dynamic context, String title = ""}) {
-  Future<void> _logout(BuildContext context) async {
+  Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('email');
     Navigator.pushAndRemoveUntil(
@@ -18,7 +18,7 @@ AppBar customAppBar({dynamic context, String title = ""}) {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
+            onPressed: () => logout(context),
           ),
         ],
       );

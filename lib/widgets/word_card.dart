@@ -24,11 +24,14 @@ class WordCard extends StatelessWidget {
         //padding: const EdgeInsets.all(16),
         child: Container(
           padding: EdgeInsets.all(45.0),
-          child: Text(
-            wordText,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              fontSize: 90.0,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              wordText,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                fontSize: 90.0,
+              ),
             ),
           ),
         ),
