@@ -11,6 +11,7 @@ class Homophones {
     if (homophones[word2] != null && homophones[word2]!.contains(word1)) {
       return true;
     }
+    print("$word1, $word2, ${homophones[word1]} ${homophones[word2]}");
     return false;
   }
 
