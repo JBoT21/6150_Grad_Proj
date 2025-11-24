@@ -20,6 +20,7 @@ class Homophones {
   }
 
   final Map<String, List<String>> homophones = {
+    'a': ['uh', 'ey'],
     'absence': ['absents'],
     'absents': ['absence'],
     'accede': ['axseed'],
@@ -1531,7 +1532,7 @@ class Homophones {
     'odd': ['od'],
     'ode': ['owed'],
     'owed': ['ode'],
-    'oh': ['owe'],
+    'oh': ['owe', 'uh'],
     'owe': ['oh'],
     'one': ['won'],
     'won': ['one'],

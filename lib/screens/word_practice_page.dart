@@ -57,7 +57,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   // timer variables
   Duration _elapsed = Duration.zero;
   Timer? _timer;
-  static const Duration kMax = Duration(seconds: 3);
+  static const Duration kMax = Duration(seconds: 5);
 
   @override
   void initState() {
@@ -144,7 +144,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     await _speechToText.listen(
       onResult: _onSpeechResult,
       localeId: 'en_US', // Specify the locale
-      listenFor: const Duration(seconds: 7), // How long to listen
+      listenFor: kMax, // How long to listen
       pauseFor: const Duration(seconds: 2), // How long to wait for pause
     );
 
@@ -199,6 +199,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     bool timedOut = false,
   }) {
     if (timedOut) {
+      print("Timed out");
       _stopListening();
       Navigator.push(
         context,

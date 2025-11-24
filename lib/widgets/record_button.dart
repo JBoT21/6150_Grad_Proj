@@ -4,7 +4,7 @@ class RecordButton extends StatelessWidget {
   final bool isRecording;
   final VoidCallback? onTap;
   final Duration? elapsed;
-  final kMax = 3;
+  final kMax = 5;
 
   const RecordButton({
     super.key,

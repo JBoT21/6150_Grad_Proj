@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final db = DatabaseHelper.instance;
     final user = await db.login(
-      _emailController.text.trim(),
+      _emailController.text.trim().toLowerCase(),
       _passwordController.text.trim(),
     );
 
