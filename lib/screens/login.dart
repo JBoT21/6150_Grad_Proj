@@ -44,13 +44,14 @@ class _LoginScreenState extends State<LoginScreen> {
         final topListId = await WordService.getTopPriority();
         if (topListId != null) {
           final words = await WordService.getWords(topListId);
-          final category = await WordService.getCategory(topListId); 
-        
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => WordlistScreen(category: category, words: words),
-          ),
-        );
+          final category = await WordService.getCategory(topListId);
+
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => WordlistScreen(category: category, words: words),
+            ),
+          );
         }
       } else if (user.role.toLowerCase() == 'teacher') {
         Navigator.pushReplacement(
@@ -72,11 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.menu_book,
-                size: 100,
-                color: Colors.blueAccent,
-              ),
+              const Icon(Icons.menu_book, size: 100, color: Colors.blueAccent),
               const SizedBox(height: 20),
               const Text(
                 "ReadRight",
@@ -90,8 +87,8 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: const Icon(Icons.email),
+                  labelText: "Email or Student ID",
+                  prefixIcon: const Icon(Icons.person),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -117,33 +114,36 @@ class _LoginScreenState extends State<LoginScreen> {
               if (_error != null)
                 Text(
                   _error!,
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               const SizedBox(height: 20),
               _isLoading
                   ? const CircularProgressIndicator()
                   : SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 4,
+                        ),
+                        child: const Text(
+                          "Login",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
-                    elevation: 4,
-                  ),
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white
-                    ),
-                  ),
-                ),
-              ),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () {
