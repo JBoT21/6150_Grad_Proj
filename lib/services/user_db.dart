@@ -47,19 +47,9 @@ class DatabaseHelper {
         recordingPath TEXT
       )
     ''');
-
-    /* Table wordlists
-    ID
-    uid - foreign key
-    list id
-    archived word?
-    */
   }
 
-  Future<int> insertAttempt(Attempt attempt) async {
-    final db = await instance.database;
-    return await db.insert('attempts', attempt.toMap());
-  }
+  // User service
 
   Future<int> insertUser(AppUser user) async {
     final db = await instance.database;

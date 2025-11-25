@@ -41,18 +41,17 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setString('classCode', user.classCode ?? "");
       if (user.role.toLowerCase() == 'student') {
         // Get wordlist for students
-        final topListId = await WordService.getTopPriority();
-        if (topListId != null) {
-          final words = await WordService.getWords(topListId);
-          final category = await WordService.getCategory(topListId);
-
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => WordlistScreen(category: category, words: words),
-            ),
-          );
+        int? currentListId = prefs.getInt('currentListId${user.id}');
+        if (currentListId == null) {
+          currentListId = await WordService.getTopPriority();
+          prefs.setInt('currentListId${user.id}', currentListId);
         }
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProgressScreen(listId: currentListId!),
+          ),
+        );
       } else if (user.role.toLowerCase() == 'teacher') {
         Navigator.pushReplacement(
           context,
@@ -64,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue[50],
