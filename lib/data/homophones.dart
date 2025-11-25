@@ -19,8 +19,21 @@ class Homophones {
     return false;
   }
 
+  void addHomophone(String word, String homophone) {
+    if (homophones.containsKey(word)) {
+      homophones[word]!.add(homophone);
+    } else {
+      homophones[word] = [homophone];
+    }
+    if (homophones.containsKey(homophone)) {
+      homophones[homophone]!.add(word);
+    } else {
+      homophones[homophone] = [word];
+    }
+  }
+
   final Map<String, List<String>> homophones = {
-    'a': ['uh', 'ey'],
+    'a': ['uh', 'ey', 'hey'],
     'absence': ['absents'],
     'absents': ['absence'],
     'accede': ['axseed'],
