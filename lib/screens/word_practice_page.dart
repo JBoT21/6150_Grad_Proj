@@ -166,7 +166,11 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     _timer = Timer.periodic(const Duration(milliseconds: 200), (t) {
       final next = _elapsed + const Duration(milliseconds: 200);
       if (next >= kMax) {
-        _onSpeechResult(null, timedOut: true);
+        _stopListening();
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => TimeOutScreen()),
+        );
       } else {
         setState(() {
           _elapsed = next;
