@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class MissedWordsScreen extends StatefulWidget {
   final int? uid;
@@ -97,7 +98,24 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
-                        onTap: () {},
+                        onTap: () async {
+                          final player = AudioPlayer();
+                          final path = word['lastRecording'];
+
+                          if(path == null || path.isEmpty){
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("No recording data avaliable for the word")),
+                            );
+                            return;
+                          }
+                          try{
+                            await player.play(DeviceFileSource(path));
+                          } catch(e){
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text("Error Playing Audio: $e")),
+                            );
+                          }
+                        },
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Row(
