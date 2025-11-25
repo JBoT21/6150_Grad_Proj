@@ -3,11 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/screens/dashboard.dart';
-import 'package:team_3_f25_project/screens/wordlist_selection.dart';
 import 'package:team_3_f25_project/screens/wordlist_screen.dart';
-import 'package:team_3_f25_project/screens/progress.dart';
 import 'package:team_3_f25_project/screens/word_practice_page.dart';
-import 'package:team_3_f25_project/screens/feedback.dart';
 import 'package:team_3_f25_project/screens/signup.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 import 'services/attempts_repository.dart';
@@ -45,13 +42,19 @@ class _ReadRightAppState extends State<ReadRightApp> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedEmail = prefs.getString('email');
+      final userId = prefs.getInt('userId');
+      int? currentListId = prefs.getInt('currentListId$userId');
+      if (currentListId == null) {
+        prefs.setInt('currentListId$userId', 1);
+        currentListId = 1;
+      }
       if (savedEmail != null) {
         final user = await DatabaseHelper.instance.getUserByEmail(savedEmail);
         if (user != null) {
           setState(
             () => _home = user.role == 'teacher'
                 ? const DashboardScreen()
-                : const WordlistSelectionScreen(),
+                : ProgressScreen(listId: currentListId!),
           );
           return;
         }
@@ -67,28 +70,17 @@ class _ReadRightAppState extends State<ReadRightApp> {
     return MaterialApp(
       title: 'ReadRight',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.indigo),
+      theme: ThemeData(primarySwatch: Colors.indigo, useMaterial3: false),
       home: _home,
       routes: {
         '/dashboard': (context) => const DashboardScreen(),
-        '/wordlist_selection': (context) => const WordlistSelectionScreen(),
-        //'/wordlist_screen': (context) => const WordlistScreen(),
-        '/progress': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-          return ProgressScreen(
-            listId: args['listId'] ?? 1, // default to list 1 if none passed
-          );
+        '/wordlist_screen': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
+          return ProgressScreen(listId: args['listId'] ?? 1);
         },
         '/practice': (context) => WordPracticeScreen(),
-        '/feedback': (context) {
-          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
-          return FeedbackScreen(
-            success: args['success'] ?? false,
-            wordText: args['wordText'] ?? '',
-            feedbackText: args['feedbackText'] ?? '',
-            studentRecording: args['recordingPath'], // optional
-          );
-        },
         '/signup': (context) => const SignupScreen(),
       },
     );

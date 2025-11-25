@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:team_3_f25_project/models/attempt.dart';
 import '../models/user.dart';
+import 'list_service.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -19,24 +20,25 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
     print('Database located at: $dbPath');
-    return await openDatabase(path, version: 1, onCreate: _createDB);
+    return await openDatabase(path, version: 2, onCreate: _createDB);
   }
 
   Future _createDB(Database db, int version) async {
-    await db.execute('''
+    await db.execute(''' 
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        role TEXT NOT NULL
+        role TEXT NOT NULL,
+        classCode TEXT NOT NULL
       )
     ''');
 
     await db.execute('''
       CREATE TABLE attempts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        uid TEXT NOT NULL,
+        uid INTEGER NOT NULL,
         wordText TEXT NOT NULL,
         score INTEGER NOT NULL,
         feedback TEXT NOT NULL,
@@ -47,10 +49,7 @@ class DatabaseHelper {
     ''');
   }
 
-  Future<int> insertAttempt(Attempt attempt) async {
-    final db = await instance.database;
-    return await db.insert('attempts', attempt.toMap());
-  }
+  // User service
 
   Future<int> insertUser(AppUser user) async {
     final db = await instance.database;
@@ -92,9 +91,119 @@ class DatabaseHelper {
     db.close();
   }
 
+  //Clear all rows in user
   Future<void> clearAllTables() async {
     final db = await DatabaseHelper.instance.database;
     await db.delete('users');
     print('All users deleted from database!');
+  }
+
+  //Check for classcode when signing up
+  Future<bool> classCodeExists(String classCode) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'users',
+      where: 'role = ? AND classCode = ?',
+      whereArgs: ['teacher', classCode],
+    );
+    return result.isNotEmpty;
+  }
+
+  //Get students by classCode for teacher in dashboard screen
+  Future<List<AppUser>> getStudentsByClassCode(String classCode) async {
+    final db = await instance.database;
+
+    final result = await db.query(
+      'users',
+      where: 'role = ? AND classCode = ?',
+      whereArgs: ['student', classCode],
+    );
+
+    return result.map((row) => AppUser.fromMap(row)).toList();
+  }
+
+  Future<double> getStudentProgress(int uid) async {
+    final db = await instance.database;
+
+    final allWords = await WordService.loadWords();
+    final totalWords = allWords.length;
+
+    if (totalWords == 0) return 0.0;
+
+    final attempts = await db.query(
+      'attempts',
+      where: 'uid = ? AND score = 1',
+      whereArgs: [uid],
+    );
+
+    final mastered = attempts.map((a) => a['wordText'] as String).toSet();
+
+    return mastered.length / totalWords;
+  }
+
+  // missed words by student
+  Future<List<Map<String, dynamic>>> getMissedWordsByStudent(int uid) async {
+    final db = await database;
+    final result = await db.rawQuery(
+      '''
+    SELECT 
+      wordText, 
+      COUNT(*) as attempts, 
+      MAX(recordingPath) as lastRecording
+    FROM attempts
+    WHERE uid = ? AND score = 0
+    GROUP BY wordText
+    ORDER BY attempts DESC
+  ''',
+      [uid],
+    );
+
+    return result;
+  }
+
+  // Missed words by class
+  Future<List<Map<String, dynamic>>> getClassMissedWords(
+    String classCode,
+  ) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT 
+      a.wordText, 
+      COUNT(*) as attempts
+    FROM attempts a
+    JOIN users u ON u.id = a.uid
+    WHERE u.classCode = ? AND a.score = 0
+    GROUP BY a.wordText
+    ORDER BY attempts DESC
+  ''',
+      [classCode],
+    );
+
+    return result;
+  }
+
+  Future<AppUser> getUser(int uid) async {
+    final db = await instance.database;
+    final result = await db.query('users', where: 'id = ?', whereArgs: [uid]);
+    return AppUser.fromMap(result.first);
+  }
+
+  // Attempts service
+  Future<int> insertAttempt(Attempt attempt) async {
+    final db = await instance.database;
+    return await db.insert('attempts', attempt.toMap());
+  }
+
+  Future<Set<String>> getAllCorrectWords(int uid) async {
+    final db = await instance.database;
+    final allAttempts = await db.query('attempts');
+
+    final correctWords = allAttempts
+        .where((a) => a['score'] == 1 && a['uid'] == uid)
+        .map((a) => a['wordText'] as String)
+        .toSet();
+    return correctWords;
   }
 }

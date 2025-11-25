@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:team_3_f25_project/services/list_service.dart';
 import '../services/user_db.dart';
 import '../screens/dashboard.dart';
-import '../screens/wordlist_selection.dart';
+import '../screens/wordlist_screen.dart';
 import '../screens/signup.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -26,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final db = DatabaseHelper.instance;
     final user = await db.login(
-      _emailController.text.trim(),
+      _emailController.text.trim().toLowerCase(),
       _passwordController.text.trim(),
     );
 
@@ -36,11 +38,19 @@ class _LoginScreenState extends State<LoginScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('email', user.email);
       await prefs.setInt('userId', user.id!);
-
+      await prefs.setString('classCode', user.classCode ?? "");
       if (user.role.toLowerCase() == 'student') {
+        // Get wordlist for students
+        int? currentListId = prefs.getInt('currentListId${user.id}');
+        if (currentListId == null) {
+          currentListId = await WordService.getTopPriority();
+          prefs.setInt('currentListId${user.id}', currentListId);
+        }
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const WordlistSelectionScreen()),
+          MaterialPageRoute(
+            builder: (_) => ProgressScreen(listId: currentListId!),
+          ),
         );
       } else if (user.role.toLowerCase() == 'teacher') {
         Navigator.pushReplacement(
@@ -53,6 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue[50],
@@ -62,11 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.menu_book,
-                size: 100,
-                color: Colors.blueAccent,
-              ),
+              const Icon(Icons.menu_book, size: 100, color: Colors.blueAccent),
               const SizedBox(height: 20),
               const Text(
                 "ReadRight",
@@ -107,33 +114,36 @@ class _LoginScreenState extends State<LoginScreen> {
               if (_error != null)
                 Text(
                   _error!,
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               const SizedBox(height: 20),
               _isLoading
                   ? const CircularProgressIndicator()
                   : SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      width: double.infinity,
+                      height: 50,
+                      child: ElevatedButton(
+                        onPressed: _login,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blueAccent,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 4,
+                        ),
+                        child: const Text(
+                          "Login",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
                     ),
-                    elevation: 4,
-                  ),
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white
-                    ),
-                  ),
-                ),
-              ),
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () {

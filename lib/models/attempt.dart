@@ -2,7 +2,7 @@
 import 'dart:convert';
 
 class Attempt {
-  final String uid;
+  final int? uid;
   final String wordText;
   final int score;
   final String feedback;
@@ -31,7 +31,7 @@ class Attempt {
   };
 
   static Attempt fromMap(Map<String, dynamic> map) => Attempt(
-    uid: map['uid'] as String,
+    uid: map['uid'] as int,
     wordText: map['wordText'] as String,
     score: map['score'] as int,
     feedback: map['feedback'] as String,

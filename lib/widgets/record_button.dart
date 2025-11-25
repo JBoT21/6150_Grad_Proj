@@ -4,6 +4,7 @@ class RecordButton extends StatelessWidget {
   final bool isRecording;
   final VoidCallback? onTap;
   final Duration? elapsed;
+  final kMax = 5;
 
   const RecordButton({
     super.key,
@@ -53,7 +54,7 @@ class RecordButton extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          isRecording ? 'Recording...' : 'Tap to record (max 7s)',
+          isRecording ? 'Recording...' : 'Tap to record',
           style: Theme.of(
             context,
           ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
@@ -61,7 +62,7 @@ class RecordButton extends StatelessWidget {
         if (elapsed != null) ...[
           const SizedBox(height: 4),
           Text(
-            '${_formatDuration(elapsed!)} / 00:07',
+            '${_formatDuration(elapsed!)} / 00:0$kMax',
             style: Theme.of(
               context,
             ).textTheme.labelMedium?.copyWith(color: Colors.grey[600]),

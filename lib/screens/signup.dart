@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/user_db.dart';
 import '../models/user.dart';
+import 'package:uuid/uuid.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -13,43 +14,80 @@ class _SignupScreenState extends State<SignupScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _classCodeController = TextEditingController();
+
   String _role = 'student';
   String? _error;
+
+  String generateClassCode() {
+    var uuid = Uuid().v4();
+    return uuid.substring(0, 6).toUpperCase();
+  }
 
   void _signup() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
     final db = DatabaseHelper.instance;
-    final existing = await db.getUserByEmail(_emailController.text.trim());
-    if (existing != null) {
-      setState(() => _error = "Email already registered.");
-      return;
-    }
+    String classCode;
 
+    // Basic required fields
     if (name.isEmpty || email.isEmpty || password.isEmpty) {
       setState(() => _error = "All fields are required.");
       return;
     }
 
-    if (!email.contains('@')) {
-      setState(() => _error = "Email must be a valid email");
+    // TEACHER → must enter a valid email
+    if (_role == 'teacher') {
+      if (!email.contains('@')) {
+        setState(() => _error = "Teachers must enter a valid email.");
+        return;
+      }
+    }
+
+    // Check duplicates
+    final existing = await db.getUserByEmail(email);
+    if (existing != null) {
+      setState(() => _error = "Email/ID already registered.");
       return;
     }
 
-    if (_passwordController.text.length < 8) {
-      setState(() => _error = "Password must be 8 characters long");
+    if (password.length < 8) {
+      setState(() => _error = "Password must be at least 8 characters.");
       return;
     }
+    if (_role == 'teacher') {
+      classCode = generateClassCode();
+    } else {
+      classCode = _classCodeController.text.trim();
+      final exists = await db.classCodeExists(classCode);
 
+      if (classCode.isEmpty) {
+        setState(() => _error = "Students must enter a class code.");
+        return;
+      }
+      if (!exists) {
+        setState(() => _error = "Students must enter a valid class code.");
+        return;
+      }
+    }
+
+    // Create user
     final newUser = AppUser(
       name: name,
       email: email,
       password: password,
       role: _role,
+      classCode: classCode,
     );
 
-    await db.insertUser(newUser);
+    final insertedId = await db.insertUser(newUser);
+
+    if (insertedId <= 0) {
+      setState(() => _error = "Failed to create user. Please try again.");
+      return;
+    }
+
     if (mounted) Navigator.pop(context);
   }
 
@@ -66,12 +104,10 @@ class _SignupScreenState extends State<SignupScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-
                   IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.blueAccent),
                     onPressed: () => Navigator.pop(context),
                   ),
-
                   IconButton(
                     icon: const Icon(Icons.delete, color: Colors.blueAccent),
                     onPressed: () {
@@ -81,12 +117,15 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ],
               ),
+
               const Icon(
                 Icons.menu_book,
                 size: 100,
                 color: Colors.blueAccent,
               ),
+
               const SizedBox(height: 20),
+
               const Text(
                 "Create ReadRight Account",
                 style: TextStyle(
@@ -95,7 +134,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   color: Colors.blueAccent,
                 ),
               ),
+
               const SizedBox(height: 40),
+
+              // NAME
               TextField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -108,12 +150,16 @@ class _SignupScreenState extends State<SignupScreen> {
                   fillColor: Colors.white,
                 ),
               ),
+
               const SizedBox(height: 16),
+
               TextField(
                 controller: _emailController,
                 decoration: InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: const Icon(Icons.email),
+                  labelText: _role == "student" ? "Student ID" : "Email",
+                  prefixIcon: Icon(
+                    _role == "teacher" ? Icons.email : Icons.badge,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -121,7 +167,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   fillColor: Colors.white,
                 ),
               ),
+
               const SizedBox(height: 16),
+
+              // PASSWORD
               TextField(
                 controller: _passwordController,
                 obscureText: true,
@@ -135,9 +184,12 @@ class _SignupScreenState extends State<SignupScreen> {
                   fillColor: Colors.white,
                 ),
               ),
+
               const SizedBox(height: 16),
+
+              // ROLE DROPDOWN
               DropdownButtonFormField<String>(
-                initialValue: _role,
+                value: _role,
                 decoration: InputDecoration(
                   labelText: "Role",
                   prefixIcon: const Icon(Icons.person_outline),
@@ -153,13 +205,25 @@ class _SignupScreenState extends State<SignupScreen> {
                 ],
                 onChanged: (value) => setState(() => _role = value!),
               ),
+
               const SizedBox(height: 20),
-              if (_error != null)
-                Text(
-                  _error!,
-                  style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500),
+
+              if (_role == 'student')
+                TextField(
+                  controller: _classCodeController,
+                  decoration: InputDecoration(
+                    labelText: "Class Code",
+                    prefixIcon: const Icon(Icons.class_),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
                 ),
+
               const SizedBox(height: 20),
+
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -182,6 +246,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ),
               ),
+
+              const SizedBox(height: 20),
+
+              if (_error != null)
+                Text(
+                  _error!,
+                  style: const TextStyle(
+                    color: Colors.red,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
             ],
           ),
         ),
