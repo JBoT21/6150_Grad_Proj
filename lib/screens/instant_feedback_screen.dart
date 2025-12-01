@@ -52,6 +52,7 @@ class _InstantFeedbackState extends State<InstantFeedback> {
     await Future.delayed(Duration(seconds: 1), () {
       textToSpeech.speak(widget.wordObject.sentence1);
     });
+    textToSpeech.stop();
   }
 
   @override
@@ -64,8 +65,6 @@ class _InstantFeedbackState extends State<InstantFeedback> {
           Timer(Duration(seconds: 2), () {
             if (mounted) {
               Navigator.pop(context);
-            } else {
-              textToSpeech.stop();
             }
           }),
         },

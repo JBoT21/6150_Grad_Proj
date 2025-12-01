@@ -125,11 +125,14 @@ class _WordlistSelectionState extends State<WordlistSelectionScreen> {
                     ],
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    "Drag and drop to reorder list priority (Top = highest priority)",
-                    style: TextStyle(fontSize: 16),
+                Expanded(
+                  //padding: EdgeInsets.all(10),
+                  child: Container(
+                    margin: EdgeInsets.all(20),
+                    child: Text(
+                      "Drag and drop to reorder list priority (Top = highest priority)",
+                      style: TextStyle(fontSize: 16),
+                    ),
                   ),
                 ),
               ],

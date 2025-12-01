@@ -28,7 +28,8 @@ class RecordButton extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        GestureDetector(
+        InkWell(
+          borderRadius: BorderRadius.circular(250),
           onTap: onTap,
           child: Container(
             width: 250,

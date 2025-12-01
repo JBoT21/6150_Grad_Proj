@@ -57,7 +57,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   // timer variables
   Duration _elapsed = Duration.zero;
   Timer? _timer;
-  static const Duration kMax = Duration(seconds: 5);
+  static const Duration kMax = Duration(seconds: 3);
 
   @override
   void initState() {
@@ -165,7 +165,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(milliseconds: 200), (t) {
       final next = _elapsed + const Duration(milliseconds: 200);
-      if (next >= kMax) {
+      if (next > kMax && _isListening) {
         _stopListening();
         Navigator.push(
           context,
@@ -180,12 +180,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   void _stopListening() async {
-    await _speechToText.stop();
-    await _recorder.stop();
-    _timer?.cancel();
     setState(() {
+      _timer?.cancel();
       _isListening = false;
     });
+    await _speechToText.stop();
+    await _recorder.stop();
   }
 
   bool _isCorrect(String recognizedWord) {
@@ -358,7 +358,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                 : null,
           ),
           const SizedBox(height: 15.0),
-          GestureDetector(
+          InkWell(
             onTap: () {
               Navigator.pop(context);
             },
@@ -390,7 +390,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue[50],
-      appBar: customAppBar(context: context, title: "Word Practice Screen"),
+      appBar: customAppBar(context: context),
       body: _buildBody(),
     );
   }

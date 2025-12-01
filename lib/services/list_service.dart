@@ -15,7 +15,6 @@ class WordService {
 
     try {
       final dir = await getApplicationDocumentsDirectory();
-      //print('Documents directory: ${dir.path}');
       final path = '${dir.path}/seed_words.csv';
 
       final file = File(path);
@@ -66,6 +65,37 @@ class WordService {
   static Future<String> getCategory(int listId) async {
     final allWords = await loadWords();
     return allWords.firstWhere((w) => w.listId == listId).category;
+  }
+
+  static Future<void> addListOfWords(
+    List<WordWithSentences> wordsWithSentences,
+    String listCategory,
+  ) async {
+    final path = await _getCSVPath();
+    final allWords = await loadWords();
+    final List<int> listIds = await getListIds();
+    listIds.sort();
+    int nextListId = listIds.last + 1;
+    int nextWordId = allWords.length + 1;
+
+    // rebuild csv
+    final header =
+        'id,list_id,priority,category,word,sentence1,sentence2,sentence3';
+    final csvLines = [header];
+    for (var w in allWords) {
+      csvLines.add(
+        '${w.id},${w.listId},${w.priority},${w.category},${w.word},${w.sentence1},${w.sentence2},${w.sentence3}',
+      );
+    }
+
+    // add new list
+    for (var w in wordsWithSentences) {
+      csvLines.add(
+        '$nextWordId,$nextListId,$nextListId,$listCategory,${w.word},${w.sentence1},${w.sentence2},${w.sentence3}',
+      );
+      nextWordId++;
+    }
+    await File(path).writeAsString(csvLines.join('\n'));
   }
 
   // Updates the priority

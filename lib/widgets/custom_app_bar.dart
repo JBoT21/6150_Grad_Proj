@@ -9,17 +9,25 @@ AppBar customAppBar({dynamic context, String title = ""}) {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
+
   return AppBar(
-      title: Text(title, style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.blueAccent,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => logout(context),
-          ),
-        ],
-      );
+    title: Text(title, style: TextStyle(color: Colors.white)),
+    backgroundColor: Colors.blueAccent,
+    actions: [
+      ElevatedButton.icon(
+        onPressed: () {
+          logout(context);
+        },
+        icon: const Icon(Icons.logout),
+        label: const Text('Logout'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.red,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        ),
+      ),
+    ],
+  );
 }
