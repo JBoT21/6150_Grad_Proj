@@ -208,4 +208,25 @@ class DatabaseHelper {
         .toSet();
     return correctWords;
   }
+
+  Future<String?> getMostMissedWord(int uid) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT 
+      wordText, 
+      COUNT(*) as attempts
+    FROM attempts
+    WHERE uid = ? AND score = 0
+    GROUP BY wordText
+    ORDER BY attempts DESC
+    LIMIT 1
+    ''',
+      [uid],
+    );
+
+    if (result.isEmpty) return "No Words Missed";
+    return result.first['wordText'] as String?;
+  }
 }
