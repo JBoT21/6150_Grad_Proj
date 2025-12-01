@@ -4,6 +4,7 @@ import 'dart:convert';
 class Attempt {
   final int? uid;
   final String wordText;
+  final int? listId;
   final int score;
   final String feedback;
   final DateTime createdAt;
@@ -13,6 +14,7 @@ class Attempt {
   Attempt({
     required this.uid,
     required this.wordText,
+    required this.listId,
     required this.score,
     required this.feedback,
     required this.createdAt,
@@ -23,6 +25,7 @@ class Attempt {
   Map<String, dynamic> toMap() => {
     'uid': uid,
     'wordText': wordText,
+    'listId': listId,
     'score': score,
     'feedback': feedback,
     'createdAt': createdAt.toIso8601String(),
@@ -33,6 +36,7 @@ class Attempt {
   static Attempt fromMap(Map<String, dynamic> map) => Attempt(
     uid: map['uid'] as int,
     wordText: map['wordText'] as String,
+    listId: map['listId'] as int,
     score: map['score'] as int,
     feedback: map['feedback'] as String,
     createdAt: DateTime.parse(map['createdAt'] as String),

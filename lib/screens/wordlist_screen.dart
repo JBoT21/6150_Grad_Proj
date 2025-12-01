@@ -22,6 +22,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   int masteredWords = 0;
   List<WordList> words = [];
   List<Map<String, dynamic>> wordStatus = [];
+  String? listCategory;
 
   @override
   void initState() {
@@ -32,6 +33,9 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Future<void> _loadProgress() async {
     prefs = await SharedPreferences.getInstance();
     userId = prefs!.getInt('userId');
+    listCategory = await WordService.getCategory(widget.listId);
+    // list categories are in Dolch_<list-name> format
+    listCategory = listCategory!.split('_')[1];
 
     final wordsInList = await WordService.getWords(widget.listId);
     final allAttempts = await db.database.then((db) => db.query('attempts'));
@@ -68,7 +72,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
           children: [
             const SizedBox(height: 20),
             Text(
-              'Word List ${widget.listId}',
+              listCategory ?? "",
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w700,

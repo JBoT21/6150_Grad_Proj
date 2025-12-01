@@ -35,3 +35,19 @@ class AppUser {
     );
   }
 }
+
+class Student extends AppUser {
+  final currentList;
+  final currentListId;
+
+  Student({
+    super.id,
+    required super.classCode,
+    required super.email,
+    required super.name,
+    required super.password,
+    required super.role,
+    required this.currentList,
+    required this.currentListId,
+  });
+}

@@ -40,6 +40,7 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uid INTEGER NOT NULL,
         wordText TEXT NOT NULL,
+        listId INT NOT NULL,
         score INTEGER NOT NULL,
         feedback TEXT NOT NULL,
         createdAt TEXT NOT NULL,
@@ -122,23 +123,24 @@ class DatabaseHelper {
     return result.map((row) => AppUser.fromMap(row)).toList();
   }
 
-  Future<double> getStudentProgress(int uid) async {
+  Future<double> getStudentProgress(int uid, int currentListId) async {
     final db = await instance.database;
 
-    final allWords = await WordService.loadWords();
-    final totalWords = allWords.length;
+    final allWordsInList = await WordService.getWords(currentListId);
 
-    if (totalWords == 0) return 0.0;
+    final listLength = allWordsInList.length;
+
+    if (listLength == 0) return 0.0;
 
     final attempts = await db.query(
       'attempts',
-      where: 'uid = ? AND score = 1',
-      whereArgs: [uid],
+      where: 'uid = ? AND score = 1 AND listId = ?',
+      whereArgs: [uid, currentListId],
     );
 
     final mastered = attempts.map((a) => a['wordText'] as String).toSet();
 
-    return mastered.length / totalWords;
+    return mastered.length / listLength;
   }
 
   // missed words by student

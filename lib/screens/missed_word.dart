@@ -32,7 +32,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -45,9 +45,11 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
     return Scaffold(
       backgroundColor: Colors.blue[50],
       appBar: AppBar(
-        title: Text(widget.uid != null
-            ? "${widget.studentName} Missed Words"
-            : "Class Missed Words"),
+        title: Text(
+          widget.uid != null
+              ? "${widget.studentName} Missed Words"
+              : "Class Missed Words",
+        ),
         centerTitle: true,
         backgroundColor: Colors.blueAccent[50],
         actions: [
@@ -74,14 +76,16 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                 textAlign: TextAlign.center,
               ),
             );
-          }
-          else {
+          } else {
             return ListView.builder(
               itemCount: missedWords.length,
               itemBuilder: (context, index) {
                 final word = missedWords[index];
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -102,48 +106,79 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                           final player = AudioPlayer();
                           final path = word['lastRecording'];
 
-                          if(path == null || path.isEmpty){
+                          if (path == null || path.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("No recording data avaliable for the word")),
+                              const SnackBar(
+                                content: Text(
+                                  "No recording data available for the word",
+                                ),
+                              ),
                             );
                             return;
                           }
-                          try{
+                          try {
                             await player.play(DeviceFileSource(path));
-                          } catch(e){
+                          } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text("Error Playing Audio: $e")),
+                              SnackBar(
+                                content: Text("Error Playing Audio: $e"),
+                              ),
                             );
                           }
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(16),
-                          child: Row(
+                          child: Column(
                             children: [
-                              Expanded(
-                                child: Text(
-                                  word['wordText'],
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: widget.uid != null
+                                        ? Row(
+                                            spacing: 20.0,
+                                            children: [
+                                              Icon(
+                                                Icons.play_circle,
+                                                size: 35,
+                                                color: Colors.blueAccent,
+                                              ),
+                                              Text(
+                                                word['wordText'],
+                                                style: const TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black87,
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        : Text(
+                                            word['wordText'],
+                                            style: const TextStyle(
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
                                   ),
-                                ),
-                              ),
-                              Container(
-                                padding:
-                                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.blueAccent,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  "Attempts: ${word['attempts']}",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blueAccent,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      "Attempts: ${word['attempts']}",
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
                             ],
                           ),
@@ -152,7 +187,6 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                     ),
                   ),
                 );
-
               },
             );
           }

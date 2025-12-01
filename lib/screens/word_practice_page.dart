@@ -222,6 +222,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         Attempt(
           uid: userId!,
           wordText: currentWord,
+          listId: currentListId,
           score: correct ? 1 : 0,
           createdAt: DateTime.now(),
           feedback: correct ? "Great job" : "Try again",

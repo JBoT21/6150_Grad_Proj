@@ -105,7 +105,10 @@ class _SignupScreenState extends State<SignupScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.blueAccent),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.blueAccent,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                   IconButton(
@@ -118,11 +121,7 @@ class _SignupScreenState extends State<SignupScreen> {
                 ],
               ),
 
-              const Icon(
-                Icons.menu_book,
-                size: 100,
-                color: Colors.blueAccent,
-              ),
+              const Icon(Icons.menu_book, size: 100, color: Colors.blueAccent),
 
               const SizedBox(height: 20),
 
@@ -136,6 +135,27 @@ class _SignupScreenState extends State<SignupScreen> {
               ),
 
               const SizedBox(height: 40),
+
+              // ROLE DROPDOWN
+              DropdownButtonFormField<String>(
+                value: _role,
+                decoration: InputDecoration(
+                  labelText: "Role",
+                  prefixIcon: const Icon(Icons.person_outline),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                items: const [
+                  DropdownMenuItem(value: 'student', child: Text("Student")),
+                  DropdownMenuItem(value: 'teacher', child: Text("Teacher")),
+                ],
+                onChanged: (value) => setState(() => _role = value!),
+              ),
+
+              const SizedBox(height: 20),
 
               // NAME
               TextField(
@@ -187,27 +207,6 @@ class _SignupScreenState extends State<SignupScreen> {
 
               const SizedBox(height: 16),
 
-              // ROLE DROPDOWN
-              DropdownButtonFormField<String>(
-                value: _role,
-                decoration: InputDecoration(
-                  labelText: "Role",
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-                items: const [
-                  DropdownMenuItem(value: 'student', child: Text("Student")),
-                  DropdownMenuItem(value: 'teacher', child: Text("Teacher")),
-                ],
-                onChanged: (value) => setState(() => _role = value!),
-              ),
-
-              const SizedBox(height: 20),
-
               if (_role == 'student')
                 TextField(
                   controller: _classCodeController,
@@ -239,9 +238,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   child: const Text(
                     "Sign Up",
                     style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),

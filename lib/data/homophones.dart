@@ -70,7 +70,7 @@ class Homophones {
     'ai': ['aye', 'eye', 'I'],
     'aye': ['ai', 'eye', 'I'],
     'eye': ['ai', 'aye', 'I'],
-    'I': ['ai', 'aye', 'eye'],
+    'i': ['ai', 'aye', 'eye', 'hi'],
     'ail': ['ale'],
     'ale': ['ail'],
     'air': ['aire', 'are', 'ayre', 'ere', 'eyre', 'heir'],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:team_3_f25_project/screens/wordlist_selection.dart';
-import 'package:team_3_f25_project/widgets/stat_tile.dart';
+import 'package:team_3_f25_project/services/list_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import '../models/user.dart';
@@ -16,11 +16,12 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   String classCode = "";
-  List<AppUser> students = [];
+  List<Student> students = [];
   bool loadingStudents = true;
   Map<int, double> progressMap = {};
   String searchQuery = "";
   String sortOption = "name_asc";
+  SharedPreferences? prefs;
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Map<int, double> temp = {};
 
     for (var s in students) {
-      double p = await db.getStudentProgress(s.id!);
+      double p = await db.getStudentProgress(s.id!, s.currentListId);
       temp[s.id!] = p;
     }
 
@@ -43,9 +44,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadClassCode() async {
-    final prefs = await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance();
     setState(() {
-      classCode = prefs.getString('classCode') ?? "N/A";
+      prefs = prefs!;
+      classCode = prefs!.getString('classCode') ?? "N/A";
     });
     _loadStudents(classCode);
   }
@@ -53,17 +55,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _loadStudents(String code) async {
     final db = DatabaseHelper.instance;
     final list = await db.getStudentsByClassCode(code);
+    List<Student> studentList = [];
+    for (int i = 0; i < list.length; i++) {
+      AppUser user = list[i];
+      int currentListId = prefs!.getInt('currentListId${user.id}')!;
+      String currentList = await WordService.getCategory(currentListId);
+      studentList.add(
+        Student(
+          id: user.id,
+          classCode: classCode,
+          email: user.email,
+          name: user.name,
+          password: user.password,
+          role: user.role,
+          currentList: currentList,
+          currentListId: currentListId,
+        ),
+      );
+    }
 
     setState(() {
-      students = list;
+      students = studentList;
       loadingStudents = false;
     });
     _loadProgress();
   }
 
   Future<void> _logout(BuildContext context) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('email');
+    await prefs!.remove('email');
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -82,8 +101,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return total / progressMap.length;
   }
 
-  List<AppUser> getFilteredAndSortedStudents() {
-    List<AppUser> filtered = students.where((s) {
+  List<Student> getFilteredAndSortedStudents() {
+    List<Student> filtered = students.where((s) {
       return s.name.toLowerCase().contains(searchQuery.toLowerCase());
     }).toList();
 
@@ -250,12 +269,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   itemCount: getFilteredAndSortedStudents().length,
                   itemBuilder: (context, index) {
                     final student = getFilteredAndSortedStudents()[index];
+
                     final progress = (progressMap[student.id] ?? 0);
 
                     return ListTile(
                       leading: const Icon(Icons.person),
                       title: Text(student.name),
-                      subtitle: Text("Progress: ${(progress * 100).toStringAsFixed(0)}%"),
+                      isThreeLine: true,
+                      subtitle: Text(
+                        "${student.currentList}\nProgress: ${(progress * 100).toStringAsFixed(0)}%",
+                      ),
                       trailing: SizedBox(
                         width: 100,
                         child: LinearProgressIndicator(
@@ -285,10 +308,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => MissedWordsScreen(
-                        uid: null,
-                        classCode: classCode,
-                      ),
+                      builder: (_) =>
+                          MissedWordsScreen(uid: null, classCode: classCode),
                     ),
                   );
                 },
