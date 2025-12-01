@@ -6,6 +6,10 @@ import 'package:team_3_f25_project/screens/login.dart';
 import '../models/user.dart';
 import '../services/user_db.dart';
 import 'missed_word.dart';
+import 'package:csv/csv.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
+import 'package:open_filex/open_filex.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -126,19 +130,60 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return filtered;
   }
 
+  //This function is the export function to export student progress to CSV
+  //CSV include email, name, progress, and most missed word
+  Future<void> _exportCSV() async {
+    final db = DatabaseHelper.instance;
+
+    List<List<dynamic>> rows = [
+      ["Student Email", "Student Name", "Progress (%)", "Most Missed Word"],
+    ];
+
+    for (var student in students) {
+      //Get student progress and most missed word
+      final progress = (progressMap[student.id] ?? 0.0) * 100;
+      final mostMissed = await db.getMostMissedWord(student.id!) ?? "None";
+
+      rows.add([
+        student.email,
+        student.name,
+        progress.toStringAsFixed(0),
+        mostMissed,
+      ]);
+    }
+
+    // Convert to list to csv
+    String csvData = const ListToCsvConverter().convert(rows);
+
+    // Save to device
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File("${dir.path}/class_${classCode}_student_report.csv");
+
+    await file.writeAsString(csvData);
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text("CSV exported to: ${file.path}")));
+
+    await OpenFilex.open(file.path);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue[50],
       appBar: AppBar(
-        title: Text('Welcome to Class-$classCode'),
-        centerTitle: true,
         backgroundColor: Colors.blueAccent[50],
+        centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.logout),
+          onPressed: () => _logout(context),
+        ),
+        title: Text('Welcome to Class-$classCode'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _logout(context),
-          ),
+          IconButton(icon: const Icon(Icons.download), onPressed: _exportCSV),
         ],
       ),
       body: SingleChildScrollView(

@@ -48,6 +48,7 @@ dependencies:
   audioplayers: ^6.1.0
   uuid: ^4.2.1
   flutter_tts: ^4.2.3
+  open_filex: ^4.3.2
 
 dev_dependencies:
   flutter_test:
