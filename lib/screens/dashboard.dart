@@ -294,6 +294,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
 
               const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          MissedWordsScreen(uid: null, classCode: classCode),
+                    ),
+                  );
+                },
+                child: const Text("Class Overall Missed Words"),
+              ),
+              SizedBox(height: 20),
 
               Text(
                 "Students in Class $classCode",
@@ -347,19 +360,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     );
                   },
                 ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          MissedWordsScreen(uid: null, classCode: classCode),
-                    ),
-                  );
-                },
-                child: const Text("Class Overall Missed Words"),
-              ),
             ],
           ),
         ),

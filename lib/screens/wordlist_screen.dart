@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:team_3_f25_project/models/user.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
@@ -18,6 +19,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   final db = DatabaseHelper.instance;
   SharedPreferences? prefs;
   int? userId;
+  AppUser? user;
   double completion = 0;
   int totalWords = 0;
   int masteredWords = 0;
@@ -43,6 +45,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
   Future<void> _loadProgress() async {
     prefs = await SharedPreferences.getInstance();
     userId = prefs!.getInt('userId');
+    user = await DatabaseHelper.instance.getUser(userId!);
     listCategory = await WordService.getCategory(widget.listId);
     // list categories are in Dolch_<list-name> format
     listCategory = listCategory!.split('_')[1];
@@ -86,9 +89,8 @@ class _ProgressScreenState extends State<ProgressScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              const SizedBox(height: 20),
               Text(
-                listCategory ?? "",
+                "Hi ${user?.name}",
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
@@ -101,7 +103,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
               ),
               const SizedBox(height: 20),
-
               // Circular progress bar
               SizedBox(
                 width: 180,
@@ -112,7 +113,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
                     CircularProgressIndicator(
                       value: completion,
                       strokeWidth: 100,
-                      color: Colors.greenAccent.shade400,
+                      color: Colors.green,
                       backgroundColor: Colors.grey.shade300,
                     ),
                     Text(
@@ -126,7 +127,14 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   ],
                 ),
               ),
-
+              Text(
+                listCategory ?? "",
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black87,
+                ),
+              ),
               const SizedBox(height: 30),
 
               Expanded(
