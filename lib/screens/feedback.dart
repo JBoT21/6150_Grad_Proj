@@ -140,7 +140,7 @@ class FeedbackScreen extends StatelessWidget {
                     ),
                   ),
                   onPressed: () =>
-                      Navigator.pushNamed(context, '/wordlist_selection'),
+                      Navigator.pushNamed(context, '/wordlist_management'),
                   child: const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     child: Text('Next Word', style: TextStyle(fontSize: 18)),

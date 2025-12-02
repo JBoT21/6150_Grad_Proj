@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
 import '../services/user_db.dart';
 import '../screens/dashboard.dart';
-import '../screens/wordlist_screen.dart';
+import 'progress_screen.dart';
 import '../screens/signup.dart';
 
 class LoginScreen extends StatefulWidget {

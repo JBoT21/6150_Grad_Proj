@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/screens/dashboard.dart';
-import 'package:team_3_f25_project/screens/wordlist_screen.dart';
+import 'package:team_3_f25_project/screens/progress_screen.dart';
 import 'package:team_3_f25_project/screens/word_practice_page.dart';
 import 'package:team_3_f25_project/screens/signup.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
@@ -74,7 +74,7 @@ class _ReadRightAppState extends State<ReadRightApp> {
       home: _home,
       routes: {
         '/dashboard': (context) => const DashboardScreen(),
-        '/wordlist_screen': (context) {
+        '/progress_screen': (context) {
           final args =
               ModalRoute.of(context)!.settings.arguments
                   as Map<String, dynamic>;

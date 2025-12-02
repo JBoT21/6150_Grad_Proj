@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:team_3_f25_project/screens/wordlist_selection.dart';
+import 'package:team_3_f25_project/screens/wordlist_management.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
@@ -239,7 +239,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => const WordlistSelectionScreen(),
+                    builder: (_) => const WordlistManagementScreen(),
                   ),
                 ),
                 child: const Text("Word Lists"),

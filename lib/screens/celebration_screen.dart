@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:team_3_f25_project/screens/wordlist_screen.dart';
+import 'package:team_3_f25_project/screens/progress_screen.dart';
 
 class CelebrationScreen extends StatelessWidget {
   final nextListId;
