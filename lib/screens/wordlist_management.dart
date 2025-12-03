@@ -46,9 +46,7 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
       final words = await WordService.getWords(id);
       // NOTE: Using a safe check for word priority
       final priority =
-          words.isNotEmpty &&
-              words.first != null &&
-              words.first.priority != null
+          words.isNotEmpty
           ? words.first.priority
           : 100;
       lists.add({
@@ -218,8 +216,7 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
           padding: const EdgeInsets.only(top: 4.0),
           child: Text(
             // **Fixing the Overflow Here** by limiting words and ensuring proper truncation
-            'Words: ${list['words'].take(5).map((w) => w.word).join(', ')}' +
-                (list['words'].length > 5 ? '...' : ''),
+            'Words: ${list['words'].take(5).map((w) => w.word).join(', ')}${list['words'].length > 5 ? '...' : ''}',
             overflow:
                 TextOverflow.ellipsis, // Ensures text does not cause overflow
             maxLines: 1,

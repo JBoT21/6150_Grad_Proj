@@ -266,7 +266,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: DropdownButtonFormField<String>(
                   decoration: const InputDecoration(labelText: "Sort By"),
-                  value: sortOption,
+                  initialValue: sortOption,
                   items: const [
                     DropdownMenuItem(
                       value: "name_asc",

@@ -15,6 +15,7 @@ import 'package:team_3_f25_project/services/user_db.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/data/homophones.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class WordPracticeScreen extends StatefulWidget {
   final db = DatabaseHelper.instance;
@@ -62,8 +63,43 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   @override
   void initState() {
     super.initState();
+    requestMicrophonePermission();
     _loadUserAndWords();
     _initSpeech();
+  }
+
+  Future<void> requestMicrophonePermission() async {
+    setState(() {
+      _loading = true;
+      _hasError = false;
+    });
+    var status = await Permission.microphone.status;
+
+    if (!status.isGranted) {
+      status = await Permission.microphone.request();
+    }
+
+    if (status.isGranted && mounted) {
+      setState(() {
+        _loading = false;
+        _hasError = false;
+      });
+      return;
+    } else if (status.isDenied && mounted) {
+      setState(() {
+        _loading = false;
+        _hasError = true;
+        _errorMessage = "Microphone permissions are needed to proceed.";
+      });
+    } else if (status.isPermanentlyDenied) {
+      // Permission permanently denied, open app settings
+      setState(() {
+        _loading = false;
+        _hasError = true;
+        _errorMessage = "Microphone permissions are needed to proceed.";
+      });
+      openAppSettings();
+    }
   }
 
   Future<void> _loadUserAndWords() async {

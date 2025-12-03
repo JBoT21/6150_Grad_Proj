@@ -22,23 +22,23 @@ class TextToSpeech {
 
     flutterTts.setLanguage("en-US");
 
-    Future<void> _getDefaultEngine() async {
+    Future<void> getDefaultEngine() async {
       await flutterTts.getDefaultEngine;
     }
 
-    Future<void> _getDefaultVoice() async {
+    Future<void> getDefaultVoice() async {
       await flutterTts.getDefaultVoice;
     }
 
-    Future<void> _setAwaitOptions() async {
+    Future<void> setAwaitOptions() async {
       await flutterTts.awaitSpeakCompletion(true);
     }
 
-    _setAwaitOptions();
+    setAwaitOptions();
 
     if (isAndroid) {
-      _getDefaultEngine();
-      _getDefaultVoice();
+      getDefaultEngine();
+      getDefaultVoice();
     }
   }
 

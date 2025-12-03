@@ -172,11 +172,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        subtitle: Text(
-                          status == 'mastered'
-                              ? 'You got it right!'
-                              : 'Not yet practiced',
-                        ),
                       ),
                     );
                   },
