@@ -47,9 +47,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
     userId = prefs!.getInt('userId');
     user = await DatabaseHelper.instance.getUser(userId!);
     listCategory = await WordService.getCategory(widget.listId);
-    // list categories are in Dolch_<list-name> format
-    listCategory = listCategory!.split('_')[1];
-
     final wordsInList = await WordService.getWords(widget.listId);
     final allAttempts = await db.database.then((db) => db.query('attempts'));
 
@@ -184,7 +181,11 @@ class _ProgressScreenState extends State<ProgressScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: ElevatedButton.icon(
         onPressed: () {
-          _logout(context);
+          Navigator.pushNamed(context, '/practice').then((_) {
+            setState(() {
+              _loadProgress();
+            });
+          });
         },
         icon: const Icon(Icons.mic),
         label: const Text('Practice'),

@@ -10,6 +10,7 @@ import 'package:team_3_f25_project/screens/instant_feedback_screen.dart';
 import 'package:team_3_f25_project/screens/celebration_screen.dart';
 import 'package:record/record.dart';
 import 'dart:async';
+import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 import 'package:speech_to_text/speech_to_text.dart';
@@ -54,6 +55,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   String recordingPath = "";
   bool _speechEnabled = false;
   bool _isListening = false;
+  bool _micPermissionGranted = false;
 
   // timer variables
   Duration _elapsed = Duration.zero;
@@ -63,43 +65,98 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   @override
   void initState() {
     super.initState();
-    requestMicrophonePermission();
     _loadUserAndWords();
+    _checkMicrophonePermission();
     _initSpeech();
   }
 
-  Future<void> requestMicrophonePermission() async {
-    setState(() {
-      _loading = true;
-      _hasError = false;
-    });
-    var status = await Permission.microphone.status;
-
-    if (!status.isGranted) {
-      status = await Permission.microphone.request();
-    }
-
-    if (status.isGranted && mounted) {
+  // Check permission status without requesting
+  Future<void> _checkMicrophonePermission() async {
+    if (Platform.isIOS) {
+      // iOS handles permissions through speech_to_text
       setState(() {
-        _loading = false;
-        _hasError = false;
+        _micPermissionGranted = true;
       });
       return;
-    } else if (status.isDenied && mounted) {
-      setState(() {
-        _loading = false;
-        _hasError = true;
-        _errorMessage = "Microphone permissions are needed to proceed.";
-      });
-    } else if (status.isPermanentlyDenied) {
-      // Permission permanently denied, open app settings
-      setState(() {
-        _loading = false;
-        _hasError = true;
-        _errorMessage = "Microphone permissions are needed to proceed.";
-      });
-      openAppSettings();
     }
+
+    // Android uses permission_handler
+    final status = await Permission.microphone.status;
+    setState(() {
+      _micPermissionGranted = status.isGranted;
+    });
+  }
+
+  // Only request permission when user tries to record
+  Future<bool> _requestMicrophonePermission() async {
+    if (Platform.isIOS) {
+      // iOS: speech_to_text handles its own permissions
+      print('✅ iOS - using speech_to_text permissions');
+      return true;
+    }
+
+    // Android: use permission_handler
+    var status = await Permission.microphone.status;
+    print('🎤 Android permission status: $status');
+
+    if (status.isGranted) {
+      print('✅ Permission already granted');
+      return true;
+    }
+
+    if (status.isDenied) {
+      print('⚠️ Permission denied, requesting...');
+      status = await Permission.microphone.request();
+      print('🎤 After request: $status');
+      if (status.isGranted) {
+        setState(() {
+          _micPermissionGranted = true;
+        });
+        return true;
+      }
+    }
+
+    if (status.isPermanentlyDenied) {
+      print('🚫 Permission permanently denied');
+      if (mounted) {
+        _showPermissionDialog();
+      }
+      return false;
+    }
+
+    if (status.isRestricted) {
+      print('🔒 Permission restricted (parental controls?)');
+      return false;
+    }
+
+    print('❓ Unknown permission state: $status');
+    return false;
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Microphone Permission Required'),
+        content: const Text(
+          'This app needs microphone access to help you practice words. '
+          'Please enable microphone permission in your device settings.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              openAppSettings();
+            },
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _loadUserAndWords() async {
@@ -176,22 +233,45 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   void _startListening() async {
+    // iOS: Use speech_to_text's built-in permission handling
+    if (Platform.isIOS) {
+      if (!_speechEnabled) {
+        print('⚠️ Speech recognition not enabled, trying to initialize...');
+        _speechEnabled = await _speechToText.initialize();
+        if (!_speechEnabled) {
+          _showPermissionDialog();
+          return;
+        }
+      }
+    } else {
+      // Android: Check permission_handler first
+      final hasPermission = await _requestMicrophonePermission();
+      if (!hasPermission) {
+        return;
+      }
+    }
+
     // start speech to text
     await _speechToText.listen(
       onResult: _onSpeechResult,
-      localeId: 'en_US', // Specify the locale
-      listenFor: kMax, // How long to listen
-      pauseFor: const Duration(seconds: 2), // How long to wait for pause
+      localeId: 'en_US',
+      listenFor: kMax,
+      pauseFor: const Duration(seconds: 2),
     );
 
     // start recording
-    final config = RecordConfig(
-      encoder: AudioEncoder.aacLc, // -> .m4a
-      sampleRate: 44100,
-      bitRate: 128000,
-    );
-    recordingPath = await _nextPath();
-    await _recorder.start(config, path: recordingPath);
+    try {
+      final config = RecordConfig(
+        encoder: AudioEncoder.aacLc,
+        sampleRate: 44100,
+        bitRate: 128000,
+      );
+      recordingPath = await _nextPath();
+      await _recorder.start(config, path: recordingPath);
+    } catch (e) {
+      print('❌ Recording error: $e');
+      // Continue anyway since speech-to-text is what matters
+    }
 
     setState(() {
       _isListening = true;
@@ -225,12 +305,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   bool _isCorrect(String recognizedWord) {
-    // if speech to text already matched, no need for further checking
     if (recognizedWord.toLowerCase() == currentWord.toLowerCase()) {
       return true;
     }
-
-    // if not, check for homophones
     return Homophones().isHomophone(recognizedWord, currentWord);
   }
 
@@ -253,7 +330,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       bool correct = _isCorrect(result.recognizedWords);
 
       userId ??= -1;
-      // add attempt to database
       widget.db.insertAttempt(
         Attempt(
           uid: userId!,
@@ -291,6 +367,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   @override
   void dispose() {
     _speechToText.stop();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -307,7 +384,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       );
     }
 
-    // Error state
     if (_hasError) {
       return Center(
         child: Padding(
@@ -334,7 +410,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       );
     }
 
-    // Empty state - no words to practice
     if (wordsToPractice == null || wordsToPractice!.isEmpty) {
       return Center(
         child: Column(
@@ -400,7 +475,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
             },
             child: Container(
               width: 250,
-              // 250 is also the width of the record button
               decoration: BoxDecoration(
                 color: Colors.orange[100],
                 shape: BoxShape.rectangle,
