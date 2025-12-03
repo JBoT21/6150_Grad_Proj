@@ -182,9 +182,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           onPressed: () => _logout(context),
         ),
         title: Text('Welcome to Class-$classCode'),
-        actions: [
-          IconButton(icon: const Icon(Icons.download), onPressed: _exportCSV),
-        ],
       ),
       body: SingleChildScrollView(
         child: Center(
@@ -305,6 +302,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   );
                 },
                 child: const Text("Class Overall Missed Words"),
+              ),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.download),
+                label: Text("Download CSV"),
+                onPressed: _exportCSV,
               ),
               SizedBox(height: 20),
 
