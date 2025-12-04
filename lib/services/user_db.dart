@@ -52,6 +52,14 @@ class DatabaseHelper {
 
   // User service
 
+  Future<List<Map<String, Object?>>> resetPassword(int uid) async {
+    final db = await instance.database;
+    return await db.rawQuery("UPDATE users SET password = ? WHERE id = ?", [
+      'ssssssss',
+      uid,
+    ]);
+  }
+
   Future<int> insertUser(AppUser user) async {
     final db = await instance.database;
     return await db.insert(
