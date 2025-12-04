@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
@@ -63,43 +65,53 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   @override
   void initState() {
     super.initState();
-    requestMicrophonePermission();
     _loadUserAndWords();
     _initSpeech();
   }
 
-  Future<void> requestMicrophonePermission() async {
-    setState(() {
-      _loading = true;
-      _hasError = false;
-    });
+  Future<bool> _requestMicrophonePermission() async {
+    if (Platform.isIOS) {
+      // iOS: speech_to_text handles its own permissions
+      print('✅ iOS - using speech_to_text permissions');
+      return true;
+    }
+
+    // Android: use permission_handler
     var status = await Permission.microphone.status;
+    print('🎤 Android permission status: $status');
 
-    if (!status.isGranted) {
+    if (status.isGranted) {
+      print('✅ Permission already granted');
+      return true;
+    }
+
+    if (status.isDenied) {
+      print('⚠️ Permission denied, requesting...');
       status = await Permission.microphone.request();
+      print('🎤 After request: $status');
+      if (status.isGranted) {
+        setState(() {
+          //_micPermissionGranted = true;
+        });
+        return true;
+      }
     }
 
-    if (status.isGranted && mounted) {
-      setState(() {
-        _loading = false;
-        _hasError = false;
-      });
-      return;
-    } else if (status.isDenied && mounted) {
-      setState(() {
-        _loading = false;
-        _hasError = true;
-        _errorMessage = "Microphone permissions are needed to proceed.";
-      });
-    } else if (status.isPermanentlyDenied) {
-      // Permission permanently denied, open app settings
-      setState(() {
-        _loading = false;
-        _hasError = true;
-        _errorMessage = "Microphone permissions are needed to proceed.";
-      });
-      openAppSettings();
+    if (status.isPermanentlyDenied) {
+      print('🚫 Permission permanently denied');
+      if (mounted) {
+        //_showPermissionDialog();
+      }
+      return false;
     }
+
+    if (status.isRestricted) {
+      print('🔒 Permission restricted (parental controls?)');
+      return false;
+    }
+
+    print('❓ Unknown permission state: $status');
+    return false;
   }
 
   Future<void> _loadUserAndWords() async {
@@ -176,6 +188,23 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   void _startListening() async {
+    if (Platform.isIOS) {
+      if (!_speechEnabled) {
+        print('⚠️ Speech recognition not enabled, trying to initialize...');
+        _speechEnabled = await _speechToText.initialize();
+        if (!_speechEnabled) {
+          print("speech not enabled");
+          //_showPermissionDialog();
+          return;
+        }
+      }
+    } else {
+      // Android: Check permission_handler first
+      final hasPermission = await _requestMicrophonePermission();
+      if (!hasPermission) {
+        return;
+      }
+    }
     // start speech to text
     await _speechToText.listen(
       onResult: _onSpeechResult,

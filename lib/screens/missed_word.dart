@@ -66,130 +66,223 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           final missedWords = snapshot.data!;
-          if (missedWords.isEmpty) {
-            return Center(
-              child: Text(
-                widget.uid != null
-                    ? "No missed words! ${widget.studentName} is doing a great job!"
-                    : "No missed words for the class! Everyone is doing a great job!",
-                style: const TextStyle(fontSize: 18),
-                textAlign: TextAlign.center,
-              ),
-            );
-          } else {
-            return ListView.builder(
-              itemCount: missedWords.length,
-              itemBuilder: (context, index) {
-                final word = missedWords[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        // User ID
+                        Expanded(
+                          child: Text(
+                            'User ID: ${widget.uid}',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+
+                        // Reset Password Button
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange.shade400,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 10,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          icon: const Icon(Icons.lock_reset, size: 18),
+                          label: const Text(
+                            'Reset Password',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onPressed: () {
+                            DatabaseHelper.instance.resetPassword(widget.uid!);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.check_circle,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        '${widget.studentName}\'s password has been reset to \'ssssssss\'',
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                backgroundColor: Colors.green,
+                                behavior: SnackBarBehavior.floating,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                duration: Duration(seconds: 3),
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(12),
-                        onTap: () async {
-                          final player = AudioPlayer();
-                          final path = word['lastRecording'];
-
-                          if (path == null || path.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  "No recording data available for the word",
-                                ),
-                              ),
-                            );
-                            return;
-                          }
-                          try {
-                            await player.play(DeviceFileSource(path));
-                          } catch (e) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Error Playing Audio: $e"),
-                              ),
-                            );
-                          }
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: widget.uid != null
-                                        ? Row(
-                                            spacing: 20.0,
-                                            children: [
-                                              Icon(
-                                                Icons.play_circle,
-                                                size: 35,
-                                                color: Colors.blueAccent,
-                                              ),
-                                              Text(
-                                                word['wordText'],
-                                                style: const TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black87,
-                                                ),
-                                              ),
-                                            ],
-                                          )
-                                        : Text(
-                                            word['wordText'],
-                                            style: const TextStyle(
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black87,
-                                            ),
-                                          ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.blueAccent,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      "Attempts: ${word['attempts']}",
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
+                  ),
+                ),
+              ),
+              // Missed Words List
+              Expanded(
+                child: missedWords.isEmpty
+                    ? Center(
+                        child: Text(
+                          widget.uid != null
+                              ? "No missed words! ${widget.studentName} is doing a great job!"
+                              : "No missed words for the class! Everyone is doing a great job!",
+                          style: const TextStyle(fontSize: 18),
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: missedWords.length,
+                        itemBuilder: (context, index) {
+                          final word = missedWords[index];
+                          return Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 5,
+                                    offset: const Offset(0, 3),
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(12),
+                                  onTap: () async {
+                                    final player = AudioPlayer();
+                                    final path = word['lastRecording'];
+
+                                    if (path == null || path.isEmpty) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "No recording data available for the word",
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    try {
+                                      await player.play(DeviceFileSource(path));
+                                    } catch (e) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            "Error Playing Audio: $e",
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Expanded(
+                                              child: widget.uid != null
+                                                  ? Row(
+                                                      spacing: 20.0,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.play_circle,
+                                                          size: 35,
+                                                          color:
+                                                              Colors.blueAccent,
+                                                        ),
+                                                        Text(
+                                                          word['wordText'],
+                                                          style:
+                                                              const TextStyle(
+                                                                fontSize: 20,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .bold,
+                                                                color: Colors
+                                                                    .black87,
+                                                              ),
+                                                        ),
+                                                      ],
+                                                    )
+                                                  : Text(
+                                                      word['wordText'],
+                                                      style: const TextStyle(
+                                                        fontSize: 20,
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        color: Colors.black87,
+                                                      ),
+                                                    ),
+                                            ),
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 6,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.blueAccent,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: Text(
+                                                "Attempts: ${word['attempts']}",
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                    ),
-                  ),
-                );
-              },
-            );
-          }
+              ),
+            ],
+          );
         },
       ),
     );

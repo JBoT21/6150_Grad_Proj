@@ -4,7 +4,8 @@ import '../models/user.dart';
 import 'package:uuid/uuid.dart';
 
 class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+  final String? classCode;
+  const SignupScreen({super.key, this.classCode});
 
   @override
   State<SignupScreen> createState() => _SignupScreenState();
@@ -14,7 +15,21 @@ class _SignupScreenState extends State<SignupScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _classCodeController = TextEditingController();
+  TextEditingController? _classCodeController;
+
+  @override
+  void initState() {
+    super.initState();
+    setState(() {
+      if (widget.classCode != null) {
+        _classCodeController = TextEditingController.fromValue(
+          TextEditingValue(text: widget.classCode!),
+        );
+      } else {
+        _classCodeController = TextEditingController();
+      }
+    });
+  }
 
   String _role = 'student';
   String? _error;
@@ -59,7 +74,7 @@ class _SignupScreenState extends State<SignupScreen> {
     if (_role == 'teacher') {
       classCode = generateClassCode();
     } else {
-      classCode = _classCodeController.text.trim();
+      classCode = _classCodeController!.text.trim();
       final exists = await db.classCodeExists(classCode);
 
       if (classCode.isEmpty) {
