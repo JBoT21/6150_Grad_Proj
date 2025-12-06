@@ -207,7 +207,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                                       ).showSnackBar(
                                         SnackBar(
                                           content: Text(
-                                            "Error Playing Audio: $e",
+                                            "Error Playing Audio. It's likely the original audio is saved on another device.",
                                           ),
                                         ),
                                       );
