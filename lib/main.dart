@@ -1,23 +1,40 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/screens/dashboard.dart';
 import 'package:team_3_f25_project/screens/progress_screen.dart';
 import 'package:team_3_f25_project/screens/word_practice_page.dart';
 import 'package:team_3_f25_project/screens/signup.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
-import 'services/attempts_repository.dart';
-import 'models/progress_view_model.dart';
 
-void main() {
-  final attemptsRepo = AttemptsRepository();
-  runApp(
-    ChangeNotifierProvider(
-      create: (_) => ProgressViewModel(attemptsRepo)..load(),
-      child: const ReadRightApp(),
-    ),
-  );
+const supabaseUrl = 'https://gelfwoihoznpghcpfylf.supabase.co';
+const supabaseKey =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlbGZ3b2lob3pucGdoY3BmeWxmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3OTc3MTUsImV4cCI6MjA4MDM3MzcxNX0.y8yPV32YatDe5VBE-u6pzfU0SmL9l2BnlW1NpIlfgVU';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase (you probably already have this)
+  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+
+  final sync = await DatabaseHelper.instance.syncService;
+
+  // Optional: Do initial sync on app start
+  await sync.fullSync(tableName: 'users', primaryKey: 'id');
+  await sync.fullSync(tableName: 'attempts', primaryKey: 'id');
+  await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
+
+  // Optional: Start periodic background sync
+  Timer.periodic(Duration(minutes: 5), (timer) {
+    sync.fullSync(tableName: 'users', primaryKey: 'id');
+    sync.fullSync(tableName: 'attempts', primaryKey: 'id');
+    sync.fullSync(tableName: 'currentListId', primaryKey: 'id');
+  });
+  runApp(ReadRightApp());
 }
 
 class ReadRightApp extends StatefulWidget {

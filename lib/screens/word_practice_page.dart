@@ -19,6 +19,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/data/homophones.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+final db = DatabaseHelper.instance;
+
 class WordPracticeScreen extends StatefulWidget {
   final db = DatabaseHelper.instance;
   WordPracticeScreen({super.key});
@@ -176,9 +178,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     }
   }
 
-  void _finishList() {
-    int nextListId = currentListId! + 1 % 5;
-    prefs!.setInt('currentListId$userId', nextListId);
+  void _finishList() async {
+    // get next highest priority with list service
+    int nextListId = await WordService.getNextListID(currentListId!) ?? 1;
+
+    // update database
+    await db.updateUserListId(userId as String, nextListId);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

@@ -1,12 +1,15 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:team_3_f25_project/models/attempt.dart';
+import 'package:team_3_f25_project/services/sync_service.dart';
 import '../models/user.dart';
 import 'list_service.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
   static Database? _database;
+  static SyncService? _syncService;
 
   DatabaseHelper._init();
 
@@ -14,6 +17,16 @@ class DatabaseHelper {
     if (_database != null) return _database!;
     _database = await _initDB('readright_user.db');
     return _database!;
+  }
+
+  // Add this getter
+  Future<SyncService> get syncService async {
+    if (_syncService != null) return _syncService!;
+
+    final db = await database;
+    _syncService = SyncService(localDb: db, supabase: Supabase.instance.client);
+
+    return _syncService!;
   }
 
   Future<Database> _initDB(String filePath) async {
@@ -31,7 +44,8 @@ class DatabaseHelper {
         email TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
         role TEXT NOT NULL,
-        classCode TEXT NOT NULL
+        classCode TEXT NOT NULL,
+        synced INTEGER DEFAULT 0
       )
     ''');
 
@@ -45,9 +59,19 @@ class DatabaseHelper {
         feedback TEXT NOT NULL,
         createdAt TEXT NOT NULL,
         durationMs INTEGER,
-        recordingPath TEXT
+        recordingPath TEXT,
+        synced INTEGER DEFAULT 0
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE currentList (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT NOT NULL,
+        currentListId INTEGER NOT NULL,
+        synced INTEGER DEFAULT 0
+      )
+''');
   }
 
   // User service
@@ -98,6 +122,24 @@ class DatabaseHelper {
   Future close() async {
     final db = await instance.database;
     db.close();
+  }
+
+  Future<int> addUserListId(String email, int listId) async {
+    final db = await instance.database;
+    return await db.insert('currentList', {
+      "email": email,
+      "currentListId": listId,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<int> updateUserListId(String email, int nextListId) async {
+    final db = await instance.database;
+    return await db.update(
+      'currentList',
+      {'currentListId': nextListId},
+      where: 'email = ?',
+      whereArgs: [email],
+    );
   }
 
   //Clear all rows in user

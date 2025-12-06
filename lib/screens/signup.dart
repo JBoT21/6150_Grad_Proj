@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:team_3_f25_project/services/list_service.dart';
 import '../services/user_db.dart';
 import '../models/user.dart';
 import 'package:uuid/uuid.dart';
@@ -101,6 +102,12 @@ class _SignupScreenState extends State<SignupScreen> {
     if (insertedId <= 0) {
       setState(() => _error = "Failed to create user. Please try again.");
       return;
+    }
+
+    if (_role == "student") {
+      int firstListId = await WordService.getTopPriority();
+      int id = await db.addUserListId(email, firstListId);
+      if (id <= 0) setState(() => _error = "Adding user list ID failed");
     }
 
     if (mounted) Navigator.pop(context);
