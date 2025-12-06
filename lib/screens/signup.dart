@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:team_3_f25_project/services/list_service.dart';
 import '../services/user_db.dart';
 import '../models/user.dart';
 import 'package:uuid/uuid.dart';
@@ -31,7 +32,14 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-  String _role = 'student';
+  String get _role {
+    return widget.classCode == null ? 'teacher' : 'student';
+  }
+
+  set _role(role) {
+    _role = role;
+  }
+
   String? _error;
 
   String generateClassCode() {
@@ -41,7 +49,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   void _signup() async {
     final name = _nameController.text.trim();
-    final email = _emailController.text.trim();
+    final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text.trim();
     final db = DatabaseHelper.instance;
     String classCode;
@@ -101,6 +109,12 @@ class _SignupScreenState extends State<SignupScreen> {
     if (insertedId <= 0) {
       setState(() => _error = "Failed to create user. Please try again.");
       return;
+    }
+
+    if (_role == "student") {
+      int firstListId = await WordService.getTopPriority();
+      int id = await db.addUserListId(email, firstListId);
+      if (id <= 0) setState(() => _error = "Adding user list ID failed");
     }
 
     if (mounted) Navigator.pop(context);
@@ -164,8 +178,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   fillColor: Colors.white,
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'student', child: Text("Student")),
                   DropdownMenuItem(value: 'teacher', child: Text("Teacher")),
+                  DropdownMenuItem(value: 'student', child: Text("Student")),
                 ],
                 onChanged: (value) => setState(() => _role = value!),
               ),

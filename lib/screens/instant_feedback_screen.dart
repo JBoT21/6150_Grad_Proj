@@ -28,7 +28,24 @@ class _TimeOutScreenState extends State<TimeOutScreen> {
     return Scaffold(
       body: Container(
         color: Colors.blue[400],
-        child: Center(child: Icon(Icons.timer, color: Colors.white, size: 250)),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            spacing: 10,
+            children: [
+              Icon(Icons.lock_clock_outlined, color: Colors.white, size: 250),
+              Text(
+                "Timed Out. Try Again.",
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 45.0,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

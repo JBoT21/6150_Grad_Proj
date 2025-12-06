@@ -16,6 +16,7 @@ AppBar customAppBar({dynamic context, String title = ""}) {
   return AppBar(
     title: Text(title, style: TextStyle(color: Colors.white)),
     backgroundColor: Colors.blueAccent,
+
     actions: [
       ElevatedButton.icon(
         onPressed: () {
@@ -24,7 +25,7 @@ AppBar customAppBar({dynamic context, String title = ""}) {
         icon: const Icon(Icons.logout),
         label: const Text('Logout'),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.deepOrange,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         ),
       ),

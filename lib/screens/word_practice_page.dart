@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:team_3_f25_project/models/user.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
@@ -19,6 +20,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/data/homophones.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+final db = DatabaseHelper.instance;
+
 class WordPracticeScreen extends StatefulWidget {
   final db = DatabaseHelper.instance;
   WordPracticeScreen({super.key});
@@ -30,6 +33,7 @@ class WordPracticeScreen extends StatefulWidget {
 class _WordPracticeScreenState extends State<WordPracticeScreen> {
   // variables to keep track of progress
   SharedPreferences? prefs;
+  AppUser? user;
   int? userId;
   int? currentListId;
   List<WordList>? completeWordList;
@@ -123,6 +127,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       // gets shared preferences to load user data and see user progress
       prefs = await SharedPreferences.getInstance();
       userId = prefs!.getInt('userId');
+      user = await db.getUser(userId!);
 
       // get list of words to practice
       currentListId = prefs!.getInt('currentListId$userId');
@@ -176,9 +181,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     }
   }
 
-  void _finishList() {
-    int nextListId = currentListId! + 1 % 5;
-    prefs!.setInt('currentListId$userId', nextListId);
+  void _finishList() async {
+    // get next highest priority with list service
+    int nextListId = await WordService.getNextListID(currentListId!) ?? 1;
+
+    // update database
+    await db.updateUserListId(userId as String, nextListId);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

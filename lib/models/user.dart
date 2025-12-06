@@ -18,7 +18,7 @@ class AppUser {
   Map<String, dynamic> toMap() => {
     'id': id,
     'name': name,
-    'email': email,
+    'email': email.toLowerCase(),
     'password': password,
     'role': role,
     'classCode': classCode,
