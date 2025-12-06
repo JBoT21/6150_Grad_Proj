@@ -29,10 +29,10 @@ void main() async {
   await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
 
   // Optional: Start periodic background sync
-  Timer.periodic(Duration(minutes: 5), (timer) {
+  Timer.periodic(Duration(minutes: 1), (timer) {
     sync.fullSync(tableName: 'users', primaryKey: 'id');
     sync.fullSync(tableName: 'attempts', primaryKey: 'id');
-    sync.fullSync(tableName: 'currentListId', primaryKey: 'id');
+    sync.fullSync(tableName: 'currentList', primaryKey: 'id');
   });
   runApp(ReadRightApp());
 }

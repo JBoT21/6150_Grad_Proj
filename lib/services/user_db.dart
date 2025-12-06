@@ -97,8 +97,8 @@ class DatabaseHelper {
     final db = await instance.database;
     final result = await db.query(
       'users',
-      where: 'email = ?',
-      whereArgs: [email],
+      where: 'LOWER(email) = ?',
+      whereArgs: [email.toLowerCase()],
     );
     if (result.isNotEmpty) {
       return AppUser.fromMap(result.first);
@@ -106,12 +106,23 @@ class DatabaseHelper {
     return null;
   }
 
+  Future<int> updatePassword(String email, String newPassword) async {
+    final db = await instance.database;
+    final result = await db.update(
+      'users',
+      {'password': newPassword},
+      where: 'email = ?',
+      whereArgs: [email],
+    );
+    return result;
+  }
+
   Future<AppUser?> login(String email, String password) async {
     final db = await instance.database;
     final result = await db.query(
       'users',
       where: 'email = ? AND password = ?',
-      whereArgs: [email, password],
+      whereArgs: [email.toLowerCase(), password],
     );
     if (result.isNotEmpty) {
       return AppUser.fromMap(result.first);

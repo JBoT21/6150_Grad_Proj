@@ -32,7 +32,14 @@ class _SignupScreenState extends State<SignupScreen> {
     });
   }
 
-  String _role = 'student';
+  String get _role {
+    return widget.classCode == null ? 'teacher' : 'student';
+  }
+
+  set _role(role) {
+    _role = role;
+  }
+
   String? _error;
 
   String generateClassCode() {
@@ -42,7 +49,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   void _signup() async {
     final name = _nameController.text.trim();
-    final email = _emailController.text.trim();
+    final email = _emailController.text.trim().toLowerCase();
     final password = _passwordController.text.trim();
     final db = DatabaseHelper.instance;
     String classCode;
@@ -171,8 +178,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   fillColor: Colors.white,
                 ),
                 items: const [
-                  DropdownMenuItem(value: 'student', child: Text("Student")),
                   DropdownMenuItem(value: 'teacher', child: Text("Teacher")),
+                  DropdownMenuItem(value: 'student', child: Text("Student")),
                 ],
                 onChanged: (value) => setState(() => _role = value!),
               ),
