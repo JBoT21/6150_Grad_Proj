@@ -72,12 +72,12 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
               if (widget.uid != null)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
+
                   child: Card(
                     elevation: 2,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Row(
