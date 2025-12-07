@@ -22,6 +22,7 @@ class WordlistManagementScreen extends StatefulWidget {
 
 class _WordlistManagementState extends State<WordlistManagementScreen> {
   List<Map<String, dynamic>> wordlists = [];
+  bool _deleteMode = false;
 
   // --- Utility Functions (Omitted for brevity, kept same logic) ---
 
@@ -96,6 +97,14 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
             icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () => _logout(context),
           ),
+          IconButton(
+            icon: Icon(_deleteMode ? Icons.cancel : Icons.delete),
+            onPressed: () {
+              setState(() {
+                _deleteMode = !_deleteMode;
+              });
+            },
+          )
         ],
       ),
       body: wordlists.isEmpty
@@ -234,10 +243,47 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
           ),
         ),
         // **Drag Handle**
-        trailing: Icon(
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (_deleteMode)
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: () {
+                 // Show confirmation dialog
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text("Confirm Delete"),
+              content: Text(
+                  "Are you sure you want to delete the word list '${list['category']}'?"),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context), // cancel
+                  child: const Text("Cancel"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      wordlists.removeWhere((l) => l['id'] == list['id']);
+                    });
+                    Navigator.pop(context); // close dialog
+
+                    // Optionally: update CSV / backend here
+                  },
+                  child: const Text("Delete"),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+        Icon(
           Icons.reorder_rounded,
           color: kPrimaryColor.withOpacity(0.7),
           size: 30,
+        ),
+        ],
         ),
         onTap: () {
           Navigator.push(
