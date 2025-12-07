@@ -5,6 +5,8 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/wordlist.dart';
+import 'package:file_picker/file_picker.dart';
+
 
 class WordService {
   static String? _csvPath;
@@ -185,5 +187,55 @@ class WordService {
       if (w.priority > highest) highest = w.priority;
     }
     return highest;
+  }
+
+  // ImportCSV for Adding lists
+  static Future<List<WordWithSentences>?> importCSV() async {
+    try {
+      // Check file type
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+
+      if (result == null || result.files.single.path == null) {
+        return null;
+      }
+
+      // Read from the file
+      final file = File(result.files.single.path!);
+      final raw = await file.readAsString();
+
+      final lines = const LineSplitter().convert(raw);
+      if (lines.isEmpty) return [];
+
+      int startIndex = 0;
+      final header = lines.first.toLowerCase();
+      if (header.contains("word") && header.contains("sentence")) {
+        startIndex = 1;
+      }
+
+      List<WordWithSentences> imported = [];
+
+      // Split the lines up and fit into proper format
+      for (int i = startIndex; i < lines.length; i++) {
+        final row = lines[i].split(",");
+
+        if (row.length < 4) continue;
+
+        imported.add(
+          WordWithSentences(
+            word: row[0].trim(), 
+            sentence1: row[1].trim(), 
+            sentence2: row[2].trim(), 
+            sentence3: row[3].trim(),
+          ),
+        );
+      }
+      return imported;
+    } catch (e) {
+      print("CSV import error: $e");
+      return null;
+    }
   }
 }

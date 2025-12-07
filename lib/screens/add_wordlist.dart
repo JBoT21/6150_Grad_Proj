@@ -62,7 +62,7 @@ class _AddWordlistScreenState extends State<AddWordlistScreen> {
     );
   }
 
-  /*/// IMPORT CSV — now uses your updated WordService
+  /// Import CSV
   Future<void> _importCSV() async {
     final imported = await WordService.importCSV();
 
@@ -81,7 +81,7 @@ class _AddWordlistScreenState extends State<AddWordlistScreen> {
       SnackBar(content: Text("Imported ${imported.length} words.")),
     );
   }
-*/
+
   /// SAVE LIST
   Future<void> _saveList() async {
     if (_titleController.text.trim().isEmpty) {
@@ -107,16 +107,43 @@ class _AddWordlistScreenState extends State<AddWordlistScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Create Word List"),
-        backgroundColor: Colors.blueAccent,
-        automaticallyImplyLeading: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text("Create Word List"),
+      backgroundColor: Colors.blueAccent,
+    ),
+    body: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Import CSV File
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _importCSV,
+                icon: const Icon(Icons.upload_file),
+                label: const Text("Import Wordlist CSV"),
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            // Text box below import option
+            Center(
+              child: Text(
+                "CSV format is word,sentence1,sentence2,sentence3 Or enter the word list manually below",
+                style: TextStyle(
+                  color: Colors.grey.shade700,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // List Entry
             TextField(
               controller: _titleController,
               decoration: const InputDecoration(
@@ -124,8 +151,10 @@ class _AddWordlistScreenState extends State<AddWordlistScreen> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 12),
 
+            const SizedBox(height: 15),
+
+            // Add words
             Row(
               children: [
                 ElevatedButton.icon(
@@ -133,41 +162,45 @@ class _AddWordlistScreenState extends State<AddWordlistScreen> {
                   icon: const Icon(Icons.add),
                   label: const Text("Add Word"),
                 ),
-                /*const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  onPressed: _importCSV,
-                  icon: const Icon(Icons.file_upload),
-                  label: const Text("Import CSV"),
-                ),*/
               ],
             ),
 
             const SizedBox(height: 20),
 
-            Expanded(
-              child: ListView.builder(
-                itemCount: words.length,
-                itemBuilder: (_, i) {
-                  final w = words[i];
-                  return ListTile(
+            // manually added words
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: words.length,
+              itemBuilder: (_, i) {
+                final w = words[i];
+                return Card(
+                  child: ListTile(
                     title: Text(w.word),
                     subtitle: Text(w.sentence1),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () => setState(() => words.removeAt(i)),
                     ),
-                  );
-                },
-              ),
+                  ),
+                );
+              },
             ),
 
-            ElevatedButton(
-              onPressed: _saveList,
-              child: const Text("Save Word List"),
+            const SizedBox(height: 20),
+
+            // Save updated list
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _saveList,
+                child: const Text("Save Word List"),
+              ),
             ),
           ],
         ),
       ),
-    );
+    ),
+  );
   }
 }
