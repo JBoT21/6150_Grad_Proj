@@ -89,9 +89,12 @@ class WordService {
     }
 
     // add new list
+    int highest = await getHighestPriority();
+    int newPriority = highest + 1;
+
     for (var w in wordsWithSentences) {
       csvLines.add(
-        '$nextWordId,$nextListId,$nextListId,$listCategory,${w.word},${w.sentence1},${w.sentence2},${w.sentence3}',
+        '$nextWordId,$nextListId,$newPriority,$listCategory,${w.word},${w.sentence1},${w.sentence2},${w.sentence3}',
       );
       nextWordId++;
     }
@@ -171,5 +174,16 @@ class WordService {
 
     return nextListID;
     // will return null when there is not another list available
+  }
+
+  // Get highest priority
+  static Future<int> getHighestPriority() async {
+    final allWords = await loadWords();
+
+    int highest = 0;
+    for (var w in allWords) {
+      if (w.priority > highest) highest = w.priority;
+    }
+    return highest;
   }
 }

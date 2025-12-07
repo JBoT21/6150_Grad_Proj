@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:team_3_f25_project/screens/progress_screen.dart';
+import 'package:team_3_f25_project/screens/add_wordlist.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
@@ -155,6 +156,15 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
                 ),
               ],
             ),
+          // Adding a new list
+          floatingActionButton: FloatingActionButton(
+            backgroundColor: kPrimaryColor,
+            child: const Icon(Icons.add, color: Colors.white),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const AddWordlistScreen()),).then((_) => _loadWordLists());
+            },
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
