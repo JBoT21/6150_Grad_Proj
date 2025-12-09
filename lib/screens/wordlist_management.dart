@@ -47,10 +47,7 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
       final category = await WordService.getCategory(id);
       final words = await WordService.getWords(id);
       // NOTE: Using a safe check for word priority
-      final priority =
-          words.isNotEmpty
-          ? words.first.priority
-          : 100;
+      final priority = words.isNotEmpty ? words.first.priority : 100;
       lists.add({
         'id': id,
         'category': category,
@@ -79,15 +76,13 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
     _loadWordLists();
   }
 
-  // --- The Refactored Build Method ---
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kLightBackgroundColor,
       appBar: AppBar(
         title: const Text(
-          "My Classroom Word Lists",
+          "Word Lists",
           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
         ),
         backgroundColor: kPrimaryColor,
@@ -104,7 +99,7 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
                 _deleteMode = !_deleteMode;
               });
             },
-          )
+          ),
         ],
       ),
       body: wordlists.isEmpty
@@ -165,15 +160,18 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
                 ),
               ],
             ),
-          // Adding a new list
-          floatingActionButton: FloatingActionButton(
-            backgroundColor: kPrimaryColor,
-            child: const Icon(Icons.add, color: Colors.white),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const AddWordlistScreen()),).then((_) => _loadWordLists());
-            },
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+      // Adding a new list
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: kPrimaryColor,
+        child: const Icon(Icons.add, color: Colors.white),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const AddWordlistScreen()),
+          ).then((_) => _loadWordLists());
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -250,40 +248,43 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
               IconButton(
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () {
-                 // Show confirmation dialog
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text("Confirm Delete"),
-              content: Text(
-                  "Are you sure you want to delete the word list '${list['category']}'?"),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context), // cancel
-                  child: const Text("Cancel"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      wordlists.removeWhere((l) => l['id'] == list['id']);
-                    });
-                    Navigator.pop(context); // close dialog
+                  // Show confirmation dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Confirm Delete"),
+                      content: Text(
+                        "Are you sure you want to delete the word list '${list['category']}'?",
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context), // cancel
+                          child: const Text("Cancel"),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            setState(() {
+                              wordlists.removeWhere(
+                                (l) => l['id'] == list['id'],
+                              );
+                            });
+                            Navigator.pop(context); // close dialog
 
-                    // Optionally: update CSV / backend here
-                  },
-                  child: const Text("Delete"),
-                ),
-              ],
+                            // Optionally: update CSV / backend here
+                          },
+                          child: const Text("Delete"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            Icon(
+              Icons.reorder_rounded,
+              color: kPrimaryColor.withOpacity(0.7),
+              size: 30,
             ),
-          );
-        },
-      ),
-        Icon(
-          Icons.reorder_rounded,
-          color: kPrimaryColor.withOpacity(0.7),
-          size: 30,
-        ),
-        ],
+          ],
         ),
         onTap: () {
           Navigator.push(
