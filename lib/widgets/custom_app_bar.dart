@@ -6,6 +6,8 @@ AppBar customAppBar({dynamic context, String title = ""}) {
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('email');
+    await prefs.remove('userId');
+    await prefs.remove('classCode');
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),

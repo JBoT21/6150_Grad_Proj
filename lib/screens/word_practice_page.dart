@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:team_3_f25_project/models/user.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
@@ -33,7 +32,6 @@ class WordPracticeScreen extends StatefulWidget {
 class _WordPracticeScreenState extends State<WordPracticeScreen> {
   // variables to keep track of progress
   SharedPreferences? prefs;
-  AppUser? user;
   int? userId;
   int? currentListId;
   List<WordList>? completeWordList;
@@ -45,10 +43,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     return wordsToPractice![nextIndex];
   }
 
+  // WordList contains the sentences for the word as well
   WordList get currentWordObject {
     return completeWordList!.firstWhere((word) => word.word == currentWord);
   }
 
+  // Error handling
   bool _loading = true;
   bool _hasError = false;
   String _errorMessage = '';
@@ -73,6 +73,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     _initSpeech();
   }
 
+  // microphone permissions
   Future<bool> _requestMicrophonePermission() async {
     if (Platform.isIOS) {
       return true;
@@ -88,17 +89,13 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     if (status.isDenied) {
       status = await Permission.microphone.request();
       if (status.isGranted) {
-        setState(() {
-          //_micPermissionGranted = true;
-        });
+        setState(() {});
         return true;
       }
     }
 
     if (status.isPermanentlyDenied) {
-      if (mounted) {
-        //_showPermissionDialog();
-      }
+      if (mounted) {}
       return false;
     }
 
@@ -109,6 +106,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     return false;
   }
 
+  // populate variables for tracking progress
   Future<void> _loadUserAndWords() async {
     setState(() {
       _loading = true;
@@ -118,7 +116,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       // gets shared preferences to load user data and see user progress
       prefs = await SharedPreferences.getInstance();
       userId = prefs!.getInt('userId');
-      user = await db.getUser(userId!);
 
       // get list of words to practice
       currentListId = await db.getUserListId(userId!);
@@ -151,6 +148,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     }
   }
 
+  // initialize speech to text functionality
   void _initSpeech() async {
     _speechEnabled = await _speechToText.initialize();
     setState(() {});
@@ -159,27 +157,33 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   void _nextWord(bool correct) {
     setState(() {
       if (correct) {
+        // correct word was already removed from word to practice
         nextIndex = nextIndex % wordsToPractice!.length;
       } else {
+        // incorrect word stays in list
         nextIndex = nextIndex + 1 % wordsToPractice!.length;
       }
     });
   }
 
   void _removeWordFromList() {
+    // removes current word from words to practice
     if (wordsToPractice!.isNotEmpty) {
       wordsToPractice!.remove(currentWord);
     }
   }
 
+  // user finished list
   void _finishList() async {
     // get next highest priority with list service
     int? nextListId = await WordService.getNextListID(currentListId!);
 
-    // update database
+    // update database with new list ID
     if (nextListId != null) {
       await db.updateUserListId(userId!, nextListId);
     }
+
+    // go to celebration screen
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -189,6 +193,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   }
 
   void _startListening() async {
+    // mic permissions
     if (Platform.isIOS) {
       if (!_speechEnabled) {
         _speechEnabled = await _speechToText.initialize();
@@ -203,7 +208,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         return;
       }
     }
-    // start speech to text
+
+    // start speech to text engine
     await _speechToText.listen(
       onResult: _onSpeechResult,
       localeId: 'en_US', // Specify the locale
@@ -225,6 +231,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       _elapsed = Duration.zero;
     });
 
+    // keep track of time and push timeout screen if needed
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(milliseconds: 200), (t) {
       final next = _elapsed + const Duration(milliseconds: 200);
@@ -242,6 +249,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     });
   }
 
+  // stop all recording and STT engines
   void _stopListening() async {
     setState(() {
       _timer?.cancel();
@@ -261,24 +269,14 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     return Homophones().isHomophone(recognizedWord, currentWord);
   }
 
-  void _onSpeechResult(
-    SpeechRecognitionResult? result, {
-    bool timedOut = false,
-  }) {
-    if (timedOut) {
-      _stopListening();
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              InstantFeedback(success: false, wordObject: currentWordObject),
-        ),
-      );
-    } else if (result!.finalResult) {
+  // process end of recording
+  void _onSpeechResult(SpeechRecognitionResult? result) {
+    // only process final result, not intermediate ones
+    if (result!.finalResult) {
+      // stop listening and check if correct
       _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
 
-      userId ??= -1;
       // add attempt to database
       widget.db.insertAttempt(
         Attempt(
@@ -293,6 +291,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         ),
       );
 
+      // Feedback page to user
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -301,13 +300,16 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         ),
       ).then((_) {
         if (correct) {
+          // increment correctly pronounced words and remove from user's practice list
           correctlyPronounced++;
           _removeWordFromList();
         }
         if (correctlyPronounced == completeWordList!.length ||
             wordsToPractice!.isEmpty) {
+          // if all words have been correctly pronounced, finish list
           _finishList();
         } else {
+          // move onto next word, whether correct or not
           _nextWord(correct);
         }
       });
@@ -317,16 +319,20 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   @override
   void dispose() {
     _speechToText.stop();
+    _recorder.dispose();
     super.dispose();
   }
 
   Future<String> _nextPath() async {
+    // make path for saving audio (local on device only)
     final dir = await getApplicationDocumentsDirectory();
     final ts = DateTime.now().millisecondsSinceEpoch;
     return '${dir.path}/readright_$currentWord$ts.m4a';
   }
 
+  // widget body
   Widget _buildBody() {
+    // Loading state
     if (_loading) {
       return const Center(
         child: CircularProgressIndicator(color: Colors.blueGrey),
@@ -384,10 +390,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       );
     }
 
+    // Everything okay
     return Center(
       child: Column(
         spacing: 10.0,
         children: [
+          // progress at top of screen
           LinearProgressIndicator(
             value:
                 correctlyPronounced /
@@ -402,6 +410,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
+          // word card and record button
           WordCard(
             wordText: currentWord,
             patternLabel: "Pattern label",
@@ -420,6 +429,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                 : null,
           ),
           const SizedBox(height: 15.0),
+          // Stop practicing button
           InkWell(
             onTap: () {
               Navigator.pop(context);

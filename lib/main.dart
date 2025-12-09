@@ -17,17 +17,18 @@ const supabaseKey =
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase (you probably already have this)
+  // Initialize Supabase
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
+  // Local database
   final sync = await DatabaseHelper.instance.syncService;
 
-  // Optional: Do initial sync on app start
+  // Initial sync on app start
   await sync.fullSync(tableName: 'users', primaryKey: 'id');
   await sync.fullSync(tableName: 'attempts', primaryKey: 'id');
   await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
 
-  // Optional: Start periodic background sync
+  // Periodic background sync
   Timer.periodic(Duration(minutes: 1), (timer) {
     sync.fullSync(tableName: 'users', primaryKey: 'id');
     sync.fullSync(tableName: 'attempts', primaryKey: 'id');
