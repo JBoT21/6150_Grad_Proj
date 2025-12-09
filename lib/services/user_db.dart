@@ -67,7 +67,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE currentList (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT NOT NULL,
+        uid INTEGER NOT NULL,
         currentListId INTEGER NOT NULL,
         synced INTEGER DEFAULT 0
       )
@@ -135,22 +135,41 @@ class DatabaseHelper {
     db.close();
   }
 
-  Future<int> addUserListId(String email, int listId) async {
+  Future<int> addUserListId(int uid, int listId) async {
     final db = await instance.database;
     return await db.insert('currentList', {
-      "email": email,
+      "uid": uid,
       "currentListId": listId,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<int> updateUserListId(String email, int nextListId) async {
+  Future<int> updateUserListId(int uid, int nextListId) async {
+    print("Updating list for $uid to list number $nextListId");
     final db = await instance.database;
-    return await db.update(
-      'currentList',
-      {'currentListId': nextListId},
-      where: 'email = ?',
-      whereArgs: [email],
+
+    final result = await db.rawUpdate(
+      'UPDATE currentList SET currentListId = ? WHERE uid = ?',
+      [nextListId, uid],
     );
+    print("Update complete: $result");
+    return result;
+  }
+
+  Future<int?> getUserListId(int uid) async {
+    print("Getting list id for user $uid");
+    final db = await instance.database;
+    final result = await db.query(
+      'currentList',
+      columns: ['currentListId'],
+      where: 'uid = ?',
+      whereArgs: [uid],
+    );
+    if (result.isNotEmpty) {
+      final listId = result[0]['currentListId'];
+      print("List ID: $listId");
+      return listId as int;
+    }
+    return null;
   }
 
   //Clear all rows in user

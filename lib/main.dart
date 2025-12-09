@@ -59,11 +59,7 @@ class _ReadRightAppState extends State<ReadRightApp> {
       final prefs = await SharedPreferences.getInstance();
       final savedEmail = prefs.getString('email');
       final userId = prefs.getInt('userId');
-      int? currentListId = prefs.getInt('currentListId$userId');
-      if (currentListId == null) {
-        prefs.setInt('currentListId$userId', 1);
-        currentListId = 1;
-      }
+      final currentListId = await db.getUserListId(userId!);
       if (savedEmail != null) {
         final user = await DatabaseHelper.instance.getUserByEmail(savedEmail);
         if (user != null) {

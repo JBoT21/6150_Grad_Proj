@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:team_3_f25_project/screens/progress_screen.dart';
 
 class CelebrationScreen extends StatelessWidget {
-  final int nextListId;
-  const CelebrationScreen({super.key, required this.nextListId});
+  final int? nextListId;
+  const CelebrationScreen({super.key, this.nextListId});
 
   @override
   Widget build(BuildContext context) {
@@ -34,22 +34,22 @@ class CelebrationScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-
-              FilledButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ProgressScreen(listId: nextListId),
-                    ),
-                  );
-                },
-                child: Icon(
-                  Icons.arrow_circle_right,
-                  size: 100,
-                  color: Colors.yellow.shade700,
+              if (nextListId != null)
+                FilledButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProgressScreen(listId: nextListId!),
+                      ),
+                    );
+                  },
+                  child: Icon(
+                    Icons.arrow_circle_right,
+                    size: 100,
+                    color: Colors.yellow.shade700,
+                  ),
                 ),
-              ),
             ],
           ),
         ),

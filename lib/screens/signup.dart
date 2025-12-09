@@ -113,7 +113,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     if (_role == "student") {
       int firstListId = await WordService.getTopPriority();
-      int id = await db.addUserListId(email, firstListId);
+      int id = await db.addUserListId(insertedId, firstListId);
       if (id <= 0) setState(() => _error = "Adding user list ID failed");
     }
 

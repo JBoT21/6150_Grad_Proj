@@ -40,15 +40,11 @@ class _LoginScreenState extends State<LoginScreen> {
       await prefs.setString('classCode', user.classCode);
       if (user.role.toLowerCase() == 'student') {
         // Get wordlist for students
-        int? currentListId = prefs.getInt('currentListId${user.id}');
-        if (currentListId == null) {
-          currentListId = await WordService.getTopPriority();
-          prefs.setInt('currentListId${user.id}', currentListId);
-        }
+        int currentListId = await db.getUserListId(user.id!) as int;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => ProgressScreen(listId: currentListId!),
+            builder: (_) => ProgressScreen(listId: currentListId),
           ),
         );
       } else if (user.role.toLowerCase() == 'teacher') {

@@ -121,7 +121,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       user = await db.getUser(userId!);
 
       // get list of words to practice
-      currentListId = prefs!.getInt('currentListId$userId');
+      currentListId = await db.getUserListId(userId!);
       completeWordList = await WordService.getWords(currentListId!);
 
       // initialize list of only word strings
@@ -174,10 +174,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   void _finishList() async {
     // get next highest priority with list service
-    int nextListId = await WordService.getNextListID(currentListId!) ?? 1;
+    int? nextListId = await WordService.getNextListID(currentListId!);
 
     // update database
-    await db.updateUserListId(userId as String, nextListId);
+    if (nextListId != null) {
+      await db.updateUserListId(userId!, nextListId);
+    }
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(

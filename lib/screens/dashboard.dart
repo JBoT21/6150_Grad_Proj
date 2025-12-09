@@ -63,7 +63,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     List<Student> studentList = [];
     for (int i = 0; i < list.length; i++) {
       AppUser user = list[i];
-      int currentListId = prefs!.getInt('currentListId${user.id}') ?? 1;
+      int currentListId = await db.getUserListId(user.id!) as int;
       String currentList = await WordService.getCategory(currentListId);
       studentList.add(
         Student(

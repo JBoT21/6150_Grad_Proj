@@ -13,9 +13,10 @@ class Homophones {
         homophones[expectedWord]!.contains(actualWord)) {
       return true;
     }
-    print(
-      "$actualWord, $expectedWord, ${homophones[actualWord]} ${homophones[expectedWord]}",
-    );
+
+    print("Heard: $actualWord, Expected: $expectedWord");
+    print("Homophones of heard word: ${homophones[actualWord]}");
+    print("Homophones of expected word: ${homophones[expectedWord]}");
     return false;
   }
 
