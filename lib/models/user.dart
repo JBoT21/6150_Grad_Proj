@@ -37,8 +37,8 @@ class AppUser {
 }
 
 class Student extends AppUser {
-  final currentList;
-  final currentListId;
+  final String currentList;
+  final int currentListId;
 
   Student({
     super.id,

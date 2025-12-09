@@ -33,7 +33,7 @@ class Homophones {
   }
 
   final Map<String, List<String>> homophones = {
-    'a': ['uh', 'ey', 'hey'],
+    'a': ['uh', 'ey', 'hey', 'oh'],
     'absence': ['absents'],
     'absents': ['absence'],
     'accede': ['axseed'],

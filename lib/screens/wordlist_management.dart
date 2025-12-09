@@ -3,6 +3,7 @@ import 'package:team_3_f25_project/screens/progress_screen.dart';
 import 'package:team_3_f25_project/screens/add_wordlist.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
+import 'package:team_3_f25_project/screens/wordlist_screen.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
 
 // --- Color Definitions ---
@@ -290,7 +291,8 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (_) => ProgressScreen(listId: list['id']),
+              // TODO change
+              builder: (_) => WordlistScreen(listId: list['id']),
             ),
           );
         },

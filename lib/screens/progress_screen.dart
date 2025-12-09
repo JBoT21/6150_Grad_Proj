@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/models/user.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
-import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 import '../services/user_db.dart';
 import '../services/list_service.dart';
@@ -31,15 +30,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
   void initState() {
     super.initState();
     _loadProgress();
-  }
-
-  Future<void> _logout(BuildContext context) async {
-    await prefs!.remove('email');
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
-    );
   }
 
   Future<void> _loadProgress() async {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:team_3_f25_project/screens/progress_screen.dart';
 
 class CelebrationScreen extends StatelessWidget {
-  final nextListId;
+  final int nextListId;
   const CelebrationScreen({super.key, required this.nextListId});
 
   @override

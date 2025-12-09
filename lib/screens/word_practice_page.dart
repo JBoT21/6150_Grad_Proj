@@ -75,24 +75,18 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   Future<bool> _requestMicrophonePermission() async {
     if (Platform.isIOS) {
-      // iOS: speech_to_text handles its own permissions
-      print('✅ iOS - using speech_to_text permissions');
       return true;
     }
 
     // Android: use permission_handler
     var status = await Permission.microphone.status;
-    print('🎤 Android permission status: $status');
 
     if (status.isGranted) {
-      print('✅ Permission already granted');
       return true;
     }
 
     if (status.isDenied) {
-      print('⚠️ Permission denied, requesting...');
       status = await Permission.microphone.request();
-      print('🎤 After request: $status');
       if (status.isGranted) {
         setState(() {
           //_micPermissionGranted = true;
@@ -102,7 +96,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     }
 
     if (status.isPermanentlyDenied) {
-      print('🚫 Permission permanently denied');
       if (mounted) {
         //_showPermissionDialog();
       }
@@ -110,11 +103,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     }
 
     if (status.isRestricted) {
-      print('🔒 Permission restricted (parental controls?)');
       return false;
     }
 
-    print('❓ Unknown permission state: $status');
     return false;
   }
 
@@ -198,11 +189,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   void _startListening() async {
     if (Platform.isIOS) {
       if (!_speechEnabled) {
-        print('⚠️ Speech recognition not enabled, trying to initialize...');
         _speechEnabled = await _speechToText.initialize();
         if (!_speechEnabled) {
-          print("speech not enabled");
-          //_showPermissionDialog();
           return;
         }
       }
@@ -276,7 +264,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     bool timedOut = false,
   }) {
     if (timedOut) {
-      print("Timed out");
       _stopListening();
       Navigator.push(
         context,

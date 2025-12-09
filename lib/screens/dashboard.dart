@@ -320,7 +320,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (_) => MissedWordsScreen(
-                              uid: null,
+                              email: null,
                               classCode: classCode,
                             ),
                           ),
@@ -359,7 +359,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             _loadStudents(classCode);
                           });
                         });
-                        // TODO: Implement add student functionality
                       },
                     ),
                   ),
@@ -587,7 +586,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (_) => MissedWordsScreen(
-                                uid: student.id!,
+                                email: student.email,
                                 studentName: student.name,
                                 classCode: classCode,
                               ),

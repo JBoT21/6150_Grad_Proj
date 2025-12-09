@@ -76,11 +76,11 @@ class DatabaseHelper {
 
   // User service
 
-  Future<List<Map<String, Object?>>> resetPassword(int uid) async {
+  Future<List<Map<String, Object?>>> resetPassword(String email) async {
     final db = await instance.database;
-    return await db.rawQuery("UPDATE users SET password = ? WHERE id = ?", [
+    return await db.rawQuery("UPDATE users SET password = ? WHERE email = ?", [
       'ssssssss',
-      uid,
+      email,
     ]);
   }
 
@@ -205,7 +205,14 @@ class DatabaseHelper {
   }
 
   // missed words by student
-  Future<List<Map<String, dynamic>>> getMissedWordsByStudent(int uid) async {
+  Future<List<Map<String, dynamic>>> getMissedWordsByStudent(
+    String email,
+  ) async {
+    final AppUser? user = await getUserByEmail(email);
+    if (user == null) {
+      return [];
+    }
+
     final db = await database;
     final result = await db.rawQuery(
       '''
@@ -218,7 +225,7 @@ class DatabaseHelper {
     GROUP BY wordText
     ORDER BY attempts DESC
   ''',
-      [uid],
+      [user.id],
     );
 
     return result;

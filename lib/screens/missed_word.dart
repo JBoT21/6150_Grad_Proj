@@ -5,13 +5,13 @@ import 'package:team_3_f25_project/screens/login.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 class MissedWordsScreen extends StatefulWidget {
-  final int? uid;
+  final String? email;
   final String classCode;
   final String? studentName;
 
   const MissedWordsScreen({
     super.key,
-    this.uid,
+    this.email,
     required this.classCode,
     this.studentName,
   });
@@ -38,15 +38,15 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final future = widget.uid != null
-        ? DatabaseHelper.instance.getMissedWordsByStudent(widget.uid!)
+    final future = widget.email != null
+        ? DatabaseHelper.instance.getMissedWordsByStudent(widget.email!)
         : DatabaseHelper.instance.getClassMissedWords(widget.classCode);
 
     return Scaffold(
       backgroundColor: Colors.blue[50],
       appBar: AppBar(
         title: Text(
-          widget.uid != null
+          widget.email != null
               ? "${widget.studentName} Missed Words"
               : "Class Missed Words",
         ),
@@ -69,7 +69,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
 
           return Column(
             children: [
-              if (widget.uid != null)
+              if (widget.email != null)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
 
@@ -85,7 +85,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                           // User ID
                           Expanded(
                             child: Text(
-                              'User ID: ${widget.uid}',
+                              'User ID: ${widget.email}',
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -113,7 +113,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                             ),
                             onPressed: () {
                               DatabaseHelper.instance.resetPassword(
-                                widget.uid!,
+                                widget.email!,
                               );
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -151,7 +151,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                 child: missedWords.isEmpty
                     ? Center(
                         child: Text(
-                          widget.uid != null
+                          widget.email != null
                               ? "No missed words! ${widget.studentName} is doing a great job!"
                               : "No missed words for the class! Everyone is doing a great job!",
                           style: const TextStyle(fontSize: 18),
@@ -220,7 +220,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                                         Row(
                                           children: [
                                             Expanded(
-                                              child: widget.uid != null
+                                              child: widget.email != null
                                                   ? Row(
                                                       spacing: 20.0,
                                                       children: [
