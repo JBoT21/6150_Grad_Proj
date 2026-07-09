@@ -24,9 +24,14 @@ void main() async {
   final sync = await DatabaseHelper.instance.syncService;
 
   // Initial sync on app start
-  await sync.fullSync(tableName: 'users', primaryKey: 'id');
-  await sync.fullSync(tableName: 'attempts', primaryKey: 'id');
-  await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
+
+  try {
+    await sync.fullSync(tableName: 'users', primaryKey: 'id');
+    await sync.fullSync(tableName: 'attempts', primaryKey: 'id');
+    await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
+  } catch (e) {
+    debugPrint('Background sync failed: $e');
+  }
 
   // Periodic background sync
   Timer.periodic(Duration(minutes: 1), (timer) {
