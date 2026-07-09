@@ -31,10 +31,20 @@ Future<void> _startBackgroundSync() async {
 
   try {
     await sync.fullSync(tableName: 'users', primaryKey: 'id');
+  } catch (e) {
+    debugPrint('Background sync failed for users: $e');
+  }
+
+  try {
     await sync.fullSync(tableName: 'attempts', primaryKey: 'id');
+  } catch (e) {
+    debugPrint('Background sync failed for attempts: $e');
+  }
+
+  try {
     await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
   } catch (e) {
-    debugPrint('Background sync failed: $e');
+    debugPrint('Background sync failed for currentList: $e');
   }
 
   Timer.periodic(const Duration(minutes: 1), (timer) {
