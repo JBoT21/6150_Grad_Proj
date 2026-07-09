@@ -20,21 +20,28 @@ void main() async {
   // Initialize Supabase
   await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
 
-  // Local database
+  runApp(const ReadRightApp());
+
+  // Start sync after UI is visible so app launch does not block.
+  _startBackgroundSync();
+}
+
+Future<void> _startBackgroundSync() async {
   final sync = await DatabaseHelper.instance.syncService;
 
-  // Initial sync on app start
-  await sync.fullSync(tableName: 'users', primaryKey: 'id');
-  await sync.fullSync(tableName: 'attempts', primaryKey: 'id');
-  await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
+  try {
+    await sync.fullSync(tableName: 'users', primaryKey: 'id');
+    await sync.fullSync(tableName: 'attempts', primaryKey: 'id');
+    await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
+  } catch (e) {
+    debugPrint('Background sync failed: $e');
+  }
 
-  // Periodic background sync
-  Timer.periodic(Duration(minutes: 1), (timer) {
+  Timer.periodic(const Duration(minutes: 1), (timer) {
     sync.fullSync(tableName: 'users', primaryKey: 'id');
     sync.fullSync(tableName: 'attempts', primaryKey: 'id');
     sync.fullSync(tableName: 'currentList', primaryKey: 'id');
   });
-  runApp(ReadRightApp());
 }
 
 class ReadRightApp extends StatefulWidget {
