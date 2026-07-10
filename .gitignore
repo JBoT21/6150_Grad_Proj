@@ -47,3 +47,7 @@ app.*.map.json
 /android/app/release
 
 .vscode/
+
+# Backend Proxy
+/backend_proxy/node_modules/
+/backend_proxy/.env
