@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:team_3_f25_project/firebase_options.dart';
 import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/screens/dashboard.dart';
 import 'package:team_3_f25_project/screens/progress_screen.dart';
@@ -10,36 +12,45 @@ import 'package:team_3_f25_project/screens/word_practice_page.dart';
 import 'package:team_3_f25_project/screens/signup.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 
-const supabaseUrl = 'https://gelfwoihoznpghcpfylf.supabase.co';
-const supabaseKey =
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlbGZ3b2lob3pucGdoY3BmeWxmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3OTc3MTUsImV4cCI6MjA4MDM3MzcxNX0.y8yPV32YatDe5VBE-u6pzfU0SmL9l2BnlW1NpIlfgVU';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase
-  await Supabase.initialize(url: supabaseUrl, anonKey: supabaseKey);
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
-  // Local database
+  runApp(const ReadRightApp());
+
+  // Start sync after UI is visible so app launch does not block.
+  _startBackgroundSync();
+}
+
+Future<void> _startBackgroundSync() async {
   final sync = await DatabaseHelper.instance.syncService;
-
-  // Initial sync on app start
 
   try {
     await sync.fullSync(tableName: 'users', primaryKey: 'id');
-    await sync.fullSync(tableName: 'attempts', primaryKey: 'id');
-    await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
   } catch (e) {
-    debugPrint('Background sync failed: $e');
+    debugPrint('Background sync failed for users: $e');
   }
 
-  // Periodic background sync
-  Timer.periodic(Duration(minutes: 1), (timer) {
+  try {
+    await sync.fullSync(tableName: 'attempts', primaryKey: 'id');
+  } catch (e) {
+    debugPrint('Background sync failed for attempts: $e');
+  }
+
+  try {
+    await sync.fullSync(tableName: 'currentList', primaryKey: 'id');
+  } catch (e) {
+    debugPrint('Background sync failed for currentList: $e');
+  }
+
+  Timer.periodic(const Duration(minutes: 1), (timer) {
     sync.fullSync(tableName: 'users', primaryKey: 'id');
     sync.fullSync(tableName: 'attempts', primaryKey: 'id');
     sync.fullSync(tableName: 'currentList', primaryKey: 'id');
   });
-  runApp(ReadRightApp());
 }
 
 class ReadRightApp extends StatefulWidget {
@@ -63,16 +74,38 @@ class _ReadRightAppState extends State<ReadRightApp> {
   Future<void> _loadSession() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      final currentUser = FirebaseAuth.instance.currentUser;
       final savedEmail = prefs.getString('email');
       final userId = prefs.getInt('userId');
-      final currentListId = await db.getUserListId(userId!);
+
+      if (currentUser != null) {
+        final email = currentUser.email ?? savedEmail;
+        if (email != null) {
+          final user = await DatabaseHelper.instance.getUserByEmail(email);
+          if (user != null) {
+            final currentListId = userId != null
+                ? await db.getUserListId(userId)
+                : null;
+            setState(
+              () => _home = user.role == 'teacher'
+                  ? const DashboardScreen()
+                  : ProgressScreen(listId: currentListId ?? 1),
+            );
+            return;
+          }
+        }
+      }
+
       if (savedEmail != null) {
         final user = await DatabaseHelper.instance.getUserByEmail(savedEmail);
         if (user != null) {
+          final currentListId = userId != null
+              ? await db.getUserListId(userId)
+              : null;
           setState(
             () => _home = user.role == 'teacher'
                 ? const DashboardScreen()
-                : ProgressScreen(listId: currentListId!),
+                : ProgressScreen(listId: currentListId ?? 1),
           );
           return;
         }
