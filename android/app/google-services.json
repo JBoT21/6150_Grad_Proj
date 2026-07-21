@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "299518212363",
+    "project_id": "summer-2026-6150-readright",
+    "storage_bucket": "summer-2026-6150-readright.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:299518212363:android:f933cbc32b8a8dc2928a0e",
+        "android_client_info": {
+          "package_name": "com.summer2026.readright"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDSsEOxncZP-9zwYWtNUq3mQ3pM2HuVSrA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

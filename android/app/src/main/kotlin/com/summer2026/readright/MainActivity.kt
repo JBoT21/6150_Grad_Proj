@@ -1,4 +1,4 @@
-package com.example.team_3_f25_project
+package com.summer2026.readright
 
 import io.flutter.embedding.android.FlutterActivity
 

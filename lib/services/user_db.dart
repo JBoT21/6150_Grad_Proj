@@ -1,6 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:team_3_f25_project/models/attempt.dart';
 import 'package:team_3_f25_project/services/sync_service.dart';
 import '../models/user.dart';
@@ -24,7 +25,7 @@ class DatabaseHelper {
     if (_syncService != null) return _syncService!;
 
     final db = await database;
-    _syncService = SyncService(localDb: db, supabase: Supabase.instance.client);
+    _syncService = SyncService(localDb: db);
 
     return _syncService!;
   }
@@ -85,12 +86,41 @@ class DatabaseHelper {
   }
 
   Future<int> insertUser(AppUser user) async {
-    final db = await instance.database;
-    return await db.insert(
-      'users',
-      user.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    try {
+      final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: user.email.toLowerCase(),
+        password: user.password,
+      );
+
+      final uid = credential.user?.uid;
+      if (uid == null) {
+        return -1;
+      }
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'name': user.name,
+        'email': user.email.toLowerCase(),
+        'role': user.role,
+        'classCode': user.classCode,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+
+      final db = await instance.database;
+      final localId = await db.insert(
+        'users',
+        user.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'localId': localId,
+      });
+
+      return localId;
+    } catch (e) {
+      print('Failed to create Firebase user: $e');
+      return -1;
+    }
   }
 
   Future<AppUser?> getUserByEmail(String email) async {
@@ -103,6 +133,29 @@ class DatabaseHelper {
     if (result.isNotEmpty) {
       return AppUser.fromMap(result.first);
     }
+
+    try {
+      final query = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: email.toLowerCase())
+          .limit(1)
+          .get();
+
+      if (query.docs.isNotEmpty) {
+        final data = query.docs.first.data();
+        return AppUser(
+          id: data['localId'] as int?,
+          name: data['name']?.toString() ?? '',
+          email: data['email']?.toString() ?? email,
+          password: '',
+          role: data['role']?.toString() ?? 'student',
+          classCode: data['classCode']?.toString() ?? '',
+        );
+      }
+    } catch (e) {
+      print('Failed to fetch Firestore user: $e');
+    }
+
     return null;
   }
 
@@ -118,16 +171,80 @@ class DatabaseHelper {
   }
 
   Future<AppUser?> login(String email, String password) async {
-    final db = await instance.database;
-    final result = await db.query(
-      'users',
-      where: 'email = ? AND password = ?',
-      whereArgs: [email.toLowerCase(), password],
-    );
-    if (result.isNotEmpty) {
-      return AppUser.fromMap(result.first);
+    try {
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email.toLowerCase(),
+        password: password,
+      );
+
+      final uid = credential.user?.uid;
+      if (uid == null) {
+        return null;
+      }
+
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+
+      final data = snapshot.data();
+      final role = data?['role']?.toString() ?? 'student';
+      final classCode = data?['classCode']?.toString() ?? '';
+      final name = data?['name']?.toString() ?? email.split('@').first;
+
+      final existing = await getUserByEmail(email);
+      final localId = existing?.id ?? await _upsertLocalUser(
+        AppUser(
+          name: name,
+          email: email.toLowerCase(),
+          password: password,
+          role: role,
+          classCode: classCode,
+        ),
+      );
+
+      return AppUser(
+        id: localId,
+        name: name,
+        email: email.toLowerCase(),
+        password: password,
+        role: role,
+        classCode: classCode,
+      );
+    } catch (e) {
+      print('Firebase login failed: $e');
+      return null;
     }
-    return null;
+  }
+
+  Future<int> _upsertLocalUser(AppUser user) async {
+    final db = await instance.database;
+    final existing = await db.query(
+      'users',
+      where: 'LOWER(email) = ?',
+      whereArgs: [user.email.toLowerCase()],
+    );
+
+    if (existing.isNotEmpty) {
+      final id = existing.first['id'] as int;
+      await db.update(
+        'users',
+        user.toMap(),
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      return id;
+    }
+
+    return await db.insert(
+      'users',
+      user.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> signOut() async {
+    await FirebaseAuth.instance.signOut();
   }
 
   Future close() async {
