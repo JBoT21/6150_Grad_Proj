@@ -4,12 +4,91 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 
+Map<String, dynamic> _normalizeForSqlite(Map<String, dynamic> data) {
+  final normalized = <String, dynamic>{};
+
+  for (final entry in data.entries) {
+    final value = entry.value;
+
+    if (value is Timestamp) {
+      normalized[entry.key] = value.toDate().toIso8601String();
+    } else if (value is DateTime) {
+      normalized[entry.key] = value.toIso8601String();
+    } else if (value is Map) {
+      normalized[entry.key] = _normalizeForSqlite(
+        Map<String, dynamic>.from(value),
+      );
+    } else if (value is List) {
+      normalized[entry.key] = value.map((item) {
+        if (item is Timestamp) {
+          return item.toDate().toIso8601String();
+        }
+        if (item is DateTime) {
+          return item.toIso8601String();
+        }
+        if (item is Map) {
+          return _normalizeForSqlite(Map<String, dynamic>.from(item));
+        }
+        return item;
+      }).toList();
+    } else {
+      normalized[entry.key] = value;
+    }
+  }
+
+  return normalized;
+}
+
 class SyncService {
   final Database localDb;
   final FirebaseFirestore firestore;
 
   SyncService({required this.localDb, FirebaseFirestore? firestore})
     : firestore = firestore ?? FirebaseFirestore.instance;
+
+  Map<String, dynamic> _sanitizeForTable({
+    required String tableName,
+    required Map<String, dynamic> data,
+  }) {
+    final normalized = _normalizeForSqlite(data);
+    final allowedColumns = <String>{};
+
+    if (tableName == 'users') {
+      allowedColumns.addAll({
+        'id',
+        'name',
+        'email',
+        'password',
+        'role',
+        'classCode',
+        'synced',
+      });
+    } else if (tableName == 'attempts') {
+      allowedColumns.addAll({
+        'id',
+        'uid',
+        'wordText',
+        'listId',
+        'score',
+        'feedback',
+        'createdAt',
+        'durationMs',
+        'recordingPath',
+        'synced',
+      });
+    } else if (tableName == 'currentList') {
+      allowedColumns.addAll({
+        'id',
+        'uid',
+        'currentListId',
+        'synced',
+      });
+    }
+
+    return Map.fromEntries(
+      normalized.entries.where((entry) => allowedColumns.contains(entry.key)),
+    );
+  }
 
   // Check if online
   Future<bool> isOnline() async {
@@ -70,18 +149,29 @@ class SyncService {
       final snapshot = await firestore.collection(tableName).get();
 
       for (var doc in snapshot.docs) {
-        final id = int.tryParse(doc.id) ?? doc.id;
+        final firestoreId = doc.id;
+        final idValue = int.tryParse(firestoreId);
+        final localId = idValue ?? 0;
 
         // Check if exists locally
         final existing = await localDb.query(
           tableName,
           where: '$primaryKey = ?',
-          whereArgs: [id],
+          whereArgs: [localId],
         );
 
-        final itemToInsert = Map<String, dynamic>.from(doc.data());
-        itemToInsert[primaryKey] = id;
+        final itemToInsert = _sanitizeForTable(
+          tableName: tableName,
+          data: Map<String, dynamic>.from(doc.data()),
+        );
+        if (itemToInsert.containsKey(primaryKey)) {
+          itemToInsert[primaryKey] = localId;
+        }
         itemToInsert['synced'] = 1;
+
+        if (existing.isEmpty && localId == 0) {
+          continue;
+        }
 
         if (existing.isEmpty) {
           // New item from cloud
@@ -91,7 +181,7 @@ class SyncService {
             tableName,
             itemToInsert,
             where: '$primaryKey = ?',
-            whereArgs: [id],
+            whereArgs: [localId],
           );
         }
       }

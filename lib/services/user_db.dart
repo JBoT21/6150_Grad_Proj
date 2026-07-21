@@ -85,10 +85,19 @@ class DatabaseHelper {
     ]);
   }
 
+  String _authEmailFor(String input, {required String role}) {
+    final normalized = input.trim().toLowerCase();
+    if (role == 'teacher' || normalized.contains('@')) {
+      return normalized;
+    }
+    return '$normalized@readright.local';
+  }
+
   Future<int> insertUser(AppUser user) async {
     try {
+      final authEmail = _authEmailFor(user.email, role: user.role);
       final credential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-        email: user.email.toLowerCase(),
+        email: authEmail,
         password: user.password,
       );
 
@@ -112,10 +121,6 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
 
-      await FirebaseFirestore.instance.collection('users').doc(uid).update({
-        'localId': localId,
-      });
-
       return localId;
     } catch (e) {
       print('Failed to create Firebase user: $e');
@@ -124,36 +129,40 @@ class DatabaseHelper {
   }
 
   Future<AppUser?> getUserByEmail(String email) async {
+    final normalizedEmail = email.toLowerCase();
     final db = await instance.database;
     final result = await db.query(
       'users',
       where: 'LOWER(email) = ?',
-      whereArgs: [email.toLowerCase()],
+      whereArgs: [normalizedEmail],
     );
-    if (result.isNotEmpty) {
-      return AppUser.fromMap(result.first);
-    }
 
     try {
       final query = await FirebaseFirestore.instance
           .collection('users')
-          .where('email', isEqualTo: email.toLowerCase())
+          .where('email', isEqualTo: normalizedEmail)
           .limit(1)
           .get();
 
       if (query.docs.isNotEmpty) {
         final data = query.docs.first.data();
-        return AppUser(
-          id: data['localId'] as int?,
+        final firestoreUser = AppUser(
+          id: result.isNotEmpty ? result.first['id'] as int? : null,
           name: data['name']?.toString() ?? '',
-          email: data['email']?.toString() ?? email,
+          email: data['email']?.toString() ?? normalizedEmail,
           password: '',
           role: data['role']?.toString() ?? 'student',
           classCode: data['classCode']?.toString() ?? '',
         );
+
+        return firestoreUser;
       }
     } catch (e) {
       print('Failed to fetch Firestore user: $e');
+    }
+
+    if (result.isNotEmpty) {
+      return AppUser.fromMap(result.first);
     }
 
     return null;
@@ -172,8 +181,9 @@ class DatabaseHelper {
 
   Future<AppUser?> login(String email, String password) async {
     try {
+      final authEmail = _authEmailFor(email, role: 'student');
       final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email.toLowerCase(),
+        email: authEmail,
         password: password,
       );
 

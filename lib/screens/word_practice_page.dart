@@ -60,6 +60,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   String recordingPath = "";
   bool _speechEnabled = false;
   bool _isListening = false;
+  String _micStatus = 'Idle';
 
   // timer variables
   Duration _elapsed = Duration.zero;
@@ -150,7 +151,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   // initialize speech to text functionality
   void _initSpeech() async {
+    debugPrint('WordPractice: initializing speech recognition');
     _speechEnabled = await _speechToText.initialize();
+    debugPrint('WordPractice: speech recognition initialized = $_speechEnabled');
     setState(() {});
   }
 
@@ -209,6 +212,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       }
     }
 
+    debugPrint('WordPractice: starting microphone listening for word "$currentWord"');
+
     // start speech to text engine
     await _speechToText.listen(
       onResult: _onSpeechResult,
@@ -228,8 +233,10 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
     setState(() {
       _isListening = true;
+      _micStatus = 'Listening...';
       _elapsed = Duration.zero;
     });
+    debugPrint('WordPractice: listening state is now true');
 
     // keep track of time and push timeout screen if needed
     _timer?.cancel();
@@ -254,9 +261,12 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     setState(() {
       _timer?.cancel();
       _isListening = false;
+      _micStatus = 'Stopped';
     });
+    debugPrint('WordPractice: stopping microphone listening');
     await _speechToText.stop();
     await _recorder.stop();
+    debugPrint('WordPractice: microphone stopped');
   }
 
   bool _isCorrect(String recognizedWord) {
@@ -271,8 +281,18 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   // process end of recording
   void _onSpeechResult(SpeechRecognitionResult? result) {
+    if (result == null) {
+      debugPrint('WordPractice: speech result was null');
+      return;
+    }
+
+    debugPrint('WordPractice: speech result received - final=${result.finalResult}, text="${result.recognizedWords}"');
+    setState(() {
+      _micStatus = result.finalResult ? 'Captured' : 'Listening...';
+    });
+
     // only process final result, not intermediate ones
-    if (result!.finalResult) {
+    if (result.finalResult) {
       // stop listening and check if correct
       _stopListening();
       bool correct = _isCorrect(result.recognizedWords);
@@ -427,6 +447,28 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                     }
                   }
                 : null,
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: _isListening
+                  ? Colors.red.shade100
+                  : (_micStatus == 'Captured'
+                        ? Colors.green.shade100
+                        : Colors.grey.shade200),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              _isListening ? 'Mic: Listening' : (_micStatus == 'Captured' ? 'Mic: Captured' : 'Mic: Idle'),
+              style: TextStyle(
+                color: _isListening
+                    ? Colors.red.shade700
+                    : (_micStatus == 'Captured'
+                          ? Colors.green.shade700
+                          : Colors.grey.shade700),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ),
           const SizedBox(height: 15.0),
           // Stop practicing button

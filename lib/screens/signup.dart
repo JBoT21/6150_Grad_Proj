@@ -4,6 +4,13 @@ import '../services/user_db.dart';
 import '../models/user.dart';
 import 'package:uuid/uuid.dart';
 
+String resolveSignupRole({required String? selectedRole, required String? classCode}) {
+  if (selectedRole != null && selectedRole.isNotEmpty) {
+    return selectedRole;
+  }
+  return classCode == null ? 'teacher' : 'student';
+}
+
 class SignupScreen extends StatefulWidget {
   final String? classCode;
   const SignupScreen({super.key, this.classCode});
@@ -17,27 +24,29 @@ class _SignupScreenState extends State<SignupScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   TextEditingController? _classCodeController;
+  String? _selectedRole;
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      if (widget.classCode != null) {
-        _classCodeController = TextEditingController.fromValue(
-          TextEditingValue(text: widget.classCode!),
-        );
-      } else {
-        _classCodeController = TextEditingController();
-      }
-    });
+    if (widget.classCode != null) {
+      _classCodeController = TextEditingController.fromValue(
+        TextEditingValue(text: widget.classCode!),
+      );
+    } else {
+      _classCodeController = TextEditingController();
+    }
+    _selectedRole = resolveSignupRole(
+      selectedRole: null,
+      classCode: widget.classCode,
+    );
   }
 
   String get _role {
-    return widget.classCode == null ? 'teacher' : 'student';
-  }
-
-  set _role(role) {
-    _role = role;
+    return _selectedRole ?? resolveSignupRole(
+      selectedRole: null,
+      classCode: widget.classCode,
+    );
   }
 
   String? _error;
@@ -181,7 +190,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   DropdownMenuItem(value: 'teacher', child: Text("Teacher")),
                   DropdownMenuItem(value: 'student', child: Text("Student")),
                 ],
-                onChanged: (value) => setState(() => _role = value!),
+                onChanged: (value) => setState(() => _selectedRole = value),
               ),
 
               const SizedBox(height: 20),
