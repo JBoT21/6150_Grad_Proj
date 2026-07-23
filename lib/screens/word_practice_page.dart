@@ -152,7 +152,13 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   // initialize speech to text functionality
   void _initSpeech() async {
     debugPrint('WordPractice: initializing speech recognition');
-    _speechEnabled = await _speechToText.initialize();
+    _speechEnabled = await _speechToText.initialize(
+      onError: (error) => debugPrint(
+        'WordPractice: speech recognition error - ${error.errorMsg} (permanent=${error.permanent})',
+      ),
+      onStatus: (status) => debugPrint('WordPractice: speech recognition status - $status'),
+      debugLogging: true,
+    );
     debugPrint('WordPractice: speech recognition initialized = $_speechEnabled');
     setState(() {});
   }
@@ -215,12 +221,19 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     debugPrint('WordPractice: starting microphone listening for word "$currentWord"');
 
     // start speech to text engine
-    await _speechToText.listen(
-      onResult: _onSpeechResult,
-      localeId: 'en_US', // Specify the locale
-      listenFor: kMax, // How long to listen
-      pauseFor: const Duration(seconds: 2), // How long to wait for pause
-    );
+    try {
+      await _speechToText.listen(
+        onResult: _onSpeechResult,
+        onSoundLevelChange: (level) => debugPrint('WordPractice: sound level = $level'),
+        localeId: 'en_US',
+        listenFor: kMax,
+        pauseFor: const Duration(seconds: 2),
+      );
+      debugPrint('WordPractice: listen() call completed without throwing');
+    } catch (e, st) {
+      debugPrint('WordPractice: listen() threw: $e');
+      debugPrint(st.toString());
+    }
 
     // start recording
     final config = RecordConfig(
@@ -236,7 +249,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       _micStatus = 'Listening...';
       _elapsed = Duration.zero;
     });
-    debugPrint('WordPractice: listening state is now true');
+    debugPrint('WordPractice: listening state is now true at ${DateTime.now()}');
 
     // keep track of time and push timeout screen if needed
     _timer?.cancel();
@@ -263,7 +276,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       _isListening = false;
       _micStatus = 'Stopped';
     });
-    debugPrint('WordPractice: stopping microphone listening');
+    debugPrint('WordPractice: stopping microphone listening at ${DateTime.now()}');
     await _speechToText.stop();
     await _recorder.stop();
     debugPrint('WordPractice: microphone stopped');
