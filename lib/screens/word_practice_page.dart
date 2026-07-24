@@ -62,6 +62,10 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   bool _isListening = false;
   String _micStatus = 'Idle';
 
+  // timeout banner
+  bool _timeoutBannerVisible = false;
+  Timer? _bannerTimer;
+
   // timer variables
   Duration _elapsed = Duration.zero;
   Timer? _timer;
@@ -157,7 +161,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         'WordPractice: speech recognition error - ${error.errorMsg} (permanent=${error.permanent})',
       ),
       onStatus: (status) => debugPrint('WordPractice: speech recognition status - $status'),
-      debugLogging: true,
+      debugLogging: false,
     );
     debugPrint('WordPractice: speech recognition initialized = $_speechEnabled');
     setState(() {});
@@ -218,6 +222,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       }
     }
 
+    if (!mounted) return;
+    _hideTimeoutBanner();
     debugPrint('WordPractice: starting microphone listening for word "$currentWord"');
 
     // start speech to text engine
@@ -257,16 +263,33 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       final next = _elapsed + const Duration(milliseconds: 200);
       if (next > kMax && _isListening) {
         _stopListening();
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => TimeOutScreen()),
-        );
+        _showTimeoutBanner();
       } else {
         setState(() {
           _elapsed = next;
         });
       }
     });
+  }
+
+  // shows an inline banner instead of routing to a separate timeout screen,
+  // so the user stays put and can immediately tap the mic to try again
+  void _showTimeoutBanner() {
+    if (!mounted) return;
+    _bannerTimer?.cancel();
+    setState(() {
+      _timeoutBannerVisible = true;
+    });
+    _bannerTimer = Timer(const Duration(milliseconds: 2000), _hideTimeoutBanner);
+  }
+
+  void _hideTimeoutBanner() {
+    _bannerTimer?.cancel();
+    if (mounted && _timeoutBannerVisible) {
+      setState(() {
+        _timeoutBannerVisible = false;
+      });
+    }
   }
 
   // stop all recording and STT engines
@@ -351,6 +374,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   @override
   void dispose() {
+    _bannerTimer?.cancel();
     _speechToText.stop();
     _recorder.dispose();
     super.dispose();
@@ -513,12 +537,88 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     );
   }
 
+  // slides down from the top on timeout; swipe up or wait it out to dismiss
+  Widget _buildTimeoutBanner() {
+    return IgnorePointer(
+      ignoring: !_timeoutBannerVisible,
+      child: AnimatedSlide(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        offset: _timeoutBannerVisible ? Offset.zero : const Offset(0, -1.2),
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 220),
+          opacity: _timeoutBannerVisible ? 1 : 0,
+          child: SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: GestureDetector(
+                onVerticalDragEnd: (details) {
+                  if ((details.primaryVelocity ?? 0) < 0) {
+                    _hideTimeoutBanner();
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: .15),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.mic_off, color: Colors.orange.shade800),
+                      const SizedBox(width: 12),
+                      Flexible(
+                        child: Text(
+                          'Please speak louder and try again!',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Colors.orange.shade900,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blue[50],
       appBar: customAppBar(context: context),
-      body: _buildBody(),
+      body: Stack(
+        children: [
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: _buildBody(),
+                ),
+              );
+            },
+          ),
+          _buildTimeoutBanner(),
+        ],
+      ),
     );
   }
 }

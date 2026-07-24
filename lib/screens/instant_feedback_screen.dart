@@ -7,50 +7,6 @@ import 'dart:async';
 
 import 'package:team_3_f25_project/services/text_to_speech.dart';
 
-class TimeOutScreen extends StatefulWidget {
-  const TimeOutScreen({super.key});
-
-  @override
-  State<TimeOutScreen> createState() => _TimeOutScreenState();
-}
-
-class _TimeOutScreenState extends State<TimeOutScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Timer(Duration(seconds: 2), () {
-      Navigator.pop(context);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: Colors.blue[400],
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            spacing: 10,
-            children: [
-              Icon(Icons.lock_clock_outlined, color: Colors.white, size: 250),
-              Text(
-                "Timed Out. Try Again.",
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 45.0,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class InstantFeedback extends StatefulWidget {
   bool success;
   WordList wordObject;
