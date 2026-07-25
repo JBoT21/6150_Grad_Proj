@@ -19,11 +19,17 @@ const openai = hasApiKey ? new OpenAI() : null;
 
 app.post('/api/story', async (req, res) => {
   try {
-    const { words } = req.body;
+const { words, prompt } = req.body;
 
-    if (!words || !Array.isArray(words) || words.length === 0) {
-      return res.status(400).json({ error: 'Please provide an array of vocabulary words in the "words" field.' });
-    }
+// Either a prompt, or a list of words
+if (
+  (!prompt || prompt.trim() === "") &&
+  (!Array.isArray(words) || words.length === 0)
+) {
+  return res.status(400).json({
+    error: 'Provide either a "prompt" string or a "words" array.'
+  });
+}
 
     let story;
 
