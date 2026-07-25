@@ -43,7 +43,7 @@ class TextToSpeech {
 
   Future<void> speak(String text) async {
     await flutterTts.setVolume(0.5);
-    await flutterTts.setSpeechRate(0.3);
+    await flutterTts.setSpeechRate(0.45);
     await flutterTts.setPitch(1.6);
 
     await flutterTts.speak(text);

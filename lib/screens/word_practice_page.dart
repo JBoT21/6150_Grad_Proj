@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
@@ -22,6 +23,10 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:team_3_f25_project/widgets/timeout_banner.dart';
 
 final db = DatabaseHelper.instance;
+
+// Lets QA simulate correct/incorrect outcomes without a working microphone.
+// True in debug/profile builds, false in release, so it never ships.
+const bool kDevControlsEnabled = !bool.fromEnvironment('dart.vm.product');
 
 class WordPracticeScreen extends StatefulWidget {
   final db = DatabaseHelper.instance;
@@ -136,6 +141,9 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       Set<String> correctWords = await widget.db.getAllCorrectWords(userId!);
       wordsToPractice!.removeWhere((word) => correctWords.contains(word));
 
+      // shuffle so the practice order differs between sessions
+      wordsToPractice!.shuffle();
+
       // used for progress tracking
       correctlyPronounced = completeWordList!.length - wordsToPractice!.length;
 
@@ -189,12 +197,20 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
 
   void _nextWord(bool correct) {
     setState(() {
-      if (correct) {
-        // correct word was already removed from word to practice
+      if (!correct) {
+        // Duolingo-style requeue: missed word isn't lost, but comes back
+        // a few words later rather than repeating immediately.
+        final word = currentWord;
+        wordsToPractice!.remove(word);
+        final insertAt = min(
+          nextIndex + 1 + Random().nextInt(3),
+          wordsToPractice!.length,
+        );
+        wordsToPractice!.insert(insertAt, word);
+      }
+      // correct word was already removed from words to practice
+      if (wordsToPractice!.isNotEmpty) {
         nextIndex = nextIndex % wordsToPractice!.length;
-      } else {
-        // incorrect word stays in list
-        nextIndex = nextIndex + 1 % wordsToPractice!.length;
       }
     });
   }
@@ -360,45 +376,49 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     if (result.finalResult) {
       // stop listening and check if correct
       _stopListening();
-      bool correct = _isCorrect(result.recognizedWords);
-
-      // add attempt to database
-      widget.db.insertAttempt(
-        Attempt(
-          uid: userId!,
-          wordText: currentWord,
-          listId: currentListId,
-          score: correct ? 1 : 0,
-          createdAt: DateTime.now(),
-          feedback: correct ? "Great job" : "Try again",
-          recordingPath: recordingPath,
-          duration: _elapsed,
-        ),
-      );
-
-      // Feedback page to user
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              InstantFeedback(success: correct, wordObject: currentWordObject),
-        ),
-      ).then((_) {
-        if (correct) {
-          // increment correctly pronounced words and remove from user's practice list
-          correctlyPronounced++;
-          _removeWordFromList();
-        }
-        if (correctlyPronounced == completeWordList!.length ||
-            wordsToPractice!.isEmpty) {
-          // if all words have been correctly pronounced, finish list
-          _finishList();
-        } else {
-          // move onto next word, whether correct or not
-          _nextWord(correct);
-        }
-      });
+      _recordOutcome(_isCorrect(result.recognizedWords));
     }
+  }
+
+  // records the attempt, shows feedback, and advances to the next word.
+  // Shared by the real speech-to-text path and the dev simulate buttons.
+  void _recordOutcome(bool correct) {
+    // add attempt to database
+    widget.db.insertAttempt(
+      Attempt(
+        uid: userId!,
+        wordText: currentWord,
+        listId: currentListId,
+        score: correct ? 1 : 0,
+        createdAt: DateTime.now(),
+        feedback: correct ? "Great job" : "Try again",
+        recordingPath: recordingPath,
+        duration: _elapsed,
+      ),
+    );
+
+    // Feedback page to user
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            InstantFeedback(success: correct, wordObject: currentWordObject),
+      ),
+    ).then((_) {
+      if (correct) {
+        // increment correctly pronounced words and remove from user's practice list
+        correctlyPronounced++;
+        _removeWordFromList();
+      }
+      if (correctlyPronounced == completeWordList!.length ||
+          wordsToPractice!.isEmpty) {
+        // if all words have been correctly pronounced, finish list
+        _finishList();
+      } else {
+        // move onto next word, whether correct or not
+        _nextWord(correct);
+      }
+    });
   }
 
   @override
@@ -514,6 +534,23 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
                   }
                 : null,
           ),
+          if (kDevControlsEnabled)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButton.icon(
+                  onPressed: () => _recordOutcome(true),
+                  icon: const Icon(Icons.check, color: Colors.green),
+                  label: const Text('Simulate Correct'),
+                ),
+                const SizedBox(width: 12),
+                TextButton.icon(
+                  onPressed: () => _recordOutcome(false),
+                  icon: const Icon(Icons.close, color: Colors.red),
+                  label: const Text('Simulate Incorrect'),
+                ),
+              ],
+            ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
