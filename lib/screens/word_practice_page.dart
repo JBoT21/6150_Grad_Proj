@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
@@ -18,6 +19,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/data/homophones.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:team_3_f25_project/widgets/timeout_banner.dart';
 
 final db = DatabaseHelper.instance;
 
@@ -61,6 +63,7 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   bool _speechEnabled = false;
   bool _isListening = false;
   String _micStatus = 'Idle';
+  bool _retriedListenFailure = false;
 
   // timeout banner
   bool _timeoutBannerVisible = false;
@@ -157,14 +160,31 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
   void _initSpeech() async {
     debugPrint('WordPractice: initializing speech recognition');
     _speechEnabled = await _speechToText.initialize(
-      onError: (error) => debugPrint(
-        'WordPractice: speech recognition error - ${error.errorMsg} (permanent=${error.permanent})',
-      ),
+      onError: _handleSpeechError,
       onStatus: (status) => debugPrint('WordPractice: speech recognition status - $status'),
       debugLogging: false,
     );
     debugPrint('WordPractice: speech recognition initialized = $_speechEnabled');
     setState(() {});
+  }
+
+  // error_listen_failed from the native audio engine has shown up as
+  // intermittent rather than a hard/permanent failure, so retry once
+  // automatically before surfacing it to the user as a real timeout.
+  void _handleSpeechError(SpeechRecognitionError error) {
+    debugPrint(
+      'WordPractice: speech recognition error - ${error.errorMsg} (permanent=${error.permanent})',
+    );
+    if (error.errorMsg == 'error_listen_failed' &&
+        !_retriedListenFailure &&
+        mounted) {
+      _retriedListenFailure = true;
+      debugPrint('WordPractice: retrying listen after error_listen_failed');
+      _stopListening();
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) _startListening(isRetry: true);
+      });
+    }
   }
 
   void _nextWord(bool correct) {
@@ -205,7 +225,10 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     );
   }
 
-  void _startListening() async {
+  void _startListening({bool isRetry = false}) async {
+    if (!isRetry) {
+      _retriedListenFailure = false;
+    }
     // mic permissions
     if (Platform.isIOS) {
       if (!_speechEnabled) {
@@ -234,6 +257,10 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
         localeId: 'en_US',
         listenFor: kMax,
         pauseFor: const Duration(seconds: 2),
+        // Server-based recognition (the default) hits kAFAssistantErrorDomain
+        // Code=300 reliably in the iOS Simulator. On-device recognition skips
+        // that network round-trip entirely and also works fully offline.
+        listenOptions: SpeechListenOptions(onDevice: true),
       );
       debugPrint('WordPractice: listen() call completed without throwing');
     } catch (e, st) {
@@ -537,68 +564,6 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
     );
   }
 
-  // slides down from the top on timeout; swipe up or wait it out to dismiss
-  Widget _buildTimeoutBanner() {
-    return IgnorePointer(
-      ignoring: !_timeoutBannerVisible,
-      child: AnimatedSlide(
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-        offset: _timeoutBannerVisible ? Offset.zero : const Offset(0, -1.2),
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 220),
-          opacity: _timeoutBannerVisible ? 1 : 0,
-          child: SafeArea(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: GestureDetector(
-                onVerticalDragEnd: (details) {
-                  if ((details.primaryVelocity ?? 0) < 0) {
-                    _hideTimeoutBanner();
-                  }
-                },
-                child: Container(
-                  margin: const EdgeInsets.all(12),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.orange.shade100,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: .15),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.mic_off, color: Colors.orange.shade800),
-                      const SizedBox(width: 12),
-                      Flexible(
-                        child: Text(
-                          'Please speak louder and try again!',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.orange.shade900,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -616,7 +581,10 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
               );
             },
           ),
-          _buildTimeoutBanner(),
+          TimeoutBanner(
+            visible: _timeoutBannerVisible,
+            onDismiss: _hideTimeoutBanner,
+          ),
         ],
       ),
     );

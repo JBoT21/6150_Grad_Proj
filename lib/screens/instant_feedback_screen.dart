@@ -61,45 +61,62 @@ class _InstantFeedbackState extends State<InstantFeedback> {
         },
         child: Container(
           margin: EdgeInsets.symmetric(vertical: 150.0, horizontal: 50.0),
-          child: Center(
-            child: Column(
-              spacing: 25.0,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    widget.wordObject.word,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 90.0,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(color: Colors.black38, offset: Offset(1.5, 2)),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Center(
+                    child: Column(
+                      spacing: 25.0,
+                      children: [
+                        FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            widget.wordObject.word,
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 90.0,
+                                  color: Colors.white,
+                                  shadows: [
+                                    Shadow(
+                                      color: Colors.black38,
+                                      offset: Offset(1.5, 2),
+                                    ),
+                                  ],
+                                ),
+                          ),
+                        ),
+                        Icon(
+                          widget.success ? Icons.check_rounded : Icons.close,
+                          color: Colors.white,
+                          size: 250,
+                        ),
+                        Text(
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                          overflow: TextOverflow.clip,
+                          widget.wordObject.sentence1,
+                          style: Theme.of(context).textTheme.headlineSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 35.0,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    color: Colors.black38,
+                                    offset: Offset(1.5, 2),
+                                  ),
+                                ],
+                              ),
+                        ),
                       ],
                     ),
                   ),
                 ),
-                Icon(
-                  widget.success ? Icons.check_rounded : Icons.close,
-                  color: Colors.white,
-                  size: 250,
-                ),
-                Text(
-                  textAlign: TextAlign.center,
-                  softWrap: true,
-                  overflow: TextOverflow.clip,
-                  widget.wordObject.sentence1,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 35.0,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(color: Colors.black38, offset: Offset(1.5, 2)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
         ),
       ),

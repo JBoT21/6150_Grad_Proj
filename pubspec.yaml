@@ -67,6 +67,13 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  sqflite_common_ffi: ^2.4.2
+
+# record_linux 1.2.1 doesn't implement the hasPermission(request:) parameter
+# that record_platform_interface added in 1.6.0, so anything newer than 1.4.0
+# fails to compile. Pin it back down until record_linux catches up upstream.
+dependency_overrides:
+  record_platform_interface: 1.4.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
