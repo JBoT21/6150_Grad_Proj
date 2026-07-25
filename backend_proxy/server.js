@@ -36,8 +36,21 @@ if (
     if (!hasApiKey) {
       console.warn('OPENAI_API_KEY is not set. Running in MOCK mode.');
       // Generate a simple mock story using the words provided
-      story = `A ${words.includes('little') ? 'little' : 'small'} ${words.includes('dog') ? 'dog' : 'puppy'} named Buddy loved to ${words.includes('run') ? 'run' : 'play'} and ${words.includes('jump') ? 'jump' : 'hop'}. He felt very ${words.includes('happy') ? 'happy' : 'glad'} under the bright ${words.includes('yellow') ? 'yellow' : 'warm'} sun.`;
-      console.log('Mock story generated successfully!');
+     if (prompt) {
+       story =
+         `Once upon a time, ${prompt}. ` +
+         `Everyone learned that kindness, courage, and imagination can solve almost any problem.`;
+     } else {
+       story =
+         `A ${words.includes('little') ? 'little' : 'small'} ` +
+         `${words.includes('dog') ? 'dog' : 'puppy'} named Buddy loved to ` +
+         `${words.includes('run') ? 'run' : 'play'} and ` +
+         `${words.includes('jump') ? 'jump' : 'hop'}. ` +
+         `He felt very ${words.includes('happy') ? 'happy' : 'glad'} under the bright ` +
+         `${words.includes('yellow') ? 'yellow' : 'warm'} sun.`;
+     }
+
+     console.log("Mock story generated successfully!");
     } else {
       // Build a Dolch-based prompt
       const systemPrompt = `You are a helpful reading assistant for children. 
