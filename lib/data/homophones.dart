@@ -1,5 +1,7 @@
 // Source: https://homophonelist.com/homophones-list/
 
+import 'package:flutter/foundation.dart';
+
 class Homophones {
   bool isHomophone(String actualWord, String expectedWord) {
     actualWord = actualWord.toLowerCase();
@@ -14,9 +16,9 @@ class Homophones {
       return true;
     }
 
-    print("Heard: $actualWord, Expected: $expectedWord");
-    print("Homophones of heard word: ${homophones[actualWord]}");
-    print("Homophones of expected word: ${homophones[expectedWord]}");
+    debugPrint("Heard: $actualWord, Expected: $expectedWord");
+    debugPrint("Homophones of heard word: ${homophones[actualWord]}");
+    debugPrint("Homophones of expected word: ${homophones[expectedWord]}");
     return false;
   }
 

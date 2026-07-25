@@ -176,7 +176,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
               // ROLE DROPDOWN
               DropdownButtonFormField<String>(
-                value: _role,
+                initialValue: _role,
                 decoration: InputDecoration(
                   labelText: "Role",
                   prefixIcon: const Icon(Icons.person_outline),

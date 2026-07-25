@@ -8,6 +8,7 @@ AppBar customAppBar({dynamic context, String title = ""}) {
     await prefs.remove('email');
     await prefs.remove('userId');
     await prefs.remove('classCode');
+    if (!context.mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),

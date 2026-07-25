@@ -142,6 +142,7 @@ class _AddWordlistScreenState extends State<AddWordlistScreen> {
   /// Import CSV
   Future<void> _importCSV() async {
     final imported = await WordService.importCSV();
+    if (!mounted) return;
 
     if (imported == null || imported.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -175,6 +176,7 @@ class _AddWordlistScreenState extends State<AddWordlistScreen> {
     }
 
     await WordService.addListOfWords(words, _titleController.text.trim());
+    if (!mounted) return;
 
     Navigator.pop(context);
   }
@@ -202,7 +204,7 @@ class _AddWordlistScreenState extends State<AddWordlistScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: kEncouragementColor.withOpacity(0.1),
+                  color: kEncouragementColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(color: kEncouragementColor, width: 2),
                 ),
@@ -326,7 +328,7 @@ class _AddWordlistScreenState extends State<AddWordlistScreen> {
                         width: 35,
                         height: 35,
                         decoration: BoxDecoration(
-                          color: kPrimaryColor.withOpacity(0.9),
+                          color: kPrimaryColor.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         alignment: Alignment.center,

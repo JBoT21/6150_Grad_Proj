@@ -8,9 +8,9 @@ import 'dart:async';
 import 'package:team_3_f25_project/services/text_to_speech.dart';
 
 class InstantFeedback extends StatefulWidget {
-  bool success;
-  WordList wordObject;
-  InstantFeedback({super.key, required this.success, required this.wordObject});
+  final bool success;
+  final WordList wordObject;
+  const InstantFeedback({super.key, required this.success, required this.wordObject});
 
   @override
   State<InstantFeedback> createState() => _InstantFeedbackState();

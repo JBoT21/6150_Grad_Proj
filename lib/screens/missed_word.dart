@@ -29,6 +29,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('email');
+    if (!context.mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -173,7 +174,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
+                                    color: Colors.black.withValues(alpha: 0.1),
                                     blurRadius: 5,
                                     offset: const Offset(0, 3),
                                   ),
@@ -202,6 +203,7 @@ class _MissedWordsScreenState extends State<MissedWordsScreen> {
                                     try {
                                       await player.play(DeviceFileSource(path));
                                     } catch (e) {
+                                      if (!context.mounted) return;
                                       ScaffoldMessenger.of(
                                         context,
                                       ).showSnackBar(

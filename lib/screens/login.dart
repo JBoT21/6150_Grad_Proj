@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:team_3_f25_project/services/list_service.dart';
 import '../services/user_db.dart';
 import '../screens/dashboard.dart';
 import 'progress_screen.dart';
@@ -41,6 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (user.role.toLowerCase() == 'student') {
         // Get wordlist for students
         int currentListId = await db.getUserListId(user.id!) as int;
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -48,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
       } else if (user.role.toLowerCase() == 'teacher') {
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const DashboardScreen()),

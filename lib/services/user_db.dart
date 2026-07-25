@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
@@ -33,7 +34,7 @@ class DatabaseHelper {
   Future<Database> _initDB(String filePath) async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
-    print('Database located at: $dbPath');
+    debugPrint('Database located at: $dbPath');
     return await openDatabase(path, version: 2, onCreate: _createDB);
   }
 
@@ -123,7 +124,7 @@ class DatabaseHelper {
 
       return localId;
     } catch (e) {
-      print('Failed to create Firebase user: $e');
+      debugPrint('Failed to create Firebase user: $e');
       return -1;
     }
   }
@@ -158,7 +159,7 @@ class DatabaseHelper {
         return firestoreUser;
       }
     } catch (e) {
-      print('Failed to fetch Firestore user: $e');
+      debugPrint('Failed to fetch Firestore user: $e');
     }
 
     if (result.isNotEmpty) {
@@ -222,7 +223,7 @@ class DatabaseHelper {
         classCode: classCode,
       );
     } catch (e) {
-      print('Firebase login failed: $e');
+      debugPrint('Firebase login failed: $e');
       return null;
     }
   }
@@ -271,19 +272,19 @@ class DatabaseHelper {
   }
 
   Future<int> updateUserListId(int uid, int nextListId) async {
-    print("Updating list for $uid to list number $nextListId");
+    debugPrint("Updating list for $uid to list number $nextListId");
     final db = await instance.database;
 
     final result = await db.rawUpdate(
       'UPDATE currentList SET currentListId = ? WHERE uid = ?',
       [nextListId, uid],
     );
-    print("Update complete: $result");
+    debugPrint("Update complete: $result");
     return result;
   }
 
   Future<int?> getUserListId(int uid) async {
-    print("Getting list id for user $uid");
+    debugPrint("Getting list id for user $uid");
     final db = await instance.database;
     final result = await db.query(
       'currentList',
@@ -293,7 +294,7 @@ class DatabaseHelper {
     );
     if (result.isNotEmpty) {
       final listId = result[0]['currentListId'];
-      print("List ID: $listId");
+      debugPrint("List ID: $listId");
       return listId as int;
     }
     return null;
@@ -303,7 +304,7 @@ class DatabaseHelper {
   Future<void> clearAllTables() async {
     final db = await DatabaseHelper.instance.database;
     await db.delete('users');
-    print('All users deleted from database!');
+    debugPrint('All users deleted from database!');
   }
 
   //Check for classcode when signing up

@@ -1,8 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:team_3_f25_project/models/wordlist.dart';
 import 'package:team_3_f25_project/services/list_service.dart';
-import 'package:team_3_f25_project/widgets/custom_app_bar.dart';
 
 // --- Color Definitions (matching other screens) ---
 const Color kPrimaryColor = Colors.blueAccent;
@@ -62,7 +60,7 @@ class _WordlistScreenState extends State<WordlistScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: kEncouragementColor.withOpacity(0.1),
+                      color: kEncouragementColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: kEncouragementColor, width: 2),
                     ),
@@ -137,7 +135,7 @@ class _WordlistScreenState extends State<WordlistScreen> {
                                     width: 35,
                                     height: 35,
                                     decoration: BoxDecoration(
-                                      color: kPrimaryColor.withOpacity(0.9),
+                                      color: kPrimaryColor.withValues(alpha: 0.9),
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     alignment: Alignment.center,
@@ -221,7 +219,7 @@ class _WordlistScreenState extends State<WordlistScreen> {
           width: 24,
           height: 24,
           decoration: BoxDecoration(
-            color: kEncouragementColor.withOpacity(0.2),
+            color: kEncouragementColor.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(6),
             border: Border.all(color: kEncouragementColor, width: 1.5),
           ),

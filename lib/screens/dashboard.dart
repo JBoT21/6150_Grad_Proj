@@ -88,6 +88,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _logout(BuildContext context) async {
     await prefs!.remove('email');
+    if (!context.mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -437,7 +438,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                 ),
-                value: sortOption,
+                initialValue: sortOption,
                 items: const [
                   DropdownMenuItem(
                     value: "name_asc",

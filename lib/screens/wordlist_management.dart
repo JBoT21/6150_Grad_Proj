@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:team_3_f25_project/screens/progress_screen.dart';
 import 'package:team_3_f25_project/screens/add_wordlist.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:team_3_f25_project/screens/login.dart';
@@ -30,7 +29,7 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('email');
-    if (mounted) {
+    if (context.mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -114,7 +113,7 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: kEncouragementColor.withOpacity(0.1),
+                      color: kEncouragementColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: kEncouragementColor, width: 2),
                     ),
@@ -145,9 +144,8 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
                       horizontal: 16,
                       vertical: 8,
                     ),
-                    onReorder: (oldIndex, newIndex) async {
+                    onReorderItem: (oldIndex, newIndex) async {
                       setState(() {
-                        if (newIndex > oldIndex) newIndex -= 1;
                         final item = wordlists.removeAt(oldIndex);
                         wordlists.insert(newIndex, item);
                       });
@@ -200,7 +198,7 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
           width: 35,
           height: 35,
           decoration: BoxDecoration(
-            color: kPrimaryColor.withOpacity(0.9),
+            color: kPrimaryColor.withValues(alpha: 0.9),
             borderRadius: BorderRadius.circular(8),
           ),
           alignment: Alignment.center,
@@ -282,7 +280,7 @@ class _WordlistManagementState extends State<WordlistManagementScreen> {
               ),
             Icon(
               Icons.reorder_rounded,
-              color: kPrimaryColor.withOpacity(0.7),
+              color: kPrimaryColor.withValues(alpha: 0.7),
               size: 30,
             ),
           ],

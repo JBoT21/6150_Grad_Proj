@@ -2,6 +2,7 @@
 // Also allows changes to be saved directly to csv file
 import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/wordlist.dart';
@@ -29,7 +30,7 @@ class WordService {
       _csvPath = path;
       return _csvPath!;
     } catch (e) {
-      print('failed to get csv path: $e');
+      debugPrint('failed to get csv path: $e');
       rethrow;
     }
   }
@@ -106,7 +107,7 @@ class WordService {
   // Updates the priority
   static Future<void> updateListPriority(int listId, int newPriority) async {
     final path = await _getCSVPath();
-    //print('Updating CSV at $path');
+    //debugPrint('Updating CSV at $path');
     final allWords = await loadWords();
     for (var word in allWords) {
       if (word.listId == listId) {
@@ -125,7 +126,7 @@ class WordService {
     }
 
     await File(path).writeAsString(csvLines.join('\n'));
-    //print('CSV updated at $path');
+    //debugPrint('CSV updated at $path');
   }
 
   // Gets the top priority
@@ -234,7 +235,7 @@ class WordService {
       }
       return imported;
     } catch (e) {
-      print("CSV import error: $e");
+      debugPrint("CSV import error: $e");
       return null;
     }
   }

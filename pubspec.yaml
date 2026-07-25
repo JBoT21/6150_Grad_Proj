@@ -68,6 +68,9 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
   sqflite_common_ffi: ^2.4.2
+  path_provider_platform_interface: ^2.1.2
+  permission_handler_platform_interface: ^4.3.0
+  record_platform_interface: ^1.4.0
 
 # record_linux 1.2.1 doesn't implement the hasPermission(request:) parameter
 # that record_platform_interface added in 1.6.0, so anything newer than 1.4.0

@@ -216,6 +216,8 @@ class _WordPracticeScreenState extends State<WordPracticeScreen> {
       await db.updateUserListId(userId!, nextListId);
     }
 
+    if (!mounted) return;
+
     // go to celebration screen
     Navigator.pushReplacement(
       context,
