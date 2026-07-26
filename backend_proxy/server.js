@@ -53,14 +53,40 @@ if (
      console.log("Mock story generated successfully!");
     } else {
       // Build a Dolch-based prompt
-      const systemPrompt = `You are a helpful reading assistant for children. 
-Generate a short, engaging story (1-3 sentences) suitable for a young child, primarily using the provided list of vocabulary words. 
-The story must be simple, educational, and completely safe and appropriate for young children. 
-Return ONLY the story text. Do not include any titles, markdown formatting, or additional commentary.`;
+      let systemPrompt;
+      let userPrompt;
 
-      const userPrompt = `Generate a story using these words: ${words.join(', ')}`;
+      if (prompt) {
 
-      console.log(`Generating story for words: ${words.join(', ')}`);
+        systemPrompt = `
+      You are a creative children's author.
+
+      Write an engaging children's story based on the user's idea.
+
+      Requirements:
+      - 300–500 words
+      - Beginning, middle, and end
+      - Friendly tone
+      - Positive ending
+      - Appropriate for ages 5–8
+      - Return ONLY the story text.
+      `;
+
+        userPrompt = prompt;
+
+        console.log("Generating story from prompt.");
+
+      } else {
+
+        systemPrompt = `
+      You are a helpful reading assistant for children.
+      Generate a short, engaging story (1–3 sentences) using the supplied vocabulary words.
+      Return ONLY the story text.
+      `;
+
+        userPrompt = `Generate a story using these words: ${words.join(", ")}`;
+        console.log(`Generating story using words: ${words.join(", ")}`);
+      }
 
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
