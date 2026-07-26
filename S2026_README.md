@@ -30,3 +30,23 @@ The following features rely on AI-generated speech reading words or sentences al
 
 These features require testing on a **device with working volume/audio output**.
 =======
+
+
+
+
+## Starting the Backend Proxy (AI Story Builder)
+
+To run the backend proxy required for AI Story Builder features:
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend_proxy
+   ```
+2. Install dependencies (first time only):
+   ```bash
+   npm install
+   ```
+3. Start the server on port 3000:
+   ```bash
+   npm start
+   ```
