@@ -19,29 +19,74 @@ const openai = hasApiKey ? new OpenAI() : null;
 
 app.post('/api/story', async (req, res) => {
   try {
-    const { words } = req.body;
+const { words, prompt } = req.body;
 
-    if (!words || !Array.isArray(words) || words.length === 0) {
-      return res.status(400).json({ error: 'Please provide an array of vocabulary words in the "words" field.' });
-    }
+// Either a prompt, or a list of words
+if (
+  (!prompt || prompt.trim() === "") &&
+  (!Array.isArray(words) || words.length === 0)
+) {
+  return res.status(400).json({
+    error: 'Provide either a "prompt" string or a "words" array.'
+  });
+}
 
     let story;
 
     if (!hasApiKey) {
       console.warn('OPENAI_API_KEY is not set. Running in MOCK mode.');
       // Generate a simple mock story using the words provided
-      story = `A ${words.includes('little') ? 'little' : 'small'} ${words.includes('dog') ? 'dog' : 'puppy'} named Buddy loved to ${words.includes('run') ? 'run' : 'play'} and ${words.includes('jump') ? 'jump' : 'hop'}. He felt very ${words.includes('happy') ? 'happy' : 'glad'} under the bright ${words.includes('yellow') ? 'yellow' : 'warm'} sun.`;
-      console.log('Mock story generated successfully!');
+     if (prompt) {
+       story =
+         `Once upon a time, ${prompt}. ` +
+         `Everyone learned that kindness, courage, and imagination can solve almost any problem.`;
+     } else {
+       story =
+         `A ${words.includes('little') ? 'little' : 'small'} ` +
+         `${words.includes('dog') ? 'dog' : 'puppy'} named Buddy loved to ` +
+         `${words.includes('run') ? 'run' : 'play'} and ` +
+         `${words.includes('jump') ? 'jump' : 'hop'}. ` +
+         `He felt very ${words.includes('happy') ? 'happy' : 'glad'} under the bright ` +
+         `${words.includes('yellow') ? 'yellow' : 'warm'} sun.`;
+     }
+
+     console.log("Mock story generated successfully!");
     } else {
       // Build a Dolch-based prompt
-      const systemPrompt = `You are a helpful reading assistant for children. 
-Generate a short, engaging story (1-3 sentences) suitable for a young child, primarily using the provided list of vocabulary words. 
-The story must be simple, educational, and completely safe and appropriate for young children. 
-Return ONLY the story text. Do not include any titles, markdown formatting, or additional commentary.`;
+      let systemPrompt;
+      let userPrompt;
 
-      const userPrompt = `Generate a story using these words: ${words.join(', ')}`;
+      if (prompt) {
 
-      console.log(`Generating story for words: ${words.join(', ')}`);
+        systemPrompt = `
+      You are a creative children's author.
+
+      Write an engaging children's story based on the user's idea.
+
+      Requirements:
+      - 300–500 words
+      - Beginning, middle, and end
+      - Friendly tone
+      - Positive ending
+      - Appropriate for ages 5–8
+      - Return ONLY the story text.
+      `;
+
+        userPrompt = prompt;
+
+        console.log("Generating story from prompt.");
+
+      } else {
+
+        systemPrompt = `
+      You are a helpful reading assistant for children.
+      Generate a short, engaging story (1–3 sentences) using the supplied vocabulary words.
+      Return ONLY the story text.
+      `;
+
+        userPrompt = `Generate a story using these words: ${words.join(", ")}`;
+        console.log(`Generating story using words: ${words.join(", ")}`);
+      }
 
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
