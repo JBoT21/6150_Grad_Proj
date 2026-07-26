@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ReadRight
 
 ## Platform Requirements
