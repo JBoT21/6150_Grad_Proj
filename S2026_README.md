@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ReadRight
 
 ## Platform Requirements
@@ -29,3 +30,6 @@ The following features rely on AI-generated speech reading words or sentences al
 - **Word Pop**
 
 These features require testing on a **device with working volume/audio output**.
+=======
+
+>>>>>>> 4def4703ef90f47349bd31fff816fc105b7e3ba5
