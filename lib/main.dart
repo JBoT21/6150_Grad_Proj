@@ -11,6 +11,7 @@ import 'package:team_3_f25_project/screens/progress_screen.dart';
 import 'package:team_3_f25_project/screens/word_practice_page.dart';
 import 'package:team_3_f25_project/screens/signup.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
+import 'package:team_3_f25_project/screens/story_builder_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -132,6 +133,7 @@ class _ReadRightAppState extends State<ReadRightApp> {
           return ProgressScreen(listId: args['listId'] ?? 1);
         },
         '/practice': (context) => WordPracticeScreen(),
+        '/story_builder': (context) => const StoryBuilderScreen(),
         '/signup': (context) => const SignupScreen(),
       },
     );
