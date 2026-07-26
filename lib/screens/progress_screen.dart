@@ -7,7 +7,8 @@ import '../services/user_db.dart';
 import '../services/list_service.dart';
 
 class ProgressScreen extends StatefulWidget {
-  final int listId; // which word list this progress screen shows
+  final int listId;
+
   const ProgressScreen({super.key, required this.listId});
 
   @override
@@ -40,7 +41,6 @@ class _ProgressScreenState extends State<ProgressScreen> {
     final wordsInList = await WordService.getWords(widget.listId);
     final allAttempts = await db.database.then((db) => db.query('attempts'));
 
-    // Get list of correctly scored words
     final correctWords = allAttempts
         .where((a) => a['score'] == 1 && a['uid'] == userId)
         .map((a) => a['wordText'] as String)
@@ -52,10 +52,12 @@ class _ProgressScreenState extends State<ProgressScreen> {
       masteredWords = words.where((w) => correctWords.contains(w.word)).length;
       completion = totalWords == 0 ? 0 : masteredWords / totalWords;
 
-      // Map each word to its progress state
       wordStatus = words.map((w) {
         bool correct = correctWords.contains(w.word);
-        return {'word': w.word, 'status': correct ? 'mastered' : 'pending'};
+        return {
+          'word': w.word,
+          'status': correct ? 'mastered' : 'pending',
+        };
       }).toList();
     });
   }
@@ -67,9 +69,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
       appBar: customAppBar(context: context),
       body: GestureDetector(
         onTap: () => Navigator.pushNamed(context, '/practice').then((_) {
-          setState(() {
-            _loadProgress();
-          });
+          _loadProgress();
         }),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -81,16 +81,21 @@ class _ProgressScreenState extends State<ProgressScreen> {
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black87,
                 ),
               ),
+
               const SizedBox(height: 10),
+
               Text(
-                'You’ve mastered $masteredWords of $totalWords words!',
-                style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
+                "You've mastered $masteredWords of $totalWords words!",
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.grey.shade700,
+                ),
               ),
+
               const SizedBox(height: 20),
-              // Circular progress bar
+
               SizedBox(
                 width: 180,
                 height: 180,
@@ -99,58 +104,56 @@ class _ProgressScreenState extends State<ProgressScreen> {
                   children: [
                     CircularProgressIndicator(
                       value: completion,
-                      strokeWidth: 100,
+                      strokeWidth: 12,
                       color: Colors.green,
                       backgroundColor: Colors.grey.shade300,
                     ),
                     Text(
-                      '${(completion * 100).toStringAsFixed(0)}%',
+                      "${(completion * 100).toStringAsFixed(0)}%",
                       style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black87,
                       ),
                     ),
                   ],
                 ),
               ),
+
+              const SizedBox(height: 20),
+
               Text(
                 listCategory ?? "",
                 style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.black87,
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 30),
+
+              const SizedBox(height: 20),
 
               Expanded(
                 child: ListView.builder(
                   itemCount: wordStatus.length,
                   itemBuilder: (context, index) {
-                    final word = wordStatus[index]['word'];
-                    final status = wordStatus[index]['status'];
+                    final word = wordStatus[index]["word"];
+                    final status = wordStatus[index]["status"];
 
                     return Card(
                       margin: const EdgeInsets.symmetric(
-                        vertical: 6,
                         horizontal: 4,
+                        vertical: 6,
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      color: status == 'mastered'
+                      color: status == "mastered"
                           ? Colors.green.shade100
                           : Colors.white,
                       child: ListTile(
                         leading: Icon(
-                          status == 'mastered'
-                              ? Icons.check_circle_rounded
+                          status == "mastered"
+                              ? Icons.check_circle
                               : Icons.circle_outlined,
-                          color: status == 'mastered'
+                          color: status == "mastered"
                               ? Colors.green
                               : Colors.grey,
-                          size: 32,
                         ),
                         title: Text(
                           word,
@@ -168,21 +171,47 @@ class _ProgressScreenState extends State<ProgressScreen> {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: ElevatedButton.icon(
-        onPressed: () {
-          Navigator.pushNamed(context, '/practice').then((_) {
-            setState(() {
-              _loadProgress();
-            });
-          });
-        },
-        icon: const Icon(Icons.mic),
-        label: const Text('Practice'),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.orange,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        ),
+
+      floatingActionButtonLocation:
+      FloatingActionButtonLocation.centerFloat,
+
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, '/story_builder');
+            },
+            icon: const Icon(Icons.auto_stories),
+            label: const Text("Story Builder"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.deepPurple,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(context, '/practice').then((_) {
+                _loadProgress();
+              });
+            },
+            icon: const Icon(Icons.mic),
+            label: const Text("Practice"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
