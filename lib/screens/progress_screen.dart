@@ -211,6 +211,29 @@ class _ProgressScreenState extends State<ProgressScreen> {
               ),
             ),
           ),
+
+          const SizedBox(height: 12),
+
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                '/balloon_pop',
+                arguments: {'listId': widget.listId},
+              ).then((_) {
+                _loadProgress();
+              });
+            },
+            icon: const Icon(Icons.bubble_chart),
+            label: const Text("Balloon Pop"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.pinkAccent,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 12,
+              ),
+            ),
+          ),
         ],
       ),
     );

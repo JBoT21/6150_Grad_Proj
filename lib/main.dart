@@ -9,6 +9,7 @@ import 'package:team_3_f25_project/screens/login.dart';
 import 'package:team_3_f25_project/screens/dashboard.dart';
 import 'package:team_3_f25_project/screens/progress_screen.dart';
 import 'package:team_3_f25_project/screens/word_practice_page.dart';
+import 'package:team_3_f25_project/screens/balloon_pop_screen.dart';
 import 'package:team_3_f25_project/screens/signup.dart';
 import 'package:team_3_f25_project/services/user_db.dart';
 import 'package:team_3_f25_project/screens/story_builder_screen.dart';
@@ -134,6 +135,12 @@ class _ReadRightAppState extends State<ReadRightApp> {
         },
         '/practice': (context) => WordPracticeScreen(),
         '/story_builder': (context) => const StoryBuilderScreen(),
+        '/balloon_pop': (context) {
+          final args =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>;
+          return BalloonPopScreen(listId: args['listId'] ?? 1);
+        },
         '/signup': (context) => const SignupScreen(),
       },
     );

@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:team_3_f25_project/models/attempt.dart';
+import 'package:team_3_f25_project/models/game_session.dart';
 import 'package:team_3_f25_project/services/sync_service.dart';
 import '../models/user.dart';
 import 'list_service.dart';
@@ -35,11 +36,16 @@ class DatabaseHelper {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, filePath);
     debugPrint('Database located at: $dbPath');
-    return await openDatabase(path, version: 2, onCreate: _createDB);
+    return await openDatabase(
+      path,
+      version: 3,
+      onCreate: _createDB,
+      onUpgrade: _upgradeDB,
+    );
   }
 
   Future _createDB(Database db, int version) async {
-    await db.execute(''' 
+    await db.execute('''
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
@@ -62,6 +68,7 @@ class DatabaseHelper {
         createdAt TEXT NOT NULL,
         durationMs INTEGER,
         recordingPath TEXT,
+        source TEXT NOT NULL DEFAULT 'practice',
         synced INTEGER DEFAULT 0
       )
     ''');
@@ -74,6 +81,39 @@ class DatabaseHelper {
         synced INTEGER DEFAULT 0
       )
 ''');
+
+    await db.execute('''
+      CREATE TABLE game_sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uid INTEGER NOT NULL,
+        listId INTEGER NOT NULL,
+        score INTEGER NOT NULL,
+        totalWords INTEGER NOT NULL,
+        correctWords INTEGER NOT NULL,
+        createdAt TEXT NOT NULL,
+        synced INTEGER DEFAULT 0
+      )
+''');
+  }
+
+  Future _upgradeDB(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 3) {
+      await db.execute(
+        "ALTER TABLE attempts ADD COLUMN source TEXT NOT NULL DEFAULT 'practice'",
+      );
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS game_sessions (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          uid INTEGER NOT NULL,
+          listId INTEGER NOT NULL,
+          score INTEGER NOT NULL,
+          totalWords INTEGER NOT NULL,
+          correctWords INTEGER NOT NULL,
+          createdAt TEXT NOT NULL,
+          synced INTEGER DEFAULT 0
+        )
+      ''');
+    }
   }
 
   // User service
@@ -434,6 +474,59 @@ class DatabaseHelper {
       COUNT(*) as attempts
     FROM attempts
     WHERE uid = ? AND score = 0
+    GROUP BY wordText
+    ORDER BY attempts DESC
+    LIMIT 1
+    ''',
+      [uid],
+    );
+
+    if (result.isEmpty) return "No Words Missed";
+    return result.first['wordText'] as String;
+  }
+
+  // Game session service (Balloon Pop)
+  Future<int> insertGameSession(GameSession session) async {
+    final db = await instance.database;
+    return await db.insert('game_sessions', session.toMap());
+  }
+
+  Future<int> getGamesPlayedCount(int uid) async {
+    final db = await instance.database;
+    final result = await db.rawQuery(
+      'SELECT COUNT(*) as count FROM game_sessions WHERE uid = ?',
+      [uid],
+    );
+    return Sqflite.firstIntValue(result) ?? 0;
+  }
+
+  Future<double> getAverageGameScore(int uid) async {
+    final db = await instance.database;
+    final sessions = await db.query(
+      'game_sessions',
+      where: 'uid = ?',
+      whereArgs: [uid],
+    );
+    if (sessions.isEmpty) return 0.0;
+
+    final ratios = sessions.map((s) {
+      final total = s['totalWords'] as int;
+      final correct = s['correctWords'] as int;
+      return total == 0 ? 0.0 : correct / total;
+    });
+    return ratios.reduce((a, b) => a + b) / sessions.length;
+  }
+
+  Future<String?> getMostMissedGameWord(int uid) async {
+    final db = await database;
+
+    final result = await db.rawQuery(
+      '''
+    SELECT
+      wordText,
+      COUNT(*) as attempts
+    FROM attempts
+    WHERE uid = ? AND score = 0 AND source = 'balloon_pop'
     GROUP BY wordText
     ORDER BY attempts DESC
     LIMIT 1

@@ -10,6 +10,7 @@ class Attempt {
   final DateTime createdAt;
   final Duration duration;
   final String recordingPath;
+  final String source;
 
   Attempt({
     required this.uid,
@@ -20,6 +21,7 @@ class Attempt {
     required this.createdAt,
     required this.duration,
     required this.recordingPath,
+    this.source = 'practice',
   });
 
   Map<String, dynamic> toMap() => {
@@ -31,6 +33,7 @@ class Attempt {
     'createdAt': createdAt.toIso8601String(),
     'durationMs': duration.inMilliseconds,
     'recordingPath': recordingPath,
+    'source': source,
   };
 
   static Attempt fromMap(Map<String, dynamic> map) => Attempt(
@@ -42,6 +45,7 @@ class Attempt {
     createdAt: DateTime.parse(map['createdAt'] as String),
     duration: Duration(milliseconds: (map['durationMs'] as num).toInt()),
     recordingPath: map['recordingPath'] as String,
+    source: (map['source'] as String?) ?? 'practice',
   );
 
   String toJson() => jsonEncode(toMap());

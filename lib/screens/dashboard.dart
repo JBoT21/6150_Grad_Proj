@@ -24,6 +24,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Student> students = [];
   bool loadingStudents = true;
   Map<int, double> progressMap = {};
+  Map<int, int> gamesPlayedMap = {};
+  Map<int, double> avgGameScoreMap = {};
   String searchQuery = "";
   String sortOption = "name_asc";
   SharedPreferences? prefs;
@@ -37,14 +39,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Future<void> _loadProgress() async {
     final db = DatabaseHelper.instance;
     Map<int, double> temp = {};
+    Map<int, int> gamesTemp = {};
+    Map<int, double> avgGameTemp = {};
 
     for (var s in students) {
       double p = await db.getStudentProgress(s.id!, s.currentListId);
       temp[s.id!] = p;
+      gamesTemp[s.id!] = await db.getGamesPlayedCount(s.id!);
+      avgGameTemp[s.id!] = await db.getAverageGameScore(s.id!);
     }
 
     setState(() {
       progressMap = temp;
+      gamesPlayedMap = gamesTemp;
+      avgGameScoreMap = avgGameTemp;
     });
   }
 
@@ -105,6 +113,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     return total / progressMap.length;
+  }
+
+  int totalGamesPlayed() {
+    if (gamesPlayedMap.isEmpty) return 0;
+    return gamesPlayedMap.values.fold(0, (sum, v) => sum + v);
+  }
+
+  double calculateAverageGameScore() {
+    final played = gamesPlayedMap.entries.where((e) => e.value > 0);
+    if (played.isEmpty) return 0;
+
+    double total = 0;
+    for (var e in played) {
+      total += avgGameScoreMap[e.key] ?? 0;
+    }
+    return total / played.length;
   }
 
   List<Student> getFilteredAndSortedStudents() {
@@ -234,6 +258,84 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
                         ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Game Performance Card
+              Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    gradient: LinearGradient(
+                      colors: [Colors.pinkAccent, Colors.pink.shade200],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.bubble_chart,
+                        size: 48,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        "Game Performance",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Column(
+                            children: [
+                              Text(
+                                "${totalGamesPlayed()}",
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const Text(
+                                "Games Played",
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(width: 40),
+                          Column(
+                            children: [
+                              Text(
+                                "${(calculateAverageGameScore() * 100).toStringAsFixed(0)}%",
+                                style: const TextStyle(
+                                  fontSize: 32,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const Text(
+                                "Avg Accuracy",
+                                style: TextStyle(color: Colors.white70),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -508,6 +610,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   itemBuilder: (context, index) {
                     final student = getFilteredAndSortedStudents()[index];
                     final progress = progressMap[student.id] ?? 0;
+                    final gamesPlayed = gamesPlayedMap[student.id] ?? 0;
+                    final avgGameScore = avgGameScoreMap[student.id] ?? 0;
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: 12),
@@ -575,6 +679,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                 ),
                               ],
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              gamesPlayed > 0
+                                  ? "🎈 $gamesPlayed games played · ${(avgGameScore * 100).toStringAsFixed(0)}% avg accuracy"
+                                  : "🎈 No games played yet",
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 12,
+                              ),
                             ),
                           ],
                         ),
